@@ -1,0 +1,40 @@
+# FastAPI Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Data Processing
+pandas>=2.1.0
+numpy>=1.24.0
+openpyxl>=3.1.0
+sqlalchemy>=2.0.0
+
+# Statistical Analysis
+statsmodels>=0.14.0
+scipy>=1.11.0
+
+# Visualization
+pyecharts>=2.0.4
+
+# API Client
+httpx>=0.25.0
+pydantic>=2.5.0
+
+# Rate Limiting
+slowapi>=0.1.9
+
+# String Matching
+python-Levenshtein>=0.23.0
+
+# Task Scheduling
+APScheduler>=3.10.0
+
+# Data Storage (for session persistence)
+pyarrow>=14.0.0
+
+# PDF Export (optional)
+reportlab>=4.0.0
+python-dotenv>=1.0.0
+
+# Windows terminal colors
+colorama>=0.4.6

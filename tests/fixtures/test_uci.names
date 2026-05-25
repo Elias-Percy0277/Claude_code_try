@@ -1,0 +1,12 @@
+1. Title: Test Dataset
+
+7. Attribute Information:
+   age: continuous
+   workclass: Private, Self-emp-not-inc, Self-emp-inc
+   education: Bachelors, Some-college, HS-grad
+   education-num: continuous
+   marital-status: Married, Never-married
+   occupation: Tech-support, Craft-repair, Sales
+   hours-per-week: continuous
+
+8. Class: <=50K, >50K
