@@ -464,6 +464,155 @@ def analyze_distribution(
         raise AnalysisError(f"分布分析失败: {e}")
 
 
+def analyze_categorical_distribution(
+    df: pd.DataFrame,
+    column: str,
+    max_categories: int = 20
+) -> Dict[str, Any]:
+    """
+    分类列频次分析
+
+    Args:
+        df: 数据集
+        column: 分类列名
+        max_categories: 最大显示类别数，超出合并为 "Other"
+
+    Returns:
+        频次统计结果
+    """
+    if column not in df.columns:
+        raise AnalysisError(f"列 '{column}' 不存在")
+
+    data = df[column].dropna()
+    if len(data) == 0:
+        raise AnalysisError("没有有效数据")
+
+    try:
+        vc = data.value_counts()
+        total = len(data)
+        unique_count = len(vc)
+
+        # 合并低频类别
+        if unique_count > max_categories:
+            top = vc.head(max_categories - 1)
+            other_count = vc.iloc[max_categories - 1:].sum()
+            vc = pd.concat([top, pd.Series({"Other": other_count})])
+
+        categories = []
+        for name, count in vc.items():
+            categories.append({
+                "name": str(name).strip(),
+                "count": int(count),
+                "percentage": round(count / total * 100, 2)
+            })
+
+        return {
+            "column": column,
+            "total_count": total,
+            "unique_count": unique_count,
+            "mode": str(data.mode().iloc[0]).strip() if len(data.mode()) > 0 else None,
+            "categories": categories
+        }
+
+    except Exception as e:
+        raise AnalysisError(f"分类分布分析失败: {e}")
+
+
+def analyze_categorical_association(
+    df: pd.DataFrame,
+    col1: str,
+    col2: str
+) -> Dict[str, Any]:
+    """
+    计算两个分类列之间的 Cramér's V 关联系数
+
+    Args:
+        df: 数据集
+        col1: 第一个分类列
+        col2: 第二个分类列
+
+    Returns:
+        关联分析结果
+    """
+    for col in [col1, col2]:
+        if col not in df.columns:
+            raise AnalysisError(f"列 '{col}' 不存在")
+
+    try:
+        ct = pd.crosstab(df[col1].dropna(), df[col2].dropna())
+        chi2 = stats.chi2_contingency(ct)[0]
+        n = ct.sum().sum()
+        min_dim = min(ct.shape[0], ct.shape[1]) - 1
+        cramers_v = np.sqrt(chi2 / (n * min_dim)) if min_dim > 0 else 0
+
+        if cramers_v > 0.3:
+            strength = "强关联"
+        elif cramers_v > 0.1:
+            strength = "中等关联"
+        else:
+            strength = "弱关联"
+
+        return {
+            "col1": col1,
+            "col2": col2,
+            "chi2": float(chi2),
+            "p_value": float(stats.chi2_contingency(ct)[1]),
+            "cramers_v": float(cramers_v),
+            "strength": strength,
+            "n": int(n)
+        }
+
+    except Exception as e:
+        raise AnalysisError(f"分类关联分析失败: {e}")
+
+
+def analyze_categorical_correlation_matrix(
+    df: pd.DataFrame,
+    columns: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """
+    计算所有分类列之间的 Cramér's V 矩阵
+
+    Args:
+        df: 数据集
+        columns: 要分析的分类列，默认所有 object/category 列
+
+    Returns:
+        Cramér's V 矩阵
+    """
+    if columns is None:
+        columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    if len(columns) < 2:
+        raise AnalysisError("Cramér's V 矩阵至少需要 2 个分类列")
+
+    try:
+        n = len(columns)
+        matrix = {}
+        for col1 in columns:
+            matrix[col1] = {}
+            for col2 in columns:
+                if col1 == col2:
+                    matrix[col1][col2] = 1.0
+                elif col2 in matrix and col1 in matrix[col2]:
+                    matrix[col1][col2] = matrix[col2][col1]
+                else:
+                    ct = pd.crosstab(df[col1].dropna(), df[col2].dropna())
+                    chi2 = stats.chi2_contingency(ct)[0]
+                    total = ct.sum().sum()
+                    min_dim = min(ct.shape[0], ct.shape[1]) - 1
+                    matrix[col1][col2] = round(float(np.sqrt(chi2 / (total * min_dim))) if min_dim > 0 else 0, 4)
+
+        return {
+            "method": "cramers_v",
+            "columns": columns,
+            "matrix": matrix
+        }
+
+    except Exception as e:
+        raise AnalysisError(f"Cramér's V 矩阵计算失败: {e}")
+
+
 def analyze_comparison(
     df: pd.DataFrame,
     value_column: str,

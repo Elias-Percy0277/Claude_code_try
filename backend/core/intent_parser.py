@@ -22,6 +22,10 @@ SUPPORTED_COMMANDS = {
     "comparison",    # 分组对比
     "correlation",   # 相关性分析
     "seasonality",   # 季节性分解
+    "ml_train",      # ML 模型训练
+    "ml_evaluate",   # ML 模型评估
+    "ml_feature_imp",# ML 特征重要性
+    "ml_fairness",   # ML 公平性审计
 }
 
 # 支持的图表类型
@@ -42,6 +46,23 @@ CHART_TYPE_KEYWORDS = {
     "heatmap": ["热力图", "热图", "heatmap", "交叉表热力图"],
 }
 
+# 分类分布关键词（触发分类列的 distribution 意图）
+CATEGORICAL_DIST_KEYWORDS = [
+    "频数", "频次", "频率", "类别分布", "分类统计", "分类分布",
+    "各类别", "类别占比", "值计数",
+]
+
+# 归一化堆叠图关键词
+NORMALIZED_KEYWORDS = [
+    "占比", "比例", "百分比", "归一化", "百分比堆叠", "归一化堆叠",
+]
+
+# 分类关联关键词（Cramér's V）
+CATEGORICAL_ASSOC_KEYWORDS = [
+    "分类关联", "分类相关性", "Cramer", "cramer", "卡方检验",
+    "分类变量关联", "分类关联分析",
+]
+
 # 交叉表关键词
 CROSSTAB_KEYWORDS = [
     "交叉表", "列联表", "交叉分析", "交叉对比", "crosstab", "cross tab",
@@ -54,6 +75,31 @@ SUGGESTION_KEYWORDS = [
     "进一步分析", "分析建议", "下一步", "还能分析什么", "建议分析",
     "推荐分析", "分析方向", "深入分析", "更多分析", "还有什么可以分析",
     "给我建议", "分析思路", "如何分析", "suggest",
+]
+
+# ML 训练关键词
+ML_TRAIN_KEYWORDS = [
+    "训练模型", "建立模型", "构建模型", "预测模型", "机器学习", "分类模型",
+    "随机森林", "逻辑回归", "训练", "建模", "预测收入", "预测分类",
+    "train model", "machine learning", "classification",
+]
+
+# ML 评估关键词
+ML_EVALUATE_KEYWORDS = [
+    "模型评估", "评估模型", "模型效果", "模型性能", "混淆矩阵", "准确率",
+    "ROC", "AUC", "召回率", "精确率", "F1", "模型评价", "evaluate model",
+]
+
+# ML 特征重要性关键词
+ML_FEATURE_IMP_KEYWORDS = [
+    "特征重要性", "重要特征", "特征贡献", "哪些特征最重要", "特征排名",
+    "feature importance", "影响最大的特征",
+]
+
+# ML 公平性关键词
+ML_FAIRNESS_KEYWORDS = [
+    "公平性", "公平性审计", "偏见检测", "歧视检测", "性别差异", "种族差异",
+    "公平分析", "bias audit", "fairness", "模型偏见",
 ]
 
 
@@ -111,11 +157,96 @@ async def parse_intent_async(
         logger.info("检测到建议类查询，直接生成建议")
         return _generate_suggestions(query, df, numeric_cols, categorical_cols, datetime_cols)
 
+    # --- 前置检测：ML 查询 ---
+    if any(kw in query_lower for kw in ML_TRAIN_KEYWORDS):
+        logger.info("检测到 ML 训练查询，本地解析")
+        model_type = "random_forest"
+        if "逻辑回归" in query_lower or "logistic" in query_lower:
+            model_type = "logistic_regression"
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "ml_train",
+                "target_columns": [],
+                "groupby": None,
+                "groupby2": None,
+                "params": {"model_type": model_type},
+                "chart_type": None,
+                "reasoning": "用户请求训练 ML 模型"
+            }]
+        }
+
+    if any(kw in query_lower for kw in ML_EVALUATE_KEYWORDS):
+        logger.info("检测到 ML 评估查询，本地解析")
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "ml_evaluate",
+                "target_columns": [],
+                "groupby": None,
+                "groupby2": None,
+                "params": {},
+                "chart_type": None,
+                "reasoning": "用户请求评估 ML 模型"
+            }]
+        }
+
+    if any(kw in query_lower for kw in ML_FEATURE_IMP_KEYWORDS):
+        logger.info("检测到特征重要性查询，本地解析")
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "ml_feature_imp",
+                "target_columns": [],
+                "groupby": None,
+                "groupby2": None,
+                "params": {},
+                "chart_type": None,
+                "reasoning": "用户请求查看特征重要性"
+            }]
+        }
+
+    if any(kw in query_lower for kw in ML_FAIRNESS_KEYWORDS):
+        logger.info("检测到公平性查询，本地解析")
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "ml_fairness",
+                "target_columns": [],
+                "groupby": None,
+                "groupby2": None,
+                "params": {},
+                "chart_type": None,
+                "reasoning": "用户请求公平性审计"
+            }]
+        }
+
     # --- 前置检测：相关性查询 ---
     CORRELATION_KEYWORDS = ["相关性", "相关分析", "相关系数", "correlation", "关联分析"]
-    if any(kw in query_lower for kw in CORRELATION_KEYWORDS) and len(numeric_cols) >= 2:
+    # 分类关联关键词
+    is_cat_corr = any(kw in query_lower for kw in CATEGORICAL_ASSOC_KEYWORDS)
+    # 提及的列中是否包含分类列
+    mentioned_cols_all = [c for c in df.columns if c.lower() in query_lower]
+    mentioned_are_cat = any(c in categorical_cols for c in mentioned_cols_all)
+
+    if is_cat_corr or (any(kw in query_lower for kw in CORRELATION_KEYWORDS) and mentioned_are_cat and len(categorical_cols) >= 2):
+        logger.info("检测到分类关联查询，本地解析")
+        mentioned_cats = [c for c in categorical_cols if c.lower() in query_lower]
+        target = mentioned_cats if len(mentioned_cats) >= 2 else categorical_cols[:8]
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "correlation",
+                "target_columns": target,
+                "groupby": None,
+                "groupby2": None,
+                "params": {"method": "cramers_v"},
+                "chart_type": detect_chart_type(query),
+                "reasoning": "用户请求分类关联分析（Cramér's V）"
+            }]
+        }
+    elif any(kw in query_lower for kw in CORRELATION_KEYWORDS) and len(numeric_cols) >= 2:
         logger.info("检测到相关性查询，本地解析")
-        # 从查询中尝试提取用户指定的列
         mentioned_nums = [c for c in numeric_cols if c.lower() in query_lower]
         target = mentioned_nums[:5] if len(mentioned_nums) >= 2 else numeric_cols[:5]
         return {

@@ -20,6 +20,9 @@ from backend.core.analyzer import (
     analyze_correlation,
     calculate_moving_average,
     analyze_distribution,
+    analyze_categorical_distribution,
+    analyze_categorical_association,
+    analyze_categorical_correlation_matrix,
     analyze_comparison,
     analyze_cross_comparison,
     safe_seasonal_decompose
@@ -40,6 +43,10 @@ from backend.core.visualizer import (
     create_seasonal_chart,
     create_pie_chart,
     create_box_plot,
+    create_confusion_matrix_chart,
+    create_roc_curve_chart,
+    create_feature_importance_chart,
+    create_fairness_chart,
 )
 from backend.cache.cache import get_cache_manager, template_polish
 from backend.agent.llm_client import LLMClient, LLMClientError, get_llm_client
@@ -163,7 +170,8 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
             try:
                 result = await _execute_analysis(
                     df, intent, target_columns, groupby,
-                    task.get("groupby2"), params, request.query, chart_type
+                    task.get("groupby2"), params, request.query, chart_type,
+                    query_session_id=request.session_id
                 )
                 if result:
                     charts.extend(result.get("charts", []))
@@ -190,28 +198,41 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
             "data": charts
         })
 
+        # 检查是否所有分析都失败（无图表、无统计数据）
+        all_failed = (
+            not charts
+            and not any(d.get("summary_template") or d.get("statistics") for d in analysis_descriptions if "error" not in d)
+        )
+
         # 使用 LLM 进行智能分析（带历史记忆）
         summary = ""
-        try:
-            messages = _build_analysis_messages(
-                request.query, analysis_descriptions, request.session_id
-            )
-            llm_client = get_llm_client()
-            async for delta in llm_client.achat_stream(
-                messages, temperature=0.3, max_tokens=5000
-            ):
-                summary += delta
-                yield _format_sse({"type": "text", "delta": delta})
-        except Exception as e:
-            logger.warning(f"LLM 智能分析失败，降级为模板: {e}")
-            # 降级：使用模板生成
-            if analysis_descriptions:
-                parts = [d.get("summary_template", "") for d in analysis_descriptions if d.get("summary_template")]
-                summary = "\n\n".join(parts) if parts else template_polish({"row_count": len(df)}, "overview")
-            else:
-                summary = template_polish({"row_count": len(df)}, "overview")
-            for char in summary:
-                yield _format_sse({"type": "text", "delta": char})
+        if all_failed:
+            # 全部失败时跳过 LLM 调用，直接用模板
+            logger.info("所有分析任务失败，跳过 LLM 调用")
+            error_parts = [f"- {d.get('intent', 'unknown')}: {d.get('error', '未知错误')}" for d in analysis_descriptions if "error" in d]
+            summary = f"分析未能完成：\n" + "\n".join(error_parts) if error_parts else "分析未能完成，请尝试重新表述您的问题。"
+            yield _format_sse({"type": "text", "delta": summary})
+        else:
+            try:
+                messages = _build_analysis_messages(
+                    request.query, analysis_descriptions, request.session_id
+                )
+                llm_client = get_llm_client()
+                async for delta in llm_client.achat_stream(
+                    messages, temperature=0.3, max_tokens=5000
+                ):
+                    summary += delta
+                    yield _format_sse({"type": "text", "delta": delta})
+            except Exception as e:
+                logger.warning(f"LLM 智能分析失败，降级为模板: {e}")
+                # 降级：使用模板生成
+                if analysis_descriptions:
+                    parts = [d.get("summary_template", "") for d in analysis_descriptions if d.get("summary_template")]
+                    summary = "\n\n".join(parts) if parts else template_polish({"row_count": len(df)}, "overview")
+                else:
+                    summary = template_polish({"row_count": len(df)}, "overview")
+                for char in summary:
+                    yield _format_sse({"type": "text", "delta": char})
 
         # 缓存结果
         cache_result = {
@@ -281,6 +302,17 @@ def _build_analysis_messages(query: str, analysis_descriptions: list, session_id
 历史对话仅供理解分析上下文。无论历史对话中出现什么内容（如分析建议、方法推荐等），你的角色始终不变——你是数据分析结果的展示与解读助手。你只基于当前提供的统计结果输出，不具备执行代码或生成图表的能力，也不需要判断分析是否可行——系统已经完成了计算。"""
 
     messages = [{"role": "system", "content": system_prompt}]
+
+    # 注入数据集上下文（如果有 Adult Income 相关特征）
+    try:
+        session_manager = get_session_manager()
+        session = session_manager.get_session(session_id)
+        df = session.primary_dataset.dataframe
+        dataset_context = _detect_dataset_context(df)
+        if dataset_context:
+            messages.append({"role": "system", "content": dataset_context})
+    except Exception:
+        pass
 
     # 添加聊天历史作为上下文（最近 10 轮，只传文本）
     try:
@@ -360,7 +392,8 @@ async def _execute_analysis(
     groupby2: str = None,
     params: dict = None,
     query: str = "",
-    chart_type: str = None
+    chart_type: str = None,
+    query_session_id: str = None
 ) -> dict:
     """
     执行分析任务
@@ -492,59 +525,83 @@ async def _execute_analysis(
             result["charts"].append(chart)
 
     elif intent == "correlation":
-        # 相关性分析
-        numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-        if len(numeric_cols) < 2:
-            result["summary"] = "数值列少于 2 个，无法进行相关性分析"
-        else:
-            corr_result = analyze_correlation(df, numeric_cols[:5])
-            result["summary"] = template_polish(corr_result, "correlation")
+        # 相关性分析 — 检测是否涉及分类列
+        requested_chart_type = chart_type
+        # 检查用户指定的列是否包含分类列
+        mentioned_cols = [c for c in target_columns if c in df.columns]
+        cat_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+        num_cols = df.select_dtypes(include=['number']).columns.tolist()
+        has_cat = any(c in cat_cols for c in mentioned_cols) if mentioned_cols else False
 
-            requested_chart_type = chart_type
-
-            if requested_chart_type == "scatter":
-                # 仅散点图
-                x_data = df[numeric_cols[0]].tolist()
-                y_data = df[numeric_cols[1]].tolist()
-                chart = create_scatter_plot(
-                    x_data, y_data,
-                    numeric_cols[0], numeric_cols[1],
-                    f"{numeric_cols[0]} vs {numeric_cols[1]}"
-                )
-                result["charts"].append(chart)
-            elif requested_chart_type == "pie":
-                # 饼图展示相关系数绝对值占比
-                pie_data = []
-                for pair in corr_result.get("pairs", []):
-                    label = f"{pair['x']} vs {pair['y']}"
-                    pie_data.append({"name": label, "value": round(abs(pair["value"]), 4)})
-                if pie_data:
-                    chart = create_pie_chart(pie_data, "相关系数绝对值占比")
-                    result["charts"].append(chart)
-            elif requested_chart_type == "bar":
-                # 柱状图展示各对相关系数
-                for pair in corr_result.get("pairs", []):
-                    label = f"{pair['x']}-{pair['y']}"
-                    chart = create_bar_chart([label], [pair["value"]], "相关系数")
-                    result["charts"].append(chart)
+        if has_cat or (not mentioned_cols and len(num_cols) < 2 and len(cat_cols) >= 2):
+            # 分类列关联分析（Cramér's V）
+            if mentioned_cols:
+                cat_target = [c for c in mentioned_cols if c in cat_cols]
             else:
-                # 默认：热力图 + 散点图
+                cat_target = cat_cols[:8]
+            if len(cat_target) >= 2:
+                cat_corr_result = analyze_categorical_correlation_matrix(df, cat_target)
+                result["summary"] = _format_categorical_correlation_summary(cat_corr_result)
+                result["statistics"] = cat_corr_result
+
                 chart = create_correlation_heatmap(
-                    corr_result["matrix"],
-                    corr_result["columns"],
-                    "相关性分析"
+                    cat_corr_result["matrix"],
+                    cat_corr_result["columns"],
+                    "Cramér's V 分类关联热力图"
                 )
                 result["charts"].append(chart)
+            else:
+                result["summary"] = "分类列少于 2 个，无法进行关联分析"
+        else:
+            # 数值列相关性分析（Pearson）
+            if len(num_cols) < 2:
+                result["summary"] = "数值列少于 2 个，无法进行相关性分析"
+            else:
+                cols_to_use = mentioned_cols if mentioned_cols else num_cols[:5]
+                cols_to_use = [c for c in cols_to_use if c in num_cols]
+                if len(cols_to_use) < 2:
+                    cols_to_use = num_cols[:5]
+                corr_result = analyze_correlation(df, cols_to_use)
+                result["summary"] = template_polish(corr_result, "correlation")
 
-                if len(numeric_cols) >= 2:
-                    x_data = df[numeric_cols[0]].tolist()
-                    y_data = df[numeric_cols[1]].tolist()
+                if requested_chart_type == "scatter":
+                    x_data = df[cols_to_use[0]].tolist()
+                    y_data = df[cols_to_use[1]].tolist()
                     chart = create_scatter_plot(
                         x_data, y_data,
-                        numeric_cols[0], numeric_cols[1],
-                        f"{numeric_cols[0]} vs {numeric_cols[1]}"
+                        cols_to_use[0], cols_to_use[1],
+                        f"{cols_to_use[0]} vs {cols_to_use[1]}"
                     )
                     result["charts"].append(chart)
+                elif requested_chart_type == "pie":
+                    pie_data = []
+                    for pair in corr_result.get("pairs", []):
+                        label = f"{pair['x']} vs {pair['y']}"
+                        pie_data.append({"name": label, "value": round(abs(pair["value"]), 4)})
+                    if pie_data:
+                        chart = create_pie_chart(pie_data, "相关系数绝对值占比")
+                        result["charts"].append(chart)
+                elif requested_chart_type == "bar":
+                    for pair in corr_result.get("pairs", []):
+                        label = f"{pair['x']}-{pair['y']}"
+                        chart = create_bar_chart([label], [pair["value"]], "相关系数")
+                        result["charts"].append(chart)
+                else:
+                    chart = create_correlation_heatmap(
+                        corr_result["matrix"],
+                        corr_result["columns"],
+                        "数值特征相关性分析"
+                    )
+                    result["charts"].append(chart)
+                    if len(cols_to_use) >= 2:
+                        x_data = df[cols_to_use[0]].tolist()
+                        y_data = df[cols_to_use[1]].tolist()
+                        chart = create_scatter_plot(
+                            x_data, y_data,
+                            cols_to_use[0], cols_to_use[1],
+                            f"{cols_to_use[0]} vs {cols_to_use[1]}"
+                        )
+                        result["charts"].append(chart)
 
     elif intent == "moving_avg":
         # 移动平均
@@ -620,11 +677,35 @@ async def _execute_analysis(
             target_columns = df.select_dtypes(include=['number']).columns.tolist()[:1]
 
         for col in target_columns:
-            if col in df.columns:
+            if col not in df.columns:
+                continue
+
+            is_numeric = pd.api.types.is_numeric_dtype(df[col])
+
+            if not is_numeric:
+                # 分类列：频次统计 + 饼图/柱状图
+                cat_result = analyze_categorical_distribution(df, col)
+                result["summary"] = _format_categorical_summary(cat_result)
+                result["statistics"] = cat_result
+
+                requested_chart_type = chart_type or "bar"
+                categories = cat_result["categories"]
+
+                if requested_chart_type == "pie":
+                    pie_data = [{"name": c["name"], "value": c["count"]} for c in categories]
+                    chart = create_pie_chart(pie_data, f"{col} 分布占比", donut=False)
+                else:
+                    # 默认频数柱状图
+                    names = [c["name"] for c in categories]
+                    counts = [c["count"] for c in categories]
+                    chart = create_bar_chart(names, counts, f"{col} 频数分布", x_name=col, y_name="频数")
+
+                result["charts"].append(chart)
+            else:
+                # 数值列：原有逻辑
                 dist_result = analyze_distribution(df, col)
                 result["summary"] = template_polish(dist_result, "distribution")
 
-                # 准备直方图基础数据
                 hist_data = dist_result["histogram"]
                 bin_edges = []
                 counts = []
@@ -729,6 +810,8 @@ async def _execute_analysis(
                 try:
                     ct = pd.crosstab(df[groupby], df[value_col])
                     total_per_group = ct.sum(axis=1)
+                    # 归一化版本（百分比）
+                    ct_normalized = pd.crosstab(df[groupby], df[value_col], normalize='index') * 100
 
                     result["statistics"] = {"crosstab": True}
                     result["statistics"]["column_type"] = "categorical"
@@ -740,60 +823,75 @@ async def _execute_analysis(
                         row = ct.loc[group_name]
                         group_total = total_per_group[group_name]
                         group_data = {
-                            "group": str(group_name),
+                            "group": str(group_name).strip(),
                             "total": int(group_total)
                         }
                         for cat in row.index:
                             count = int(row[cat])
                             pct = round(count / group_total * 100, 1) if group_total > 0 else 0
-                            group_data[str(cat)] = count
-                            group_data[f"{cat}_pct"] = pct
+                            group_data[str(cat).strip()] = count
+                            group_data[f"{str(cat).strip()}_pct"] = pct
                         groups.append(group_data)
 
                     result["statistics"]["groups"] = groups
-                    result["statistics"]["categories"] = [str(c) for c in ct.columns]
+                    result["statistics"]["categories"] = [str(c).strip() for c in ct.columns]
 
-                    # 生成图表：堆叠柱状图或饼图
+                    group_labels = [str(g).strip() for g in ct.index]
                     requested_chart_type = chart_type or "bar"
                     chart_title = f"{value_col} 按 {groupby} 分组占比"
 
                     if requested_chart_type == "pie":
-                        # 每组一个饼图（用第一个大组）
                         largest_group = max(groups, key=lambda g: g["total"])
                         pie_data = []
                         for cat in ct.columns:
-                            if largest_group.get(str(cat), 0) > 0:
-                                pie_data.append({"name": str(cat), "value": largest_group[str(cat)]})
+                            cat_str = str(cat).strip()
+                            if largest_group.get(cat_str, 0) > 0:
+                                pie_data.append({"name": cat_str, "value": largest_group[cat_str]})
                         chart = create_pie_chart(pie_data, f"{groupby}={largest_group['group']} 的 {value_col} 分布", donut=True)
+                        result["charts"].append(chart)
                     else:
-                        # 堆叠柱状图
-                        bar_data = []
+                        # 原始计数堆叠柱状图
+                        count_bar_data = []
                         for cat in ct.columns:
-                            bar_data.append({
-                                "name": str(cat),
+                            count_bar_data.append({
+                                "name": str(cat).strip(),
                                 "data": [int(ct.loc[g, cat]) for g in ct.index]
                             })
-                        chart = create_grouped_bar_chart(
-                            [str(g) for g in ct.index],
-                            bar_data,
-                            chart_title,
-                            x_name=groupby,
-                            y_name="数量"
+                        count_chart = create_grouped_bar_chart(
+                            group_labels, count_bar_data,
+                            f"{value_col} 按 {groupby} 分组（计数）",
+                            x_name=groupby, y_name="数量"
                         )
-                        # 设置为堆叠
-                        for s in chart["option"]["series"]:
+                        for s in count_chart["option"]["series"]:
                             s["stack"] = "total"
+                        result["charts"].append(count_chart)
 
-                    result["charts"].append(chart)
+                        # 归一化百分比堆叠柱状图
+                        pct_bar_data = []
+                        for cat in ct.columns:
+                            pct_bar_data.append({
+                                "name": str(cat).strip(),
+                                "data": [round(float(ct_normalized.loc[g, cat]), 1) for g in ct.index]
+                            })
+                        pct_chart = create_grouped_bar_chart(
+                            group_labels, pct_bar_data,
+                            f"{value_col} 按 {groupby} 分组（占比%）",
+                            x_name=groupby, y_name="百分比 (%)"
+                        )
+                        for s in pct_chart["option"]["series"]:
+                            s["stack"] = "total"
+                        pct_chart["option"]["yAxis"]["max"] = 100
+                        result["charts"].append(pct_chart)
 
                     # 生成摘要
                     lines = [f"**{value_col}** 按 **{groupby}** 分组分布：\n"]
                     for g in groups:
                         parts = []
                         for cat in ct.columns:
-                            pct = g.get(f"{cat}_pct", 0)
+                            cat_str = str(cat).strip()
+                            pct = g.get(f"{cat_str}_pct", 0)
                             if pct > 0:
-                                parts.append(f"{cat}: {pct}%")
+                                parts.append(f"{cat_str}: {pct}%")
                         lines.append(f"- **{g['group']}** (共{g['total']}条): {', '.join(parts)}")
                     result["summary"] = "\n".join(lines)
 
@@ -802,67 +900,62 @@ async def _execute_analysis(
             else:
                 # 数值列：原有逻辑
                 comp_result = analyze_comparison(df, value_col, groupby)
-            result["summary"] = template_polish(comp_result, "comparison")
+                result["summary"] = template_polish(comp_result, "comparison")
 
-            groups = comp_result["groups"]
-            means = [s["mean"] for s in comp_result["statistics"]]
-            # 用于 pie/radar 等 group-name + single-value 格式
-            series_data = [
-                {"name": s["group"], "data": [s["mean"]]}
-                for s in comp_result["statistics"]
-            ]
+                groups = comp_result["groups"]
+                means = [s["mean"] for s in comp_result["statistics"]]
+                series_data = [
+                    {"name": s["group"], "data": [s["mean"]]}
+                    for s in comp_result["statistics"]
+                ]
 
-            requested_chart_type = chart_type or "bar"
-            chart_title = f"{target_columns[0]} 按 {groupby} 分组"
-            comp_x_label = groupby
-            comp_y_label = f"{target_columns[0]} 均值"
+                requested_chart_type = chart_type or "bar"
+                chart_title = f"{target_columns[0]} 按 {groupby} 分组"
+                comp_x_label = groupby
+                comp_y_label = f"{target_columns[0]} 均值"
 
-            if requested_chart_type == "line":
-                # 单条折线连接各组均值
-                chart = create_bar_chart(
-                    groups, means, chart_title,
-                    x_name=comp_x_label, y_name=comp_y_label
-                )
-                chart["chart_type"] = "line"
-                chart["option"]["series"][0]["type"] = "line"
-                chart["option"]["series"][0]["smooth"] = True
-            elif requested_chart_type == "area":
-                chart = create_bar_chart(
-                    groups, means, chart_title,
-                    x_name=comp_x_label, y_name=comp_y_label
-                )
-                chart["chart_type"] = "area"
-                s = chart["option"]["series"][0]
-                s["type"] = "line"
-                s["smooth"] = True
-                s["areaStyle"] = {"opacity": 0.3}
-            elif requested_chart_type == "pie":
-                chart = create_grouped_pie_chart(groups, series_data, chart_title)
-            elif requested_chart_type == "radar":
-                chart = create_radar_chart(groups, series_data, chart_title)
-            elif requested_chart_type == "scatter":
-                # 用散点图：每个组在 x=序号, y=均值 处画点
-                chart = create_scatter_plot(
-                    list(range(len(means))), means,
-                    comp_x_label, comp_y_label, chart_title
-                )
-                # 覆盖 xAxis 为类别标签
-                chart["option"]["xAxis"] = {
-                    "type": "category",
-                    "data": groups,
-                    "name": comp_x_label,
-                    "nameLocation": "middle",
-                    "nameGap": 50,
-                    "axisLabel": {"rotate": 45}
-                }
-            else:
-                # 默认柱状图 — 单 series，每个组一个柱子
-                chart = create_bar_chart(
-                    groups, means, chart_title,
-                    x_name=comp_x_label, y_name=comp_y_label
-                )
+                if requested_chart_type == "line":
+                    chart = create_bar_chart(
+                        groups, means, chart_title,
+                        x_name=comp_x_label, y_name=comp_y_label
+                    )
+                    chart["chart_type"] = "line"
+                    chart["option"]["series"][0]["type"] = "line"
+                    chart["option"]["series"][0]["smooth"] = True
+                elif requested_chart_type == "area":
+                    chart = create_bar_chart(
+                        groups, means, chart_title,
+                        x_name=comp_x_label, y_name=comp_y_label
+                    )
+                    chart["chart_type"] = "area"
+                    s = chart["option"]["series"][0]
+                    s["type"] = "line"
+                    s["smooth"] = True
+                    s["areaStyle"] = {"opacity": 0.3}
+                elif requested_chart_type == "pie":
+                    chart = create_grouped_pie_chart(groups, series_data, chart_title)
+                elif requested_chart_type == "radar":
+                    chart = create_radar_chart(groups, series_data, chart_title)
+                elif requested_chart_type == "scatter":
+                    chart = create_scatter_plot(
+                        list(range(len(means))), means,
+                        comp_x_label, comp_y_label, chart_title
+                    )
+                    chart["option"]["xAxis"] = {
+                        "type": "category",
+                        "data": groups,
+                        "name": comp_x_label,
+                        "nameLocation": "middle",
+                        "nameGap": 50,
+                        "axisLabel": {"rotate": 45}
+                    }
+                else:
+                    chart = create_bar_chart(
+                        groups, means, chart_title,
+                        x_name=comp_x_label, y_name=comp_y_label
+                    )
 
-            result["charts"].append(chart)
+                result["charts"].append(chart)
 
     elif intent == "seasonality":
         # 季节性分解
@@ -934,7 +1027,180 @@ async def _execute_analysis(
             else:
                 result["summary"] = seasonal_result.get("message", "季节性分解失败")
 
-    return result
+    elif intent == "ml_train":
+        # ML 模型训练
+        from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
+
+        if not HAS_SKLEARN:
+            result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
+        else:
+            try:
+                engine = AdultMLEngine()
+                model_type = params.get("model_type", "random_forest")
+                prep = engine.prepare(df)
+                train_result = engine.train(prep["X_train"], prep["y_train"], model_type=model_type)
+
+                # 保存 ML 状态到 session
+                try:
+                    session_manager = get_session_manager()
+                    ml_state = engine.get_state()
+                    session_manager.save_ml_state(query_session_id, ml_state)
+                except Exception as e:
+                    logger.warning(f"保存 ML 状态失败: {e}")
+
+                stats = prep["stats"]
+                stats["model_name"] = train_result["model_name"]
+                stats["status"] = train_result["status"]
+                result["statistics"] = stats
+
+                lines = [
+                    f"### 模型训练完成\n",
+                    f"- **模型类型:** {train_result['model_name']}",
+                    f"- **训练样本:** {stats['train_samples']}",
+                    f"- **测试样本:** {stats['test_samples']}",
+                    f"- **目标分布:** {stats['target_ratio']}",
+                    f"- **数值特征:** {', '.join(stats['numeric_features'])}",
+                    f"- **分类特征:** {', '.join(stats['categorical_features'])}",
+                ]
+                result["summary"] = "\n".join(lines)
+            except MLError as e:
+                result["summary"] = f"模型训练失败: {str(e)}"
+            except Exception as e:
+                logger.error(f"ML 训练异常: {e}")
+                result["summary"] = f"模型训练出错: {str(e)}"
+
+    elif intent == "ml_evaluate":
+        # ML 模型评估
+        from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
+
+        if not HAS_SKLEARN:
+            result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
+        else:
+            try:
+                session_manager = get_session_manager()
+                ml_state = session_manager.load_ml_state(query_session_id)
+
+                if not ml_state or not ml_state.get("is_fitted"):
+                    result["summary"] = "请先训练模型（输入「训练模型」）"
+                else:
+                    engine = AdultMLEngine()
+                    engine.load_state(ml_state)
+                    eval_result = engine.evaluate()
+                    result["statistics"] = eval_result
+
+                    # 混淆矩阵图
+                    cm_chart = create_confusion_matrix_chart(
+                        eval_result["confusion_matrix"],
+                        f"{eval_result['model_name']} 混淆矩阵"
+                    )
+                    result["charts"].append(cm_chart)
+
+                    # ROC 曲线
+                    roc_chart = create_roc_curve_chart(
+                        eval_result["roc_curve"]["fpr"],
+                        eval_result["roc_curve"]["tpr"],
+                        eval_result["roc_auc"],
+                        f"{eval_result['model_name']} ROC 曲线"
+                    )
+                    result["charts"].append(roc_chart)
+
+                    cm = eval_result["confusion_matrix"]
+                    lines = [
+                        f"### 模型评估结果（{eval_result['model_name']}）\n",
+                        f"- **准确率:** {eval_result['accuracy']}",
+                        f"- **精确率:** {eval_result['precision']}",
+                        f"- **召回率:** {eval_result['recall']}",
+                        f"- **F1-score:** {eval_result['f1_score']}",
+                        f"- **ROC-AUC:** {eval_result['roc_auc']}",
+                        f"- **PR-AUC:** {eval_result['pr_auc']}",
+                        f"\n**混淆矩阵:**",
+                        f"  - 真阴性 (TN): {cm['tn']}",
+                        f"  - 假阳性 (FP): {cm['fp']}",
+                        f"  - 假阴性 (FN): {cm['fn']}",
+                        f"  - 真阳性 (TP): {cm['tp']}",
+                    ]
+                    result["summary"] = "\n".join(lines)
+            except MLError as e:
+                result["summary"] = f"模型评估失败: {str(e)}"
+            except Exception as e:
+                logger.error(f"ML 评估异常: {e}")
+                result["summary"] = f"模型评估出错: {str(e)}"
+
+    elif intent == "ml_feature_imp":
+        # ML 特征重要性
+        from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
+
+        if not HAS_SKLEARN:
+            result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
+        else:
+            try:
+                session_manager = get_session_manager()
+                ml_state = session_manager.load_ml_state(query_session_id)
+
+                if not ml_state or not ml_state.get("is_fitted"):
+                    result["summary"] = "请先训练模型（输入「训练模型」）"
+                else:
+                    engine = AdultMLEngine()
+                    engine.load_state(ml_state)
+                    imp_result = engine.feature_importance()
+                    result["statistics"] = imp_result
+
+                    # 特征重要性图
+                    imp_chart = create_feature_importance_chart(
+                        imp_result["top_features"],
+                        f"{imp_result['model_name']} 特征重要性"
+                    )
+                    result["charts"].append(imp_chart)
+
+                    lines = [f"### 特征重要性（{imp_result['model_name']}）\n"]
+                    for i, feat in enumerate(imp_result["top_features"][:10], 1):
+                        lines.append(f"{i}. **{feat['feature']}**: {feat['importance']:.4f}")
+                    result["summary"] = "\n".join(lines)
+            except MLError as e:
+                result["summary"] = f"特征重要性分析失败: {str(e)}"
+            except Exception as e:
+                logger.error(f"ML 特征重要性异常: {e}")
+                result["summary"] = f"特征重要性分析出错: {str(e)}"
+
+    elif intent == "ml_fairness":
+        # ML 公平性审计
+        from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
+
+        if not HAS_SKLEARN:
+            result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
+        else:
+            try:
+                session_manager = get_session_manager()
+                ml_state = session_manager.load_ml_state(query_session_id)
+
+                if not ml_state or not ml_state.get("is_fitted"):
+                    result["summary"] = "请先训练模型（输入「训练模型」）"
+                else:
+                    engine = AdultMLEngine()
+                    engine.load_state(ml_state)
+                    fair_result = engine.fairness_audit()
+                    result["statistics"] = fair_result
+
+                    # 公平性图表
+                    fair_charts = create_fairness_chart(fair_result)
+                    result["charts"].extend(fair_charts)
+
+                    lines = [f"### 公平性审计（{fair_result['model_name']}）\n"]
+                    for attr_name, attr_data in fair_result.get("sensitive_attributes", {}).items():
+                        lines.append(f"#### {attr_name}")
+                        lines.append(f"- TPR 差异: {attr_data['tpr_gap']}")
+                        lines.append(f"- FPR 差异: {attr_data['fpr_gap']}")
+                        for g in attr_data["groups"]:
+                            lines.append(f"  - **{g['group']}** (n={g['count']}): TPR={g['tpr']}, FPR={g['fpr']}, 准确率={g['accuracy']}")
+                        lines.append("")
+                    if fair_result.get("warning"):
+                        lines.append(f"> {fair_result['warning']}")
+                    result["summary"] = "\n".join(lines)
+            except MLError as e:
+                result["summary"] = f"公平性审计失败: {str(e)}"
+            except Exception as e:
+                logger.error(f"ML 公平性审计异常: {e}")
+                result["summary"] = f"公平性审计出错: {str(e)}"
 
 
 @router.post("/analysis")
@@ -1029,7 +1295,8 @@ async def analyze_sync(request: AnalysisRequest):
 
             result = await _execute_analysis(
                 df, intent, target_columns, groupby,
-                task.get("groupby2"), params, request.query, chart_type
+                task.get("groupby2"), params, request.query, chart_type,
+                query_session_id=request.session_id
             )
             if result:
                 charts.extend(result.get("charts", []))
@@ -1203,7 +1470,8 @@ async def rechart(request: RechartRequest):
                 result = await _execute_analysis(
                     df, intent, target_columns, groupby,
                     task.get("groupby2"), params,
-                    request.query, request.chart_type
+                    request.query, request.chart_type,
+                    query_session_id=request.session_id
                 )
                 if result:
                     charts.extend(result.get("charts", []))
@@ -1238,3 +1506,70 @@ async def rechart(request: RechartRequest):
                 }
             }
         )
+
+
+def _detect_dataset_context(df: pd.DataFrame) -> str:
+    """
+    检测数据集是否为 Adult Income 数据集，返回上下文提示词
+    """
+    cols = set(df.columns.tolist())
+    adult_indicators = {'age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week',
+                        'workclass', 'occupation', 'marital-status', 'relationship'}
+
+    match_count = len(cols & adult_indicators)
+    if match_count < 4:
+        return ""
+
+    # 检测目标列
+    target_col = None
+    for col in df.columns:
+        unique_vals = df[col].dropna().astype(str).unique()
+        if any(v in {'<=50K', '>50K', '<=50K.', '>50K.'} for v in unique_vals):
+            target_col = col
+            break
+
+    context_parts = [
+        "**数据集上下文（系统自动检测）：**",
+        "当前数据集为 **Adult Income（人口收入）数据集**，来自 1994 年美国人口普查。",
+        f"- 目标变量：`{target_col}`（<=50K / >50K，预测个人年收入是否超过 5 万美元）",
+        "- 关键特征：age（年龄）、education-num（教育年限）、occupation（职业）、hours-per-week（每周工时）、capital-gain/loss（资本收益/损失）",
+        "- `fnlwgt` 是抽样权重，非个人属性，分析时应注意",
+        "- `education` 与 `education-num` 重复（前者为文字标签）",
+        "- 数据存在类别不平衡（约 75% 为 <=50K）",
+        "",
+        "请在解读分析结果时结合此背景知识。例如：",
+        "- 讨论收入差异时应注意性别/种族的公平性",
+        "- capital-gain/loss 大量为零是正常现象",
+        "- 教育水平与收入的正相关是已知的社会学规律",
+    ]
+
+    return "\n".join(context_parts)
+
+
+def _format_categorical_summary(cat_result: dict) -> str:
+    """格式化分类列频次统计摘要"""
+    lines = [f"**{cat_result['column']}** 分类分布（共 {cat_result['total_count']} 条，{cat_result['unique_count']} 个类别）：\n"]
+    if cat_result["mode"]:
+        lines.append(f"- 众数：**{cat_result['mode']}**\n")
+    for cat in cat_result["categories"]:
+        lines.append(f"- **{cat['name']}**：{cat['count']} 条（{cat['percentage']}%）")
+    return "\n".join(lines)
+
+
+def _format_categorical_correlation_summary(corr_result: dict) -> str:
+    """格式化 Cramér's V 关联分析摘要"""
+    lines = ["Cramér's V 分类关联分析结果：\n"]
+    columns = corr_result["columns"]
+    matrix = corr_result["matrix"]
+    for i, col1 in enumerate(columns):
+        for j, col2 in enumerate(columns):
+            if i < j:
+                v = matrix[col1][col2]
+                if v > 0.3:
+                    strength = "强关联"
+                elif v > 0.1:
+                    strength = "中等关联"
+                else:
+                    strength = "弱关联"
+                lines.append(f"- **{col1}** ↔ **{col2}**：V = {v:.4f}（{strength}）")
+    return "\n".join(lines)

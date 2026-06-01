@@ -75,13 +75,15 @@ class Session:
         datasets: Dict[str, Dataset],
         created_at: Optional[datetime] = None,
         last_accessed: Optional[datetime] = None,
-        disk_path: Optional[str] = None
+        disk_path: Optional[str] = None,
+        ml_state: Optional[Dict[str, Any]] = None
     ):
         self.session_id = session_id
         self.datasets = datasets  # dataset_id -> Dataset
         self.created_at = created_at or datetime.now()
         self.last_accessed = last_accessed or datetime.now()
         self.disk_path = disk_path or os.path.join(SESSIONS_DIR, session_id)
+        self.ml_state = ml_state  # ML 引擎状态（序列化的 AdultMLEngine）
 
     @property
     def primary_dataset(self) -> Optional[Dataset]:
@@ -197,6 +199,36 @@ class SessionManager:
     def _get_cache_path(self, session_id: str) -> str:
         """获取缓存文件路径"""
         return os.path.join(self._get_session_dir(session_id), "cache.json")
+
+    def _get_ml_state_path(self, session_id: str) -> str:
+        """获取 ML 状态文件路径"""
+        return os.path.join(self._get_session_dir(session_id), "ml_state.json")
+
+    def save_ml_state(self, session_id: str, ml_state: Dict[str, Any]) -> None:
+        """保存 ML 引擎状态到磁盘"""
+        ml_path = self._get_ml_state_path(session_id)
+        with open(ml_path, 'w', encoding='utf-8') as f:
+            json.dump(ml_state, f, ensure_ascii=False)
+        # 同时更新内存中的 session
+        if session_id in self._memory_cache:
+            self._memory_cache[session_id].ml_state = ml_state
+        logger.info(f"ML 状态已保存: {session_id}")
+
+    def load_ml_state(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """从磁盘加载 ML 引擎状态"""
+        ml_path = self._get_ml_state_path(session_id)
+        if not os.path.exists(ml_path):
+            return None
+        try:
+            with open(ml_path, 'r', encoding='utf-8') as f:
+                state = json.load(f)
+            # 更新内存中的 session
+            if session_id in self._memory_cache:
+                self._memory_cache[session_id].ml_state = state
+            return state
+        except Exception as e:
+            logger.warning(f"加载 ML 状态失败: {e}")
+            return None
 
     def _analyze_columns(self, df: pd.DataFrame) -> Dict[str, Dict[str, Any]]:
         """分析列信息"""

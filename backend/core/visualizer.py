@@ -941,3 +941,215 @@ def create_grouped_scatter_chart(
             }]
         }
     }
+
+
+def create_confusion_matrix_chart(
+    cm_data: dict,
+    title: str = "混淆矩阵"
+) -> Dict[str, Any]:
+    """
+    创建混淆矩阵热力图
+
+    Args:
+        cm_data: 包含 tn, fp, fn, tp 的字典
+        title: 图表标题
+    """
+    tn = cm_data["tn"]
+    fp = cm_data["fp"]
+    fn = cm_data["fn"]
+    tp = cm_data["tp"]
+
+    data = [[tn, fp], [fn, tp]]
+    flat_data = []
+    for i in range(2):
+        for j in range(2):
+            flat_data.append([j, i, data[i][j]])
+
+    return {
+        "chart_type": "heatmap",
+        "option": {
+            "title": _create_base_title(title),
+            "tooltip": {"formatter": "function(p){ return ['<=50K','>50K'][p.data[1]] + ' 预测为 ' + ['<=50K','>50K'][p.data[0]] + ': ' + p.data[2]; }"},
+            "grid": {"left": "15%", "right": "15%", "bottom": "15%", "containLabel": True},
+            "xAxis": {
+                "type": "category",
+                "data": ["预测 <=50K", "预测 >50K"],
+                "splitArea": {"show": True}
+            },
+            "yAxis": {
+                "type": "category",
+                "data": ["实际 <=50K", "实际 >50K"],
+                "splitArea": {"show": True}
+            },
+            "visualMap": {
+                "min": 0,
+                "max": max(tn + fp, fn + tp),
+                "calculable": True,
+                "orient": "horizontal",
+                "left": "center",
+                "bottom": "0%"
+            },
+            "series": [{
+                "type": "heatmap",
+                "data": flat_data,
+                "label": {"show": True, "fontSize": 16, "fontWeight": "bold"},
+                "emphasis": {"itemStyle": {"shadowBlur": 10, "shadowColor": "rgba(0, 0, 0, 0.5)"}}
+            }]
+        }
+    }
+
+
+def create_roc_curve_chart(
+    fpr: list,
+    tpr: list,
+    auc_score: float,
+    title: str = "ROC 曲线"
+) -> Dict[str, Any]:
+    """
+    创建 ROC 曲线图
+    """
+    roc_points = [[float(f), float(t)] for f, t in zip(fpr, tpr)]
+    diagonal = [[0, 0], [1, 1]]
+
+    return {
+        "chart_type": "line",
+        "option": {
+            "title": _create_base_title(title, f"AUC = {auc_score:.4f}"),
+            "tooltip": {"trigger": "item"},
+            "grid": {"left": "10%", "right": "10%", "bottom": "15%", "containLabel": True},
+            "xAxis": {
+                "type": "value",
+                "name": "假阳性率 (FPR)",
+                "min": 0, "max": 1,
+                "nameLocation": "middle", "nameGap": 30
+            },
+            "yAxis": {
+                "type": "value",
+                "name": "真阳性率 (TPR)",
+                "min": 0, "max": 1,
+                "nameLocation": "end"
+            },
+            "series": [
+                {
+                    "name": "随机基线",
+                    "type": "line",
+                    "data": diagonal,
+                    "lineStyle": {"type": "dashed", "color": "#999"},
+                    "symbol": "none",
+                    "itemStyle": {"color": "#999"}
+                },
+                {
+                    "name": f"ROC (AUC={auc_score:.4f})",
+                    "type": "line",
+                    "data": roc_points,
+                    "smooth": False,
+                    "lineStyle": {"width": 2, "color": "#5470c6"},
+                    "symbol": "none",
+                    "areaStyle": {"opacity": 0.15, "color": "#5470c6"},
+                    "itemStyle": {"color": "#5470c6"}
+                }
+            ]
+        }
+    }
+
+
+def create_feature_importance_chart(
+    features: list,
+    title: str = "特征重要性",
+    top_n: int = 15
+) -> Dict[str, Any]:
+    """
+    创建特征重要性水平柱状图
+    """
+    features = features[:top_n]
+    features.reverse()
+
+    names = [f["feature"] for f in features]
+    values = [round(f["importance"] * 100, 2) for f in features]
+
+    return {
+        "chart_type": "bar",
+        "option": {
+            "title": _create_base_title(title),
+            "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
+            "grid": {"left": "30%", "right": "10%", "bottom": "5%", "top": "15%", "containLabel": True},
+            "xAxis": {
+                "type": "value",
+                "name": "重要性 (%)",
+                "nameLocation": "end"
+            },
+            "yAxis": {
+                "type": "category",
+                "data": names,
+                "axisLabel": {"fontSize": 11}
+            },
+            "series": [{
+                "type": "bar",
+                "data": values,
+                "itemStyle": {
+                    "color": {
+                        "type": "linear",
+                        "x": 0, "y": 0, "x2": 1, "y2": 0,
+                        "colorStops": [
+                            {"offset": 0, "color": "#5470c6"},
+                            {"offset": 1, "color": "#91cc75"}
+                        ]
+                    }
+                },
+                "label": {"show": True, "position": "right", "formatter": "{c}%"}
+            }]
+        }
+    }
+
+
+def create_fairness_chart(
+    fairness_result: dict,
+    title: str = "公平性审计"
+) -> list:
+    """
+    创建公平性审计对比柱状图（每个敏感属性一张图）
+    """
+    charts = []
+
+    for attr_name, attr_data in fairness_result.get("sensitive_attributes", {}).items():
+        groups = attr_data["groups"]
+        group_names = [g["group"] for g in groups]
+        tpr_values = [g["tpr"] for g in groups]
+        fpr_values = [g["fpr"] for g in groups]
+
+        charts.append({
+            "chart_type": "bar",
+            "option": {
+                "title": _create_base_title(
+                    f"公平性审计 - {attr_name}",
+                    f"TPR 差异: {attr_data['tpr_gap']:.4f}, FPR 差异: {attr_data['fpr_gap']:.4f}"
+                ),
+                "tooltip": {"trigger": "axis"},
+                "legend": {"data": ["TPR (真正率)", "FPR (假阳性率)"], "top": "12%"},
+                "grid": {"left": "10%", "right": "10%", "bottom": "15%", "top": "25%", "containLabel": True},
+                "xAxis": {
+                    "type": "category",
+                    "data": group_names,
+                    "axisLabel": {"rotate": 30}
+                },
+                "yAxis": {"type": "value", "name": "比率", "min": 0, "max": 1},
+                "series": [
+                    {
+                        "name": "TPR (真正率)",
+                        "type": "bar",
+                        "data": tpr_values,
+                        "itemStyle": {"color": "#5470c6"},
+                        "label": {"show": True, "position": "top", "formatter": "{c}"}
+                    },
+                    {
+                        "name": "FPR (假阳性率)",
+                        "type": "bar",
+                        "data": fpr_values,
+                        "itemStyle": {"color": "#ee6666"},
+                        "label": {"show": True, "position": "top", "formatter": "{c}"}
+                    }
+                ]
+            }
+        })
+
+    return charts
