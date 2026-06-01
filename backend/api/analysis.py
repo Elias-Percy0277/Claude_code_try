@@ -135,6 +135,7 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
                 "type": "error",
                 "message": intent_result["error"]
             })
+            yield _format_sse({"type": "done"})
             return
 
         tasks = intent_result.get("tasks", [])
@@ -143,6 +144,7 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
                 "type": "error",
                 "message": "无法识别分析意图"
             })
+            yield _format_sse({"type": "done"})
             return
 
         # 执行分析任务

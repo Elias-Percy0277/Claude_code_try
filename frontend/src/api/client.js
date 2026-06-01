@@ -6,6 +6,9 @@ import axios from 'axios'
 
 const API_BASE = '/api'
 
+// SSE 请求直连后端，绕过 Vite 代理缓冲
+const API_DIRECT = 'http://localhost:8000/api'
+
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
@@ -85,7 +88,7 @@ export async function analyzeSync(sessionId, query) {
  * 分析请求（SSE 流式）
  */
 export async function analyzeStream(sessionId, query, onData, onError, onDone, signal = null) {
-  const response = await fetch(`${API_BASE}/analysis`, {
+  const response = await fetch(`${API_DIRECT}/analysis`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -108,6 +111,7 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
   let chartsReceived = false
   let currentResponse = ''
   let aborted = false
+  let doneCalled = false
 
   // 监听 abort 信号，主动取消 reader
   if (signal) {
@@ -115,6 +119,31 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
       aborted = true
       try { reader.cancel() } catch (e) { /* ignore */ }
     }, { once: true })
+  }
+
+  function processLine(line) {
+    if (!line.trim() || !line.startsWith('data: ')) return
+    const jsonStr = line.slice(6)
+    if (jsonStr === '[DONE]') return
+
+    try {
+      const data = JSON.parse(jsonStr)
+
+      if (data.type === 'charts') {
+        onData({ type: 'charts', data: data.data })
+        chartsReceived = true
+      } else if (data.type === 'text') {
+        currentResponse += data.delta
+        onData({ type: 'text', delta: data.delta, content: currentResponse })
+      } else if (data.type === 'done') {
+        doneCalled = true
+        onDone({ content: currentResponse, hasCharts: chartsReceived, warning: data.warning })
+      } else if (data.type === 'error') {
+        onError(data.message)
+      }
+    } catch (e) {
+      console.error('解析 SSE 数据失败:', e)
+    }
   }
 
   try {
@@ -127,29 +156,22 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
       buffer = lines.pop() || ''
 
       for (const line of lines) {
-        if (!line.trim() || !line.startsWith('data: ')) continue
-
-        const jsonStr = line.slice(6)
-        if (jsonStr === '[DONE]') break
-
-        try {
-          const data = JSON.parse(jsonStr)
-
-          if (data.type === 'charts') {
-            onData({ type: 'charts', data: data.data })
-            chartsReceived = true
-          } else if (data.type === 'text') {
-            currentResponse += data.delta
-            onData({ type: 'text', delta: data.delta, content: currentResponse })
-          } else if (data.type === 'done') {
-            onDone({ content: currentResponse, hasCharts: chartsReceived, warning: data.warning })
-          } else if (data.type === 'error') {
-            onError(data.message)
-          }
-        } catch (e) {
-          console.error('解析 SSE 数据失败:', e)
-        }
+        processLine(line)
       }
+    }
+
+    // 流结束后处理可能残留在 buffer 中的数据
+    if (buffer.trim()) {
+      const remainingLines = buffer.split('\n')
+      for (const line of remainingLines) {
+        processLine(line)
+      }
+      buffer = ''
+    }
+
+    // 兜底：如果流结束但从未收到 done 事件，手动触发
+    if (!doneCalled && !aborted) {
+      onDone({ content: currentResponse, hasCharts: chartsReceived, warning: null })
     }
   } catch (error) {
     if (error.name === 'AbortError') {
@@ -157,6 +179,10 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
       onDone({ content: currentResponse, hasCharts: chartsReceived, warning: null })
     } else {
       onError(error.message)
+      // 即使出错也要确保 onDone 被调用，避免前端卡死
+      if (!doneCalled) {
+        onDone({ content: currentResponse, hasCharts: chartsReceived, warning: null })
+      }
     }
   }
 }

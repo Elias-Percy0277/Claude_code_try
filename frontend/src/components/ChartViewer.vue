@@ -5,6 +5,11 @@
         <span class="title-dot"></span>
         {{ props.historyMode ? '历史图表' : '分析图表' }}
       </h3>
+      <button class="btn-close-charts" @click="handleCloseCharts" title="关闭图表">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2L12 12M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
 
     <div
@@ -76,6 +81,23 @@
                 placeholder="Y 轴"
               />
               <button class="btn-sm" @click="applyAxisNames(index)">应用</button>
+            </div>
+          </div>
+
+          <!-- X 轴间距 -->
+          <div class="setting-row" v-if="hasYAxis(item.chart)">
+            <label class="setting-label">X 轴间距</label>
+            <div class="setting-inputs">
+              <input
+                type="number"
+                class="setting-input"
+                min="0"
+                :value="panelStates[index]?.xInterval ?? ''"
+                @input="updatePanelState(index, 'xInterval', $event.target.value)"
+                placeholder="间距值"
+              />
+              <button class="btn-sm" @click="applyXInterval(index)">应用</button>
+              <button class="btn-sm btn-secondary" @click="resetXInterval(index)">重置</button>
             </div>
           </div>
 
@@ -364,6 +386,7 @@ function renderCharts() {
         open: false,
         yMin: '',
         yMax: '',
+        xInterval: '',
         chartType: item.chart.chart_type,
         showLabels: false,
         smooth: false,
@@ -452,6 +475,23 @@ function resetYAxis(index) {
   panelStates[index].yMin = ''
   panelStates[index].yMax = ''
   instance.setOption({ yAxis: { min: undefined, max: undefined } }, false)
+}
+
+function applyXInterval(index) {
+  const instance = chartInstances.value[index]
+  if (!instance) return
+  const val = panelStates[index].xInterval
+  if (val === '' || val === null) return
+  const interval = Number(val)
+  if (isNaN(interval) || interval < 0) return
+  instance.setOption({ xAxis: { interval } })
+}
+
+function resetXInterval(index) {
+  const instance = chartInstances.value[index]
+  if (!instance) return
+  panelStates[index].xInterval = ''
+  instance.setOption({ xAxis: { interval: undefined } }, false)
 }
 
 async function switchType(index, newType) {
@@ -575,6 +615,13 @@ function handleTitleBlur(index, event) {
   }
 }
 
+function handleCloseCharts() {
+  store.setCharts([])
+  store.pinnedCharts = []
+  store.viewingHistoryCharts = false
+  store.viewingMessageIndex = -1
+}
+
 watch(() => [store.charts, store.pinnedCharts], async () => {
   if (skipNextWatch) {
     skipNextWatch = false
@@ -633,6 +680,26 @@ onUnmounted(() => {
   height: 6px;
   border-radius: 50%;
   background: var(--theme-green);
+}
+
+.btn-close-charts {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--theme-border);
+  background: transparent;
+  color: var(--theme-white-dim);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-close-charts:hover {
+  border-color: var(--theme-red);
+  color: var(--theme-red);
+  background: rgba(255, 68, 68, 0.08);
 }
 
 .btn-action {

@@ -1,6 +1,6 @@
 <template>
   <div class="chat-panel">
-    <div class="messages" ref="messagesContainer">
+    <div class="messages" ref="messagesContainer" @scroll="onScroll">
       <div
         v-for="(message, index) in store.messages"
         :key="index"
@@ -30,7 +30,12 @@
           </span>
         </div>
         <div class="message-content">
-          <div class="message-text" v-if="message.content">{{ message.content }}</div>
+          <div
+            v-if="message.content"
+            class="message-text"
+            :class="{ 'md-render': message.role === 'assistant' }"
+            v-html="renderContent(message)"
+          ></div>
 
           <div v-if="message.charts && message.charts.length > 0" class="message-charts">
             <button
@@ -75,17 +80,44 @@
         </div>
       </div>
     </div>
+    <!-- 跳转按钮 -->
+    <button
+      v-if="showJump"
+      class="jump-btn"
+      @click="handleJump"
+      :title="isNearBottom ? '跳转到顶部' : '跳转到底部'"
+    >
+      <svg v-if="isNearBottom" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 12V4M8 4L4 8M8 4L12 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 4V12M8 12L4 8M8 12L12 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app'
+import { marked } from 'marked'
 
 const store = useAppStore()
 const messagesContainer = ref(null)
 
 const emit = defineEmits(['viewCharts', 'pinCharts'])
+
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+})
+
+function renderContent(message) {
+  if (message.role === 'assistant') {
+    return marked.parse(message.content)
+  }
+  return message.content
+}
 
 function handleViewCharts(messageIndex) {
   emit('viewCharts', messageIndex)
@@ -114,6 +146,27 @@ function scrollToBottom() {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
+
+const showJump = ref(false)
+const isNearBottom = ref(true)
+
+function onScroll() {
+  const el = messagesContainer.value
+  if (!el) return
+  const threshold = 100
+  showJump.value = el.scrollHeight > el.clientHeight + threshold
+  isNearBottom.value = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
+}
+
+function handleJump() {
+  const el = messagesContainer.value
+  if (!el) return
+  if (isNearBottom.value) {
+    el.scrollTo({ top: 0, behavior: 'smooth' })
+  } else {
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }
+}
 </script>
 
 <style scoped>
@@ -123,12 +176,12 @@ function scrollToBottom() {
   border-radius: var(--theme-radius);
   padding: 1rem;
   min-height: 200px;
-  max-height: 80vh;
-  height: 400px;
+  flex: 1;
   resize: vertical;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .messages {
@@ -138,6 +191,31 @@ function scrollToBottom() {
   overflow-y: auto;
   flex: 1;
   padding-right: 4px;
+}
+
+/* 跳转按钮 */
+.jump-btn {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--theme-green);
+  background: var(--theme-green);
+  color: var(--theme-black);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  opacity: 0.85;
+  transition: opacity 0.2s, box-shadow 0.2s;
+}
+
+.jump-btn:hover {
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.4);
 }
 
 .message {
@@ -188,6 +266,78 @@ function scrollToBottom() {
   white-space: pre-wrap;
   font-size: 0.9rem;
   word-break: break-word;
+}
+
+.message-text.md-render {
+  white-space: normal;
+}
+
+/* Markdown 表格样式 */
+.message-text.md-render :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.82rem;
+}
+
+.message-text.md-render :deep(th) {
+  background: rgba(23, 247, 0, 0.1);
+  color: var(--theme-green);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--theme-border);
+  white-space: nowrap;
+}
+
+.message-text.md-render :deep(td) {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--theme-border);
+  color: var(--theme-white);
+}
+
+.message-text.md-render :deep(tr:nth-child(even)) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.message-text.md-render :deep(tr:hover) {
+  background: rgba(23, 247, 0, 0.05);
+}
+
+/* Markdown 其他元素 */
+.message-text.md-render :deep(h2) {
+  color: var(--theme-green);
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+  border-bottom: 1px solid var(--theme-border);
+  padding-bottom: 0.3rem;
+}
+
+.message-text.md-render :deep(h3) {
+  color: var(--theme-green);
+  font-size: 0.95rem;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.message-text.md-render :deep(strong) {
+  color: var(--theme-green);
+}
+
+.message-text.md-render :deep(ul),
+.message-text.md-render :deep(ol) {
+  padding-left: 1.2rem;
+  margin: 0.4rem 0;
+}
+
+.message-text.md-render :deep(li) {
+  margin: 0.2rem 0;
+}
+
+.message-text.md-render :deep(code) {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.85em;
 }
 
 .message.user .message-text {

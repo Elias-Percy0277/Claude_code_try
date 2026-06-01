@@ -1,5 +1,10 @@
 <template>
   <div id="app" class="datavis-app">
+    <!-- 会话切换过渡动画 -->
+    <div v-if="switchingSession" class="session-switch-overlay">
+      <div class="switch-spinner"></div>
+    </div>
+
     <!-- 背景装饰线条 -->
     <div class="bg-decoration">
       <div class="bg-line bg-line-1"></div>
@@ -151,34 +156,11 @@
                 :message="store.error"
                 @close="store.clearError()"
               />
+
             </div>
 
-            <!-- 底栏：输入 + 示例 -->
+            <!-- 底栏：悬浮输入框 -->
             <div class="session-bottombar">
-              <div class="input-row">
-                <textarea
-                  v-model="store.queryInput"
-                  @keydown.enter.exact.prevent="handleSendMessage"
-                  placeholder="输入分析请求..."
-                  rows="2"
-                  :disabled="store.isLoading"
-                ></textarea>
-                <button
-                  v-if="store.isLoading"
-                  @click="handleStopAnalysis"
-                  class="btn-stop"
-                >
-                  停止
-                </button>
-                <button
-                  v-else
-                  @click="handleSendMessage"
-                  :disabled="!store.queryInput.trim()"
-                  class="btn-send"
-                >
-                  发送
-                </button>
-              </div>
               <div v-if="!store.isLoading" class="examples-row">
                 <button
                   v-for="(example, i) in exampleQueries"
@@ -187,6 +169,36 @@
                   class="btn-example"
                 >
                   {{ example }}
+                </button>
+              </div>
+              <div class="input-container">
+                <textarea
+                  v-model="store.queryInput"
+                  @keydown.enter.exact.prevent="handleSendMessage"
+                  @input="onQueryInput"
+                  placeholder="输入分析请求..."
+                  rows="1"
+                ></textarea>
+                <button
+                  v-if="store.isLoading"
+                  @click="handleStopAnalysis"
+                  class="btn-stop-icon"
+                  title="停止"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                    <rect x="2" y="2" width="10" height="10" rx="1.5"/>
+                  </svg>
+                </button>
+                <button
+                  v-else
+                  @click="handleSendMessage"
+                  :disabled="!store.queryInput.trim()"
+                  class="btn-send-icon"
+                  title="发送"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 16V2M9 2L4 7M9 2L14 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -222,6 +234,7 @@ const store = useAppStore()
 const showAddFile = ref(false)
 const sessionSidebar = ref(null)
 const abortController = ref(null)
+const switchingSession = ref(false)
 
 const defaultQueries = [
   '分析数据概览',
@@ -274,6 +287,9 @@ async function handleSessionSwitched(sessionId) {
     if (!confirm('分析正在进行中，确定要切换吗？')) return
   }
 
+  switchingSession.value = true
+  await new Promise(r => setTimeout(r, 300))
+
   store.setLoading(true)
   try {
     // 验证会话并获取详情
@@ -305,6 +321,7 @@ async function handleSessionSwitched(sessionId) {
     store.setError('加载会话失败: ' + e.message)
   } finally {
     store.setLoading(false)
+    switchingSession.value = false
   }
 }
 
@@ -380,12 +397,24 @@ async function handleSendMessage() {
   // 创建 AbortController 用于停止分析
   abortController.value = new AbortController()
 
+  // 5 秒无数据时提示用户
+  let dataReceived = false
+  const slowTimer = setTimeout(() => {
+    if (!dataReceived && store.isLoading) {
+      store.updateLastMessageContent('响应时间较长，如长时间无结果请尝试刷新页面（F5）。')
+    }
+  }, 5000)
+
   try {
     await analyzeStream(
       store.sessionId,
       query,
       // onData
       (data) => {
+        if (!dataReceived) {
+          dataReceived = true
+          clearTimeout(slowTimer)
+        }
         if (data.type === 'charts') {
           store.setCharts(data.data)
         } else if (data.type === 'text') {
@@ -394,10 +423,12 @@ async function handleSendMessage() {
       },
       // onError
       (error) => {
+        clearTimeout(slowTimer)
         store.setError(error)
       },
       // onDone
       (result) => {
+        clearTimeout(slowTimer)
         // 如果已经被停止，不要覆盖状态
         if (!store.isLoading) return
         store.setLoading(false)
@@ -422,6 +453,7 @@ async function handleSendMessage() {
       abortController.value.signal
     )
   } catch (error) {
+    clearTimeout(slowTimer)
     if (error.name === 'AbortError') {
       // 用户主动停止，状态已由 handleStopAnalysis 更新
     } else {
@@ -445,6 +477,13 @@ function handleStopAnalysis() {
   if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.content.includes('[已停止]')) {
     lastMsg.content = (lastMsg.content || '') + '\n\n*[已停止]*'
     store.$persist()
+  }
+}
+
+// 输入框输入时，若正在加载则立即终止当前进程
+function onQueryInput() {
+  if (store.isLoading) {
+    handleStopAnalysis()
   }
 }
 
@@ -591,6 +630,35 @@ function generateSuggestions(content, query) {
 </script>
 
 <style scoped>
+/* 会话切换过渡 */
+.session-switch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--theme-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: switch-fade 0.3s ease;
+}
+
+@keyframes switch-fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.switch-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--theme-border);
+  border-top-color: var(--theme-green);
+  border-radius: 50%;
+  animation: switch-spin 0.6s linear infinite;
+}
+
+@keyframes switch-spin {
+  to { transform: rotate(360deg); }
+}
 /* ============ 背景装饰 ============ */
 .bg-decoration {
   position: fixed;
@@ -637,17 +705,19 @@ function generateSuggestions(content, query) {
 
 /* ============ 根布局 ============ */
 .datavis-app {
-  min-height: 100vh;
+  height: 100vh;
   background: var(--theme-black);
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* ============ 主区域 ============ */
@@ -811,6 +881,7 @@ function generateSuggestions(content, query) {
   flex-direction: column;
   gap: 1rem;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* 顶栏 */
@@ -1021,127 +1092,31 @@ function generateSuggestions(content, query) {
   opacity: 0.6;
 }
 
-/* 底栏 */
+/* 底栏：悬浮输入框 */
 .session-bottombar {
-  background: var(--theme-dark);
-  border: 1px solid var(--theme-border);
-  border-radius: var(--theme-radius);
-  padding: 1rem;
   flex-shrink: 0;
-}
-
-.input-row {
+  padding: 0.5rem 1.25rem 0.75rem;
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
-}
-
-.input-row textarea {
-  flex: 1;
-  background: var(--theme-dark-2);
-  border: 1px solid var(--theme-border);
-  border-radius: var(--theme-radius-sm);
-  padding: 0.75rem;
-  font-size: 0.95rem;
-  color: var(--theme-white);
-  resize: none;
-  font-family: 'Inter', inherit;
-  transition: border-color 0.3s ease;
-  min-height: 44px;
-  max-height: 120px;
-}
-
-.input-row textarea::placeholder {
-  color: var(--theme-white-dim);
-}
-
-.input-row textarea:focus {
-  outline: none;
-  border-color: var(--theme-green);
-  box-shadow: 0 0 0 2px var(--theme-green-dim);
-}
-
-.btn-send {
-  padding: 0.6rem 1.5rem;
-  background: var(--theme-green);
-  color: var(--theme-black);
-  border: none;
-  border-radius: var(--theme-radius-sm);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  transition: var(--theme-transition);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.btn-send:hover:not(:disabled) {
-  box-shadow: 0 0 20px rgba(23, 247, 0, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-send:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-stop {
-  padding: 0.6rem 1.5rem;
-  background: var(--theme-red);
-  color: var(--theme-white);
-  border: none;
-  border-radius: var(--theme-radius-sm);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  transition: var(--theme-transition);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.btn-stop:hover {
-  box-shadow: 0 0 20px rgba(255, 68, 68, 0.4);
-  transform: translateY(-1px);
-}
-
-.loading-text {
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-}
-
-.loading-text::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border: 2px solid var(--theme-black);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .examples-row {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
   flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
 }
 
 .btn-example {
-  padding: 0.4rem 0.75rem;
+  padding: 0.35rem 0.75rem;
   border: 1px solid var(--theme-border);
   background: transparent;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--theme-white-dim);
   transition: var(--theme-transition);
   white-space: nowrap;
@@ -1151,6 +1126,90 @@ function generateSuggestions(content, query) {
   border-color: var(--theme-green);
   color: var(--theme-green);
   background: var(--theme-green-dim);
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  background: var(--theme-dark);
+  border: 1px solid var(--theme-border);
+  border-radius: 22px;
+  padding: 0.45rem 0.55rem 0.45rem 1rem;
+  width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-container:focus-within {
+  border-color: var(--theme-green);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 2px var(--theme-green-dim);
+}
+
+.input-container textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.35rem 0;
+  font-size: 0.95rem;
+  color: var(--theme-white);
+  resize: none;
+  font-family: 'Inter', inherit;
+  min-height: 24px;
+  max-height: 120px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.input-container textarea::placeholder {
+  color: var(--theme-white-dim);
+}
+
+.btn-send-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--theme-green);
+  color: var(--theme-black);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-send-icon:hover:not(:disabled) {
+  box-shadow: 0 0 16px rgba(23, 247, 0, 0.4);
+  transform: scale(1.05);
+}
+
+.btn-send-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-stop-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--theme-red);
+  color: var(--theme-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-stop-icon:hover {
+  box-shadow: 0 0 16px rgba(255, 68, 68, 0.4);
+  transform: scale(1.05);
 }
 
 /* ============ 添加文件覆盖层 ============ */
@@ -1288,12 +1347,29 @@ function generateSuggestions(content, query) {
     gap: 0.5rem;
   }
 
+  .session-bottombar {
+    padding: 0.5rem 0.75rem 0.75rem;
+  }
+
+  .input-container {
+    border-radius: 18px;
+    padding: 0.4rem 0.5rem 0.4rem 0.85rem;
+  }
+
   .examples-row {
-    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .examples-row::-webkit-scrollbar {
+    display: none;
   }
 
   .btn-example {
-    width: 100%;
+    flex-shrink: 0;
   }
 }
 </style>
