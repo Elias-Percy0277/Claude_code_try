@@ -147,9 +147,10 @@ class AdultMLEngine:
         # 资本特征二值化
         for cap_col in ['capital-gain', 'capital-loss']:
             if cap_col in df_features.columns:
-                df_features[f'has_{cap_col}'] = (df_features[cap_col] > 0).astype(int)
-                if cap_col not in numeric_cols:
-                    numeric_cols.append(f'has_{cap_col}')
+                new_col = f'has_{cap_col}'
+                df_features[new_col] = (df_features[cap_col] > 0).astype(int)
+                if new_col not in numeric_cols:
+                    numeric_cols.append(new_col)
 
         # 对偏态特征做 log(1+x) 变换
         for cap_col in ['capital-gain', 'capital-loss']:
@@ -238,6 +239,7 @@ class AdultMLEngine:
             )
             self.model_name = "逻辑回归"
         else:
+            kwargs = dict(kwargs)
             n_estimators = kwargs.pop('n_estimators', 200)
             classifier = RandomForestClassifier(
                 n_estimators=n_estimators,
@@ -468,7 +470,10 @@ class AdultMLEngine:
         }
 
     def get_state(self) -> Dict[str, Any]:
-        """获取可序列化的状态（用于 session 持久化）"""
+        """获取可序列化的状态（用于 session 持久化）
+
+        注意：使用 pickle 序列化，仅在可信环境中使用。
+        """
         import pickle
         import base64
 

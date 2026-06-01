@@ -1202,6 +1202,8 @@ async def _execute_analysis(
                 logger.error(f"ML 公平性审计异常: {e}")
                 result["summary"] = f"公平性审计出错: {str(e)}"
 
+    return result
+
 
 @router.post("/analysis")
 async def analyze(request: AnalysisRequest):
