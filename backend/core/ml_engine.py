@@ -487,6 +487,7 @@ class AdultMLEngine:
             "target_col": self.target_col,
             "feature_names": self.feature_names,
             "training_stats": self.training_stats,
+            "X_test_pkl": base64.b64encode(pickle.dumps(self.X_test)).decode('ascii'),
             "y_test_pkl": base64.b64encode(pickle.dumps(self.y_test)).decode('ascii'),
             "y_pred_pkl": base64.b64encode(pickle.dumps(self.y_pred)).decode('ascii'),
             "y_proba_pkl": base64.b64encode(pickle.dumps(self.y_proba)).decode('ascii'),
@@ -505,6 +506,7 @@ class AdultMLEngine:
         self.target_col = state["target_col"]
         self.feature_names = state["feature_names"]
         self.training_stats = state["training_stats"]
+        self.X_test = pickle.loads(base64.b64decode(state["X_test_pkl"]))
         self.y_test = pickle.loads(base64.b64decode(state["y_test_pkl"]))
         self.y_pred = pickle.loads(base64.b64decode(state["y_pred_pkl"]))
         self.y_proba = pickle.loads(base64.b64decode(state["y_proba_pkl"]))

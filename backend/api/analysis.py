@@ -1031,7 +1031,9 @@ async def _execute_analysis(
         # ML 模型训练
         from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
 
-        if not HAS_SKLEARN:
+        if not query_session_id:
+            result["summary"] = "ML 功能需要有效的会话"
+        elif not HAS_SKLEARN:
             result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
         else:
             try:
@@ -1073,7 +1075,9 @@ async def _execute_analysis(
         # ML 模型评估
         from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
 
-        if not HAS_SKLEARN:
+        if not query_session_id:
+            result["summary"] = "ML 功能需要有效的会话"
+        elif not HAS_SKLEARN:
             result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
         else:
             try:
@@ -1130,7 +1134,9 @@ async def _execute_analysis(
         # ML 特征重要性
         from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
 
-        if not HAS_SKLEARN:
+        if not query_session_id:
+            result["summary"] = "ML 功能需要有效的会话"
+        elif not HAS_SKLEARN:
             result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
         else:
             try:
@@ -1166,7 +1172,9 @@ async def _execute_analysis(
         # ML 公平性审计
         from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
 
-        if not HAS_SKLEARN:
+        if not query_session_id:
+            result["summary"] = "ML 功能需要有效的会话"
+        elif not HAS_SKLEARN:
             result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
         else:
             try:

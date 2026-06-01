@@ -80,7 +80,7 @@ SUGGESTION_KEYWORDS = [
 # ML 训练关键词
 ML_TRAIN_KEYWORDS = [
     "训练模型", "建立模型", "构建模型", "预测模型", "机器学习", "分类模型",
-    "随机森林", "逻辑回归", "训练", "建模", "预测收入", "预测分类",
+    "随机森林", "逻辑回归", "建模", "预测收入", "预测分类",
     "train model", "machine learning", "classification",
 ]
 
