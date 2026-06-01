@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}联系人 - 微信托管控制台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>联系人管理</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
+        <i class="bi bi-person-plus"></i> 添加联系人
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>微信ID</th>
+                        <th>备注</th>
+                        <th>白名单</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in contacts %}
+                    <tr>
+                        <td>{{ contact.name }}</td>
+                        <td><code>{{ contact.wx_id }}</code></td>
+                        <td>{{ contact.remark or '-' }}</td>
+                        <td>
+                            {% if contact.is_whitelist %}
+                                <span class="status-badge status-active">已启用</span>
+                            {% else %}
+                                <span class="status-badge" style="background-color: #f8f9fa; color: #6c757d;">未启用</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="editContact({{ contact.id }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info"
+                                    onclick="viewMessages({{ contact.id }}, '{{ contact.name }}')">
+                                <i class="bi bi-chat"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning"
+                                    onclick="toggleWhitelist({{ contact.id }}, {{ 'false' if contact.is_whitelist else 'true' }})">
+                                <i class="bi bi-{% if contact.is_whitelist %}dash{% else %}check{% endif %}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteContact({{ contact.id }}, '{{ contact.name }}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            暂无联系人，点击右上角添加
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 添加联系人模态框 -->
+<div class="modal fade" id="addContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加联系人</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addContactForm">
+                    <div class="mb-3">
+                        <label class="form-label">微信ID/昵称</label>
+                        <input type="text" class="form-control" name="wx_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">显示名称</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">备注</label>
+                        <input type="text" class="form-control" name="remark">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_whitelist" id="isWhitelist">
+                        <label class="form-check-label" for="isWhitelist">
+                            加入白名单（启用自动回复）
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">自定义系统提示词（可选）</label>
+                        <textarea class="form-control" name="system_prompt" rows="3"
+                                  placeholder="例如：你是一个幽默的朋友，喜欢用表情包..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="addContact()">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑联系人模态框 -->
+<div class="modal fade" id="editContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑联系人</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editContactForm">
+                    <input type="hidden" name="id" id="editContactId">
+                    <div class="mb-3">
+                        <label class="form-label">微信ID</label>
+                        <input type="text" class="form-control" name="wx_id" id="editWxId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">显示名称</label>
+                        <input type="text" class="form-control" name="name" id="editName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">备注</label>
+                        <input type="text" class="form-control" name="remark" id="editRemark">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" name="is_whitelist" id="editIsWhitelist">
+                        <label class="form-check-label" for="editIsWhitelist">
+                            加入白名单
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">系统提示词</label>
+                        <textarea class="form-control" name="system_prompt" id="editSystemPrompt" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">风格学习</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="styleFile" accept=".txt">
+                            <button class="btn btn-outline-secondary" type="button" onclick="learnStyle()">学习风格</button>
+                        </div>
+                        <small class="text-muted">上传与该联系人的聊天记录 TXT 文件</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveContact()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 消息记录模态框 -->
+<div class="modal fade" id="messagesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">聊天记录 - <span id="messagesContactName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="messagesList" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center text-muted">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-warning" onclick="clearContext()">
+                    <i class="bi bi-trash"></i> 清空上下文
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentContactId = null;
+
+async function addContact() {
+    const form = document.getElementById('addContactForm');
+    const data = new FormData(form);
+    const contact = {
+        wx_id: data.get('wx_id'),
+        name: data.get('name'),
+        remark: data.get('remark') || null,
+        is_whitelist: document.getElementById('isWhitelist').checked,
+        system_prompt: data.get('system_prompt') || null
+    };
+
+    try {
+        const res = await fetch('/api/contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contact)
+        });
+        const result = await res.json();
+        if (result.success) {
+            bootstrap.Modal.getInstance(document.getElementById('addContactModal')).hide();
+            location.reload();
+        } else {
+            alert('添加失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+
+async function editContact(id) {
+    currentContactId = id;
+    try {
+        const res = await fetch(`/api/contacts/${id}`);
+        const result = await res.json();
+        if (result.success) {
+            const c = result.data;
+            document.getElementById('editContactId').value = c.id;
+            document.getElementById('editWxId').value = c.wx_id;
+            document.getElementById('editName').value = c.name;
+            document.getElementById('editRemark').value = c.remark || '';
+            document.getElementById('editIsWhitelist').checked = c.is_whitelist;
+            document.getElementById('editSystemPrompt').value = c.system_prompt || '';
+            new bootstrap.Modal(document.getElementById('editContactModal')).show();
+        }
+    } catch (e) {
+        alert('加载失败: ' + e);
+    }
+}
+
+async function saveContact() {
+    const id = document.getElementById('editContactId').value;
+    const data = {
+        wx_id: document.getElementById('editWxId').value,
+        name: document.getElementById('editName').value,
+        remark: document.getElementById('editRemark').value || null,
+        is_whitelist: document.getElementById('editIsWhitelist').checked,
+        system_prompt: document.getElementById('editSystemPrompt').value || null
+    };
+
+    try {
+        const res = await fetch(`/api/contacts/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+            bootstrap.Modal.getInstance(document.getElementById('editContactModal')).hide();
+            location.reload();
+        } else {
+            alert('保存失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+
+async function toggleWhitelist(id, enable) {
+    try {
+        const res = await fetch(`/api/contacts/${id}/whitelist`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_whitelist: enable })
+        });
+        const result = await res.json();
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('操作失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+
+async function deleteContact(id, name) {
+    if (!confirm(`确定要删除联系人 "${name}" 吗？`)) return;
+
+    try {
+        const res = await fetch(`/api/contacts/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('删除失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+
+async function viewMessages(id, name) {
+    currentContactId = id;
+    document.getElementById('messagesContactName').textContent = name;
+    document.getElementById('messagesList').innerHTML = '<div class="text-center text-muted"><div class="spinner-border"></div></div>';
+    new bootstrap.Modal(document.getElementById('messagesModal')).show();
+
+    try {
+        const res = await fetch(`/api/contacts/${id}/messages?limit=50`);
+        const result = await res.json();
+        if (result.success) {
+            const messages = result.data;
+            let html = '';
+            messages.forEach(msg => {
+                const align = msg.msg_type === 'received' ? 'start' : 'end';
+                const bgColor = msg.msg_type === 'received' ? 'bg-light' : 'bg-primary text-white';
+                const label = msg.msg_type === 'received' ? '收到' : '发送';
+                html += `
+                    <div class="d-flex justify-content-${align} mb-2">
+                        <div class="p-2 rounded ${bgColor}" style="max-width: 70%;">
+                            <small class="opacity-50">${label}</small>
+                            <div>${msg.content}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            if (!html) html = '<div class="text-center text-muted">暂无消息记录</div>';
+            document.getElementById('messagesList').innerHTML = html;
+        }
+    } catch (e) {
+        document.getElementById('messagesList').innerHTML = '<div class="text-center text-danger">加载失败</div>';
+    }
+}
+
+async function clearContext() {
+    if (!currentContactId) return;
+    if (!confirm('确定要清空该联系人的对话上下文吗？')) return;
+
+    try {
+        const res = await fetch(`/api/contacts/${currentContactId}/clear-context`, { method: 'POST' });
+        const result = await res.json();
+        if (result.success) {
+            alert('上下文已清空');
+        } else {
+            alert('操作失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+
+async function learnStyle() {
+    const fileInput = document.getElementById('styleFile');
+    if (!fileInput.files.length) {
+        alert('请选择文件');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('contact_name', document.getElementById('editName').value);
+
+    try {
+        const res = await fetch('/api/style/upload', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await res.json();
+        if (result.success) {
+            document.getElementById('editSystemPrompt').value = result.data.system_prompt;
+            alert('风格学习完成！已生成系统提示词');
+        } else {
+            alert('学习失败: ' + result.error);
+        }
+    } catch (e) {
+        alert('操作失败: ' + e);
+    }
+}
+</script>
+{% endblock %}

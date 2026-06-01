@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataVis - 数据分析平台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --theme-black: #171717;
+      --theme-dark: #1a1a1a;
+      --theme-dark-2: #222222;
+      --theme-dark-3: #2a2a2a;
+      --theme-white: #f7f7f7;
+      --theme-white-dim: #999999;
+      --theme-green: #17f700;
+      --theme-green-dim: rgba(23, 247, 0, 0.15);
+      --theme-border: #333333;
+      --theme-red: #ff4444;
+      --theme-radius: 12px;
+      --theme-radius-sm: 8px;
+      --theme-transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--theme-black);
+      color: var(--theme-white);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background-color: var(--theme-green);
+      color: var(--theme-black);
+    }
+
+    ::-moz-selection {
+      background-color: var(--theme-green);
+      color: var(--theme-black);
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--theme-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--theme-green);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2aff00;
+    }
+
+    #app {
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--theme-green);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ============ LOADING ANIMATION ============ */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--theme-black);
+      transition: clip-path 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    #loading-screen.fade-out {
+      clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    }
+
+    /* Green grid background pattern */
+    .loading-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(var(--theme-green) 1px, transparent 1px),
+        linear-gradient(90deg, var(--theme-green) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0;
+      animation: grid-fade-in 1.5s ease 0.3s forwards;
+    }
+
+    @keyframes grid-fade-in {
+      0% { opacity: 0; }
+      40% { opacity: 0.06; }
+      100% { opacity: 0.04; }
+    }
+
+    /* Scanning line */
+    .loading-scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--theme-green), transparent);
+      box-shadow: 0 0 20px var(--theme-green), 0 0 60px rgba(23, 247, 0, 0.3);
+      animation: scanline-move 2s ease-in-out infinite;
+      opacity: 0;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes scanline-move {
+      0% { top: -2px; opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    /* Central content container */
+    .loading-content {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      z-index: 2;
+    }
+
+    /* Rotating geometric frame */
+    .loading-geo {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+
+    .loading-geo-square {
+      position: absolute;
+      inset: 0;
+      border: 1.5px solid var(--theme-green);
+      animation: geo-spin 4s linear infinite;
+    }
+
+    .loading-geo-square:nth-child(2) {
+      inset: 12px;
+      animation-direction: reverse;
+      animation-duration: 3s;
+      border-color: rgba(23, 247, 0, 0.5);
+    }
+
+    .loading-geo-square:nth-child(3) {
+      inset: 24px;
+      animation-duration: 2s;
+      border-color: rgba(23, 247, 0, 0.25);
+    }
+
+    @keyframes geo-spin {
+      0% { transform: rotate(0deg); }
+      25% { border-radius: 0; }
+      50% { transform: rotate(180deg); border-radius: 20%; }
+      75% { border-radius: 0; }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Center dot */
+    .loading-geo-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: var(--theme-green);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 15px var(--theme-green);
+      animation: dot-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 15px var(--theme-green); }
+      50% { transform: translate(-50%, -50%) scale(1.5); box-shadow: 0 0 30px var(--theme-green), 0 0 60px rgba(23, 247, 0, 0.3); }
+    }
+
+    /* Title text */
+    .loading-title {
+      display: flex;
+      font-family: 'Inter', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .loading-title span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: letter-appear 0.5s ease forwards;
+    }
+
+    .loading-title .letter-green {
+      color: var(--theme-green);
+      text-shadow: 0 0 20px rgba(23, 247, 0, 0.5);
+    }
+
+    .loading-title .letter-stroke {
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--theme-white);
+    }
+
+    @keyframes letter-appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Progress bar */
+    .loading-progress {
+      width: 200px;
+      height: 2px;
+      background: var(--theme-dark-2);
+      border-radius: 1px;
+      overflow: hidden;
+      opacity: 0;
+      animation: progress-fade-in 0.3s ease 1.2s forwards;
+    }
+
+    @keyframes progress-fade-in {
+      to { opacity: 1; }
+    }
+
+    .loading-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--theme-green), #4dff1a);
+      border-radius: 1px;
+      box-shadow: 0 0 10px rgba(23, 247, 0, 0.5);
+      transition: width 0.3s ease;
+    }
+
+    /* Status text */
+    .loading-status {
+      font-size: 0.75rem;
+      color: var(--theme-green);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: status-fade 0.3s ease 1.5s forwards;
+      font-weight: 300;
+    }
+
+    @keyframes status-fade {
+      to { opacity: 0.6; }
+    }
+
+    /* Corner decorations */
+    .loading-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      opacity: 0;
+      animation: corner-appear 0.4s ease 0.8s forwards;
+    }
+
+    @keyframes corner-appear {
+      to { opacity: 0.3; }
+    }
+
+    .loading-corner::before,
+    .loading-corner::after {
+      content: '';
+      position: absolute;
+      background: var(--theme-green);
+    }
+
+    .loading-corner::before {
+      width: 100%;
+      height: 1px;
+    }
+
+    .loading-corner::after {
+      width: 1px;
+      height: 100%;
+    }
+
+    .loading-corner.tl { top: 2rem; left: 2rem; }
+    .loading-corner.tl::before { top: 0; left: 0; }
+    .loading-corner.tl::after { top: 0; left: 0; }
+
+    .loading-corner.tr { top: 2rem; right: 2rem; }
+    .loading-corner.tr::before { top: 0; right: 0; }
+    .loading-corner.tr::after { top: 0; right: 0; }
+
+    .loading-corner.bl { bottom: 2rem; left: 2rem; }
+    .loading-corner.bl::before { bottom: 0; left: 0; }
+    .loading-corner.bl::after { bottom: 0; left: 0; }
+
+    .loading-corner.br { bottom: 2rem; right: 2rem; }
+    .loading-corner.br::before { bottom: 0; right: 0; }
+    .loading-corner.br::after { bottom: 0; right: 0; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .loading-title {
+        font-size: 2rem;
+        letter-spacing: 0.2em;
+      }
+      .loading-geo {
+        width: 80px;
+        height: 80px;
+      }
+      .loading-geo-square:nth-child(2) { inset: 8px; }
+      .loading-geo-square:nth-child(3) { inset: 16px; }
+      .loading-corner { width: 20px; height: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-grid"></div>
+    <div class="loading-scanline"></div>
+
+    <div class="loading-corner tl"></div>
+    <div class="loading-corner tr"></div>
+    <div class="loading-corner bl"></div>
+    <div class="loading-corner br"></div>
+
+    <div class="loading-content">
+      <div class="loading-geo">
+        <div class="loading-geo-square"></div>
+        <div class="loading-geo-square"></div>
+        <div class="loading-geo-square"></div>
+        <div class="loading-geo-dot"></div>
+      </div>
+
+      <div class="loading-title">
+        <span class="letter-stroke" style="animation-delay: 0.6s">D</span>
+        <span class="letter-stroke" style="animation-delay: 0.7s">A</span>
+        <span class="letter-stroke" style="animation-delay: 0.8s">T</span>
+        <span class="letter-stroke" style="animation-delay: 0.9s">A</span>
+        <span class="letter-green" style="animation-delay: 1.0s">V</span>
+        <span class="letter-green" style="animation-delay: 1.1s">I</span>
+        <span class="letter-green" style="animation-delay: 1.2s">S</span>
+      </div>
+
+      <div class="loading-progress">
+        <div class="loading-progress-fill" id="loading-progress-fill"></div>
+      </div>
+
+      <div class="loading-status" id="loading-status">INITIALIZING</div>
+    </div>
+  </div>
+
+  <div id="app"></div>
+
+  <script>
+    // Loading animation controller
+    (function() {
+      var fill = document.getElementById('loading-progress-fill');
+      var status = document.getElementById('loading-status');
+      var loadingScreen = document.getElementById('loading-screen');
+      var progress = 0;
+      var statusTexts = ['LOADING MODULES', 'CONNECTING', 'PREPARING', 'ALMOST READY'];
+      var removed = false;
+
+      function updateProgress() {
+        if (removed) return;
+        progress += Math.random() * 15 + 5;
+        if (progress > 90) progress = 90;
+        fill.style.width = progress + '%';
+
+        var idx = Math.min(Math.floor(progress / 25), statusTexts.length - 1);
+        status.textContent = statusTexts[idx];
+
+        if (progress < 85) {
+          setTimeout(updateProgress, 200 + Math.random() * 300);
+        }
+      }
+
+      setTimeout(updateProgress, 1400);
+
+      function hideLoading() {
+        if (removed) return;
+        removed = true;
+        fill.style.width = '100%';
+        status.textContent = 'READY';
+        setTimeout(function() {
+          loadingScreen.classList.add('fade-out');
+          setTimeout(function() {
+            loadingScreen.remove();
+          }, 900);
+        }, 300);
+      }
+
+      // Listen for app ready event
+      window.addEventListener('app-ready', hideLoading);
+
+      // Fallback: auto-hide after 4s
+      setTimeout(hideLoading, 4000);
+    })();
+  </script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

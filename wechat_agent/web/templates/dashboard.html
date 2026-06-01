@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}仪表盘 - 微信托管控制台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>仪表盘</h2>
+    <div>
+        <button class="btn btn-success" id="resumeBtn" onclick="resumeReply()" style="display: none;">
+            <i class="bi bi-play-fill"></i> 恢复回复
+        </button>
+        <button class="btn btn-warning" id="pauseBtn" onclick="pauseReply()">
+            <i class="bi bi-pause-fill"></i> 暂停回复
+        </button>
+    </div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-people fs-4 text-primary"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">总联系人</h6>
+                        <h3 class="mb-0">{{ stats.total_contacts }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-check-circle fs-4 text-success"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">白名单</h6>
+                        <h3 class="mb-0">{{ stats.whitelist_contacts }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-chat-dots fs-4 text-info"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">总消息数</h6>
+                        <h3 class="mb-0">{{ stats.total_messages }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-calendar-day fs-4 text-warning"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-1">今日消息</h6>
+                        <h3 class="mb-0">{{ stats.today_messages }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 服务状态 -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-cpu"></i> AI 服务</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="me-3">状态:</span>
+                    {% if ollama_connected %}
+                        <span class="status-badge status-active">连接正常</span>
+                    {% else %}
+                        <span class="status-badge status-paused">未连接</span>
+                    {% endif %}
+                </div>
+                <p class="text-muted">
+                    确保 Ollama 服务正在运行: <code>ollama serve</code>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="bi bi-robot"></i> 自动回复</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="me-3">状态:</span>
+                    {% if is_paused %}
+                        <span class="status-badge status-paused">已暂停</span>
+                    {% else %}
+                        <span class="status-badge status-active">运行中</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="me-3">模式:</span>
+                    {% if reply_mode == 'copy_only' %}
+                        <span class="status-badge status-copy-mode">仅复制</span>
+                    {% elif reply_mode == 'copy_paste' %}
+                        <span class="status-badge status-copy-mode">自动粘贴</span>
+                    {% elif reply_mode == 'auto_paste' %}
+                        <span class="status-badge status-auto-mode">粘贴+发送</span>
+                    {% else %}
+                        <span class="status-badge status-auto-mode">自动发送</span>
+                    {% endif %}
+                </div>
+                <div class="btn-group w-100 mb-2" role="group">
+                    <button type="button" class="btn btn-sm {% if reply_mode == 'copy_only' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                            onclick="setReplyMode('copy_only')">仅复制</button>
+                    <button type="button" class="btn btn-sm {% if reply_mode == 'copy_paste' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                            onclick="setReplyMode('copy_paste')">自动粘贴</button>
+                </div>
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-sm {% if reply_mode == 'auto_paste' %}btn-success{% else %}btn-outline-success{% endif %}"
+                            onclick="setReplyMode('auto_paste')">粘贴+发送</button>
+                    <button type="button" class="btn btn-sm {% if reply_mode == 'auto_send' %}btn-success{% else %}btn-outline-success{% endif %}"
+                            onclick="setReplyMode('auto_send')">自动发送</button>
+                </div>
+                <p class="text-muted mt-2 small mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    仅复制：复制到剪贴板<br>
+                    自动粘贴：复制+Ctrl+V（按Enter发送）<br>
+                    粘贴+发送：复制+Ctrl+V+Enter<br>
+                    自动发送：搜索联系人+发送
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近消息 -->
+<div class="card mt-4">
+    <div class="card-header bg-transparent">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> 快速操作</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="{{ url_for('main.contacts') }}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-person-plus"></i> 添加联系人
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('main.settings_page') }}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-gear"></i> 修改设置
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('main.chat_history') }}" class="btn btn-outline-info w-100">
+                    <i class="bi bi-chat-left-text"></i> 查看聊天记录
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function pauseReply() {
+        try {
+            const res = await fetch('/api/control/pause', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('pauseBtn').style.display = 'none';
+                document.getElementById('resumeBtn').style.display = 'inline-block';
+                updateStatus();
+            }
+        } catch (e) {
+            alert('操作失败: ' + e);
+        }
+    }
+
+    async function resumeReply() {
+        try {
+            const res = await fetch('/api/control/resume', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('resumeBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                updateStatus();
+            }
+        } catch (e) {
+            alert('操作失败: ' + e);
+        }
+    }
+
+    async function setReplyMode(mode) {
+        try {
+            const res = await fetch('/api/control/reply-mode', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: mode })
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            }
+        } catch (e) {
+            alert('操作失败: ' + e);
+        }
+    }
+
+    // 初始化按钮状态
+    {% if is_paused %}
+        document.getElementById('pauseBtn').style.display = 'none';
+        document.getElementById('resumeBtn').style.display = 'inline-block';
+    {% endif %}
+</script>
+{% endblock %}

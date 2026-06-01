@@ -1,0 +1,36 @@
+{
+  "web": {
+    "host": "127.0.0.1",
+    "port": 5001,
+    "debug": false
+  },
+  "ollama": {
+    "base_url": "http://localhost:11434",
+    "model": "qwen2.5",
+    "timeout": 30
+  },
+  "ai": {
+    "max_context_messages": 20,
+    "temperature": 0.7,
+    "default_system_prompt": "你是一个友好的助手，请用自然的语言回复消息。"
+  },
+  "wechat": {
+    "auto_reply": true,
+    "whitelist_only": true,
+    "poll_interval": 3,
+    "detection_mode": "hybrid"
+  },
+  "detector": {
+    "diff_threshold": 30,
+    "change_ratio": 0.02
+  },
+  "logging": {
+    "level": "INFO",
+    "max_file_size": 10485760,
+    "backup_count": 5
+  },
+  "style_learning": {
+    "enabled": true,
+    "sample_messages": 50
+  }
+}
