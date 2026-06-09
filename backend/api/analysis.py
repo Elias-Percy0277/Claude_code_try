@@ -3,6 +3,7 @@
 处理用户自然语言查询，返回分析结果和图表
 支持 SSE 流式响应
 """
+import asyncio
 import json
 import logging
 import pandas as pd
@@ -99,6 +100,9 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
         # 记录分析开始
         AnalysisLogger.log_analysis_start(request.session_id, request.query)
 
+        # 立即发送进度事件，让前端知道请求已被接收
+        yield _format_sse({"type": "progress", "message": "正在解析分析意图..."})
+
         # 检查缓存
         cached_result = cache_manager.get(request.session_id, request.query, file_hash)
         if cached_result:
@@ -119,6 +123,23 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
         intent_result = await parse_intent_async(request.query, df)
         logger.debug(f"意图解析结果: {intent_result}")
         AnalysisLogger.log_intent_parsed(intent_result.get("tasks", []))
+
+        # 意图解析完成，发送进度
+        task_names = [t.get("intent", "") for t in intent_result.get("tasks", [])]
+        if task_names:
+            intent_labels = {
+                "overview": "数据概览", "trend": "趋势分析", "correlation": "相关性分析",
+                "moving_avg": "移动平均", "distribution": "分布分析", "comparison": "分组对比",
+                "categorical_distribution": "分类分布", "seasonality": "季节性分析",
+                "cross_comparison": "交叉对比", "categorical_association": "分类关联分析",
+                "categorical_correlation": "分类相关性", "suggest": "建议查询",
+                "train_model": "模型训练", "predict": "预测", "evaluate": "模型评估",
+                "fairness_audit": "公平性审计", "feature_importance": "特征重要性",
+            }
+            labels = [intent_labels.get(n, n) for n in task_names]
+            yield _format_sse({"type": "progress", "message": f"正在执行{'、'.join(labels)}..."})
+        else:
+            yield _format_sse({"type": "progress", "message": "正在执行数据分析..."})
 
         # 处理原始 AI 响应（非结构化）
         if "raw_response" in intent_result:
@@ -198,6 +219,9 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
             "data": charts
         })
 
+        # 图表已发送，准备生成分析报告
+        yield _format_sse({"type": "progress", "message": "正在生成分析报告..."})
+
         # 检查是否所有分析都失败（无图表、无统计数据）
         all_failed = (
             not charts
@@ -267,6 +291,7 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
             "type": "error",
             "message": f"分析过程出错: {str(e)}"
         })
+        yield _format_sse({"type": "done"})
 
 
 def _build_analysis_messages(query: str, analysis_descriptions: list, session_id: str) -> list:
@@ -1210,7 +1235,97 @@ async def _execute_analysis(
                 logger.error(f"ML 公平性审计异常: {e}")
                 result["summary"] = f"公平性审计出错: {str(e)}"
 
+    elif intent == "ml_crossval":
+        # ML 交叉验证（多模型对比）
+        from backend.core.ml_engine import AdultMLEngine, MLError, HAS_SKLEARN
+
+        if not query_session_id:
+            result["summary"] = "ML 功能需要有效的会话"
+        elif not HAS_SKLEARN:
+            result["summary"] = "机器学习功能不可用：scikit-learn 未安装"
+        else:
+            try:
+                session_manager = get_session_manager()
+                session = session_manager.get_session(query_session_id)
+                cv_df = session.primary_dataset.dataframe
+
+                engine = AdultMLEngine()
+                prep = engine.prepare(cv_df)
+                X_train = prep["X_train"]
+                y_train = prep["y_train"]
+
+                # 逻辑回归交叉验证
+                engine.train(X_train, y_train, model_type="logistic_regression")
+                lr_cv = engine.cross_validate(X_train, y_train, cv=5)
+
+                # 随机森林交叉验证
+                engine.train(X_train, y_train, model_type="random_forest")
+                rf_cv = engine.cross_validate(X_train, y_train, cv=5)
+
+                # 保存随机森林模型到 session（后续评估使用）
+                ml_state = engine.get_state()
+                session_manager.save_ml_state(query_session_id, ml_state)
+
+                cv_stats = {
+                    "logistic_regression": lr_cv,
+                    "random_forest": rf_cv,
+                    "training_stats": prep["stats"],
+                }
+                result["statistics"] = cv_stats
+
+                # 生成对比摘要
+                lines = [
+                    "### 5 折交叉验证结果对比\n",
+                    f"- **训练样本:** {prep['stats']['train_samples']}",
+                    f"- **测试样本:** {prep['stats']['test_samples']}",
+                    f"- **目标分布:** {prep['stats']['target_ratio']}\n",
+                    "| 模型 | 平均 F1 | 标准差 | 各折 F1 |",
+                    "|------|---------|--------|---------|",
+                    f"| 逻辑回归 | {lr_cv['mean_f1']} | {lr_cv['std_f1']} | {', '.join(str(s) for s in lr_cv['fold_scores'])} |",
+                    f"| 随机森林 | {rf_cv['mean_f1']} | {rf_cv['std_f1']} | {', '.join(str(s) for s in rf_cv['fold_scores'])} |",
+                    "",
+                ]
+
+                # 推荐模型
+                if rf_cv["mean_f1"] > lr_cv["mean_f1"]:
+                    lines.append(f"**推荐模型：随机森林**（F1: {rf_cv['mean_f1']} vs {lr_cv['mean_f1']}）")
+                else:
+                    lines.append(f"**推荐模型：逻辑回归**（F1: {lr_cv['mean_f1']} vs {rf_cv['mean_f1']}）")
+
+                lines.append("\n随机森林模型已训练并保存，可输入「评估模型效果」查看完整评估。")
+                result["summary"] = "\n".join(lines)
+
+                # 对比柱状图
+                chart = create_grouped_bar_chart(
+                    ["平均F1", "标准差"],
+                    [
+                        {"name": "逻辑回归", "data": [lr_cv["mean_f1"], lr_cv["std_f1"]]},
+                        {"name": "随机森林", "data": [rf_cv["mean_f1"], rf_cv["std_f1"]]},
+                    ],
+                    "交叉验证结果对比",
+                    x_name="指标", y_name="分数"
+                )
+                result["charts"].append(chart)
+
+            except MLError as e:
+                result["summary"] = f"交叉验证失败: {str(e)}"
+            except Exception as e:
+                logger.error(f"ML 交叉验证异常: {e}")
+                result["summary"] = f"交叉验证出错: {str(e)}"
+
     return result
+
+
+async def _flushing_sse_wrapper(gen: AsyncGenerator) -> AsyncGenerator[str, None]:
+    """
+    包装 SSE 生成器，每次 yield 后强制交出事件循环控制权。
+
+    这确保 ASGI 服务器（uvicorn）在生成每个 SSE 数据块后立即将其刷新到网络，
+    而不是在内部缓冲区中积压多个块后再批量发送。
+    """
+    async for chunk in gen:
+        yield chunk
+        await asyncio.sleep(0)
 
 
 @router.post("/analysis")
@@ -1225,7 +1340,7 @@ async def analyze(request: AnalysisRequest):
         StreamingResponse: SSE 格式的流式响应
     """
     return StreamingResponse(
-        analyze_stream_generator(request),
+        _flushing_sse_wrapper(analyze_stream_generator(request)),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

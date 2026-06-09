@@ -33,8 +33,11 @@
           <div
             v-if="message.content"
             class="message-text"
-            :class="{ 'md-render': message.role === 'assistant' }"
-            v-html="renderContent(message)"
+            :class="{
+              'md-render': message.role === 'assistant' && !isProgressMessage(message),
+              'progress-text': isProgressMessage(message)
+            }"
+            v-html="renderContent(message, index)"
           ></div>
 
           <div v-if="message.charts && message.charts.length > 0" class="message-charts">
@@ -61,8 +64,8 @@
         </div>
       </div>
 
-      <!-- 加载中指示器 -->
-      <div v-if="store.isLoading" class="message assistant">
+      <!-- 加载中指示器：仅在等待首个数据到达时显示 -->
+      <div v-if="store.isLoading && !isLastAssistantStreaming" class="message assistant">
         <div class="message-avatar assistant">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <rect x="2" y="3" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.2"/>
@@ -98,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { marked } from 'marked'
 
@@ -112,11 +115,45 @@ marked.setOptions({
   gfm: true,
 })
 
-function renderContent(message) {
+// 判断最后一条助手消息是否正在流式接收中（有内容且不是纯进度消息）
+const isLastAssistantStreaming = computed(() => {
+  if (!store.isLoading || store.messages.length === 0) return false
+  const lastMsg = store.messages[store.messages.length - 1]
+  return lastMsg?.role === 'assistant' && lastMsg.content?.length > 0 && !lastMsg.content.startsWith('⏳')
+})
+
+// 流式传输期间跳过 Markdown 解析，避免主线程阻塞
+function renderContent(message, index) {
   if (message.role === 'assistant') {
+    // 进度消息：直接转义显示
+    if (isProgressMessage(message)) {
+      return message.content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    }
+    // 正在流式接收的最后一条消息：直接显示纯文本
+    const isStreaming = store.isLoading &&
+      index === store.messages.length - 1 &&
+      message.content.length > 0
+    if (isStreaming) {
+      // 转义 HTML 特殊字符后显示纯文本，保留换行
+      return message.content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>')
+    }
     return marked.parse(message.content)
   }
   return message.content
+}
+
+// 判断消息是否是进度消息
+function isProgressMessage(message) {
+  return message.role === 'assistant' &&
+    store.isLoading &&
+    message.content?.startsWith('⏳')
 }
 
 function handleViewCharts(messageIndex) {
@@ -139,6 +176,18 @@ watch(() => store.messages.length, async () => {
 watch(() => store.charts.length, async () => {
   await nextTick()
   scrollToBottom()
+})
+
+// 监听流式内容变化，自动滚动到底部
+watch(() => {
+  if (store.messages.length === 0) return 0
+  const lastMsg = store.messages[store.messages.length - 1]
+  return lastMsg?.content?.length || 0
+}, async () => {
+  if (store.isLoading) {
+    await nextTick()
+    scrollToBottom()
+  }
 })
 
 function scrollToBottom() {
@@ -352,6 +401,21 @@ function handleJump() {
   color: var(--theme-white);
   border-bottom-left-radius: 2px;
   border: 1px solid var(--theme-border);
+}
+
+/* 进度消息样式 */
+.message.assistant .progress-text {
+  background: transparent;
+  border: 1px dashed var(--theme-border);
+  color: var(--theme-green);
+  font-size: 0.85rem;
+  padding: 0.5rem 0.85rem;
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .message.system .message-text {

@@ -1,93 +1,142 @@
 """
 请求日志中间件
 记录所有 HTTP 请求和响应的详细信息
+
+使用纯 ASGI 中间件实现，避免 BaseHTTPMiddleware 对 SSE 流式响应的缓冲问题。
+BaseHTTPMiddleware 内部使用 anyio.MemoryObjectStream 缓冲响应体，
+导致 SSE 事件被积压直到生成器完全结束才一次性发送给客户端。
+纯 ASGI 实现直接透传所有响应数据，不做任何缓冲。
 """
 import time
 import uuid
 import json
+import logging
 from typing import Callable
-from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
+from fastapi import Request
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 import logging
 
 from .logger_config import get_logger
 
 logger = get_logger(__name__)
 
+# SSE 流式端点路径集合（这些端点使用 StreamingResponse，需要特殊处理）
+SSE_PATHS = {"/api/analysis"}
 
-class RequestLoggingMiddleware(BaseHTTPMiddleware):
+
+class RequestLoggingMiddleware:
     """
-    请求日志中间件
-    记录请求和响应的详细信息
+    纯 ASGI 请求日志中间件
+
+    不继承 BaseHTTPMiddleware，直接实现 __call__ 接口。
+    所有响应体数据（包括 SSE 事件流）直接透传，不做缓冲。
+    仅拦截 http.response.start 消息来记录响应状态码和耗时。
     """
 
     def __init__(self, app: ASGIApp):
-        super().__init__(app)
+        self.app = app
         self.logger = logger
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # 生成请求ID
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        # 非 HTTP 请求（WebSocket、lifespan 等）直接透传
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
         request_id = str(uuid.uuid4())[:8]
         start_time = time.time()
 
+        # 提取请求基本信息
+        path = scope.get("path", "")
+        method = scope.get("method", "")
+
+        # 判断是否为 SSE 流式端点
+        is_sse = path in SSE_PATHS and method == "POST"
+
         # 记录请求信息
-        self._log_request(request, request_id)
+        self._log_request(scope, request_id)
 
-        # 处理请求
+        # 标记响应是否已记录（防止重复记录）
+        response_logged = False
+
+        async def send_with_logging(message: Message):
+            """包装 send 回调：拦截响应头用于日志，其余数据直接透传"""
+            nonlocal response_logged
+
+            if message["type"] == "http.response.start" and not response_logged:
+                response_logged = True
+                status_code = message.get("status", 0)
+                process_time = time.time() - start_time
+
+                # SSE 端点使用不同的日志格式
+                if is_sse:
+                    self.logger.info(
+                        f"[RES] [{request_id}] [SSE] Status: {status_code} "
+                        f"(streaming started at {process_time * 1000:.1f}ms)"
+                    )
+                else:
+                    self._log_response_from_status(
+                        path, status_code, request_id, process_time
+                    )
+
+                # 注入自定义响应头（X-Request-ID、X-Process-Time）
+                headers = list(message.get("headers", []))
+                headers.append((b"x-request-id", request_id.encode()))
+                if not is_sse:
+                    # SSE 端点不注入 Process-Time，因为此时响应尚未完成
+                    headers.append(
+                        (b"x-process-time", f"{process_time:.3f}".encode())
+                    )
+                message = {**message, "headers": headers}
+
+            # 关键：直接将消息转发给真实的 send，不做任何缓冲
+            await send(message)
+
         try:
-            response = await call_next(request)
-
-            # 计算处理时间
-            process_time = time.time() - start_time
-
-            # 记录响应信息
-            self._log_response(request, response, request_id, process_time)
-
-            # 添加自定义响应头
-            response.headers["X-Request-ID"] = request_id
-            response.headers["X-Process-Time"] = f"{process_time:.3f}"
-
-            return response
-
+            await self.app(scope, receive, send_with_logging)
         except Exception as e:
-            # 记录异常
+            # 记录异常（仅在响应头尚未发送时）
             process_time = time.time() - start_time
-            self._log_error(request, e, request_id, process_time)
+            if not response_logged:
+                self._log_error(path, e, request_id, process_time)
             raise
 
-    def _log_request(self, request: Request, request_id: str):
-        """记录请求信息"""
-        client_ip = self._get_client_ip(request)
+    def _log_request(self, scope: Scope, request_id: str):
+        """记录请求信息（从 ASGI scope 提取，不消费 request body）"""
+        method = scope.get("method", "")
+        path = scope.get("path", "")
+        query_string = scope.get("query_string", b"").decode("utf-8", errors="ignore")
 
         # 基本信息
         log_parts = [
             f"▶ [{request_id}]",
-            f"{request.method}",
-            f"{request.url.path}",
+            method,
+            path,
         ]
 
-        # 添加查询参数（如果有）
-        if request.query_params:
-            log_parts.append(f"?{dict(request.query_params)}")
+        # 添加查询参数
+        if query_string:
+            log_parts.append(f"?{query_string}")
 
         self.logger.info(" ".join(log_parts))
 
-        # 详细信息（DEBUG级别）
+        # 详细信息（DEBUG 级别）
         if self.logger.isEnabledFor(logging.DEBUG):
+            headers = dict(scope.get("headers", []))
+            client = scope.get("client")
+            client_ip = f"{client[0]}:{client[1]}" if client else "unknown"
+            user_agent = ""
+            for key, val in scope.get("headers", []):
+                if key == b"user-agent":
+                    user_agent = val.decode("utf-8", errors="ignore")
+                    break
             self.logger.debug(f"  ├─ Client: {client_ip}")
-            self.logger.debug(f"  ├─ User-Agent: {request.headers.get('user-agent', 'N/A')}")
-            self.logger.debug(f"  └─ Headers: {self._format_headers(request.headers)}")
+            self.logger.debug(f"  ├─ User-Agent: {user_agent}")
 
-        # 记录请求体（对于 POST/PUT/PATCH 请求）
-        if request.method in ("POST", "PUT", "PATCH"):
-            self._log_request_body(request, request_id)
-
-    def _log_response(self, request: Request, response: Response, request_id: str, process_time: float):
-        """记录响应信息"""
-        status_code = response.status_code
-
-        # 根据状态码选择日志级别
+    def _log_response_from_status(
+        self, path: str, status_code: int, request_id: str, process_time: float
+    ):
+        """根据状态码记录响应信息"""
         if status_code < 300:
             log_func = self.logger.info
             status_symbol = "✓"
@@ -105,69 +154,19 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             f"◀ [{request_id}]",
             status_symbol,
             f"Status: {status_code}",
-            f"Time: {process_time*1000:.1f}ms"
+            f"Time: {process_time * 1000:.1f}ms",
         ]
 
         log_func(" ".join(log_parts))
 
-    def _log_error(self, request: Request, error: Exception, request_id: str, process_time: float):
+    def _log_error(
+        self, path: str, error: Exception, request_id: str, process_time: float
+    ):
         """记录错误信息"""
         self.logger.error(
             f"✗ [{request_id}] Error: {type(error).__name__}: {str(error)} "
-            f"(Time: {process_time*1000:.1f}ms)"
+            f"(Time: {process_time * 1000:.1f}ms)"
         )
-
-    def _log_request_body(self, request: Request, request_id: str):
-        """记录请求体（如果有且不是文件上传）"""
-        content_type = request.headers.get("content-type", "")
-
-        # 跳过文件上传
-        if "multipart/form-data" in content_type:
-            self.logger.debug(f"  └─ Body: [File Upload]")
-            return
-
-        # 跳过大型请求体
-        content_length = int(request.headers.get("content-length", 0))
-        if content_length > 1024:  # 大于1KB的请求体只记录摘要
-            self.logger.debug(f"  └─ Body Size: {content_length} bytes")
-            return
-
-        # 对于其他内容类型，尝试记录请求体
-        try:
-            # 注意：这会消耗请求体，需要重新创建
-            body = request._body
-
-            if body:
-                try:
-                    body_json = json.loads(body)
-                    self.logger.debug(f"  └─ Body: {json.dumps(body_json, ensure_ascii=False)}")
-                except json.JSONDecodeError:
-                    # 不是JSON格式
-                    body_str = body.decode('utf-8', errors='ignore')
-                    self.logger.debug(f"  └─ Body: {body_str[:200]}")
-        except Exception as e:
-            self.logger.debug(f"  └─ Body: [Unable to read: {e}]")
-
-    def _get_client_ip(self, request: Request) -> str:
-        """获取客户端IP地址"""
-        # 尝试从各种头部获取真实IP
-        forwarded = request.headers.get("x-forwarded-for")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
-
-        real_ip = request.headers.get("x-real-ip")
-        if real_ip:
-            return real_ip
-
-        return request.client.host if request.client else "unknown"
-
-    def _format_headers(self, headers: dict) -> dict:
-        """格式化请求头（过滤敏感信息）"""
-        sensitive_headers = {"authorization", "cookie", "set-cookie"}
-        return {
-            k: (v if k.lower() not in sensitive_headers else "***")
-            for k, v in headers.items()
-        }
 
 
 class FileUploadLogger:

@@ -6,8 +6,9 @@ import axios from 'axios'
 
 const API_BASE = '/api'
 
-// SSE 请求直连后端，绕过 Vite 代理缓冲
-const API_DIRECT = 'http://localhost:8000/api'
+// SSE 请求 URL：开发模式直连后端绕过代理缓冲，生产模式用相对路径
+const API_DIRECT = import.meta.env.VITE_SSE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:8000/api' : '/api')
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -113,6 +114,10 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
   let aborted = false
   let doneCalled = false
 
+  // SSE 流超时保护：180 秒内无数据则自动终止
+  const STREAM_TIMEOUT = 180000
+  let lastDataTime = Date.now()
+
   // 监听 abort 信号，主动取消 reader
   if (signal) {
     signal.addEventListener('abort', () => {
@@ -129,15 +134,30 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
     try {
       const data = JSON.parse(jsonStr)
 
+      // SSE 调试日志（验证通过后可移除）
+      console.log(`[SSE] type=${data.type}`, data.type === 'charts'
+        ? `charts=${data.data?.length}`
+        : data.type === 'progress'
+          ? data.message
+          : data.type === 'done'
+            ? 'done'
+            : data.delta?.substring(0, 30))
+
       if (data.type === 'charts') {
         onData({ type: 'charts', data: data.data })
         chartsReceived = true
       } else if (data.type === 'text') {
         currentResponse += data.delta
         onData({ type: 'text', delta: data.delta, content: currentResponse })
+      } else if (data.type === 'progress') {
+        onData({ type: 'progress', message: data.message })
       } else if (data.type === 'done') {
         doneCalled = true
-        onDone({ content: currentResponse, hasCharts: chartsReceived, warning: data.warning })
+        try {
+          onDone({ content: currentResponse, hasCharts: chartsReceived, warning: data.warning })
+        } catch (e) {
+          console.error('[SSE] onDone 回调异常:', e)
+        }
       } else if (data.type === 'error') {
         onError(data.message)
       }
@@ -148,9 +168,17 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
 
   try {
     while (true) {
+      // 超时检查：防止后端僵死导致前端无限等待
+      if (Date.now() - lastDataTime > STREAM_TIMEOUT) {
+        console.warn('[SSE] 流超时（180s 无数据），自动终止')
+        try { reader.cancel() } catch (e) { /* ignore */ }
+        break
+      }
+
       const { done, value } = await reader.read()
       if (done || aborted) break
 
+      lastDataTime = Date.now()
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''

@@ -147,8 +147,8 @@
                 <button @click="handleBackToCurrent" class="btn-back-current">返回最新</button>
               </div>
 
-              <!-- 图表展示 -->
-              <ChartViewer v-if="store.charts.length > 0 || store.pinnedCharts.length > 0" :history-mode="store.viewingHistoryCharts" />
+              <!-- 图表展示（用 v-show 避免组件销毁/重建导致 ECharts 初始化失败） -->
+              <ChartViewer v-show="store.chartsVisible" :history-mode="store.viewingHistoryCharts" />
 
               <!-- 错误提示 -->
               <ErrorMessage
@@ -251,19 +251,24 @@ const exampleQueries = computed(() => {
 onMounted(async () => {
   store.$hydrate()
 
-  // 如果有会话，验证有效性并恢复历史
+  // 如果有会话，验证有效性并从后端恢复完整历史（含 charts）
   if (store.hasValidSession) {
     try {
       const sessionInfo = await checkSession(store.sessionId)
       if (!sessionInfo.valid) {
         store.clearSession()
         sessionSidebar.value?.fetchSessions()
-      } else if (store.messages.length === 0) {
-        // 从后端恢复聊天历史
-        const result = await getAnalysisHistory(store.sessionId)
-        if (result.success && result.history && result.history.length > 0) {
-          store.messages = result.history
-          store.$persist()
+      } else {
+        // 始终从后端获取完整历史（含 charts 数据）
+        // localStorage 中不存储 charts，需要从后端恢复
+        try {
+          const result = await getAnalysisHistory(store.sessionId)
+          if (result.success && result.history && result.history.length > 0) {
+            store.messages = result.history
+            store.$persist()
+          }
+        } catch (e) {
+          // 后端历史获取失败，使用 localStorage 中的基本消息
         }
       }
     } catch (e) {
@@ -369,30 +374,23 @@ async function handleDeleteDataset(datasetId) {
   }
 }
 
-// 处理发送消息
-async function handleSendMessage() {
+// 处理发送消息（非阻塞模式：不 await analyzeStream，让 SSE 流在后台执行）
+function handleSendMessage() {
   const query = store.queryInput.trim()
   if (!query || store.isLoading) return
 
-  // 添加用户消息
-  store.addMessage({
-    role: 'user',
-    content: query
-  })
-
-  // 添加助手消息占位
-  store.addMessage({
-    role: 'assistant',
-    content: '',
-    charts: null
-  })
-
-  store.queryInput = ''
-  store.setLoading(true)
-  store.setError(null)
-  store.setCharts([])
+  // ===== 优先执行：状态重置 =====
   store.viewingHistoryCharts = false
   store.viewingMessageIndex = -1
+  store.queryInput = ''
+  store.setLoading(true)
+  store.setStreaming(true)
+  store.setError(null)
+  store.setCharts([])
+
+  // ===== 添加消息 =====
+  store.addMessage({ role: 'user', content: query })
+  store.addMessage({ role: 'assistant', content: '', charts: null })
 
   // 创建 AbortController 用于停止分析
   abortController.value = new AbortController()
@@ -405,35 +403,36 @@ async function handleSendMessage() {
     }
   }, 5000)
 
-  try {
-    await analyzeStream(
-      store.sessionId,
-      query,
-      // onData
-      (data) => {
-        if (!dataReceived) {
-          dataReceived = true
-          clearTimeout(slowTimer)
-        }
-        if (data.type === 'charts') {
-          store.setCharts(data.data)
-        } else if (data.type === 'text') {
-          store.updateLastMessageContent(data.content)
-        }
-      },
-      // onError
-      (error) => {
+  // 非阻塞调用：不用 await，analyzeStream 在后台执行
+  analyzeStream(
+    store.sessionId,
+    query,
+    // onData
+    (data) => {
+      if (!dataReceived) {
+        dataReceived = true
         clearTimeout(slowTimer)
-        store.setError(error)
-      },
-      // onDone
-      (result) => {
-        clearTimeout(slowTimer)
-        // 如果已经被停止，不要覆盖状态
-        if (!store.isLoading) return
-        store.setLoading(false)
-        abortController.value = null
-        // 更新最终消息，包含图表信息
+      }
+      if (data.type === 'charts') {
+        store.setCharts(data.data)
+      } else if (data.type === 'text') {
+        store.updateLastMessageContent(data.content)
+      } else if (data.type === 'progress') {
+        store.updateLastMessageContent(`⏳ ${data.message}`)
+      }
+    },
+    // onError
+    (error) => {
+      clearTimeout(slowTimer)
+      store.setError(error)
+    },
+    // onDone
+    (result) => {
+      clearTimeout(slowTimer)
+      store.setLoading(false)
+      store.setStreaming(false)
+      abortController.value = null
+      try {
         const lastMsg = store.messages[store.messages.length - 1]
         if (lastMsg && lastMsg.role === 'assistant') {
           lastMsg.content = result.content
@@ -441,28 +440,28 @@ async function handleSendMessage() {
             lastMsg.charts = store.charts
           }
         }
-        // 提取分析摘要
         const summary = extractSummary(result.content)
         if (summary) {
           store.setAnalysisSummary(summary)
         }
-        // 更新动态建议
         store.setSuggestedQueries(generateSuggestions(result.content, query))
         store.$persist()
-      },
-      abortController.value.signal
-    )
-  } catch (error) {
+      } catch (e) {
+        console.error('[onDone] 回调异常（不影响 loading 状态）:', e)
+      }
+    },
+    abortController.value.signal
+  ).catch(error => {
+    // 处理 analyzeStream 自身的异常（如 fetch 网络错误）
     clearTimeout(slowTimer)
-    if (error.name === 'AbortError') {
-      // 用户主动停止，状态已由 handleStopAnalysis 更新
-    } else {
+    if (error.name !== 'AbortError') {
       store.setError(error.message)
       store.updateLastMessageContent(`分析失败：${error.message}`)
       store.setLoading(false)
+      store.setStreaming(false)
     }
     abortController.value = null
-  }
+  })
 }
 
 // 停止分析
@@ -473,6 +472,10 @@ function handleStopAnalysis() {
   }
   // 立即更新 UI 状态，不依赖 stream 错误传播
   store.setLoading(false)
+  store.setStreaming(false)
+  // 确保退出历史图表视图
+  store.viewingHistoryCharts = false
+  store.viewingMessageIndex = -1
   const lastMsg = store.messages[store.messages.length - 1]
   if (lastMsg && lastMsg.role === 'assistant' && !lastMsg.content.includes('[已停止]')) {
     lastMsg.content = (lastMsg.content || '') + '\n\n*[已停止]*'
@@ -480,11 +483,9 @@ function handleStopAnalysis() {
   }
 }
 
-// 输入框输入时，若正在加载则立即终止当前进程
+// 输入框输入事件（移除了自动中止行为，避免用户正常输入时意外中断分析）
 function onQueryInput() {
-  if (store.isLoading) {
-    handleStopAnalysis()
-  }
+  // 仅做输入处理，不再自动中止正在进行的分析
 }
 
 // 查看历史图表

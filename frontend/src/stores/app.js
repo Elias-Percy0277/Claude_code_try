@@ -19,6 +19,9 @@ export const useAppStore = defineStore('app', {
     // 当前显示的图表
     charts: [],
 
+    // 控制图表区域可见性（不销毁组件）
+    chartsVisible: false,
+
     // 固定的历史图表（用于对比展示）
     pinnedCharts: [],
 
@@ -28,6 +31,7 @@ export const useAppStore = defineStore('app', {
 
     // UI 状态
     isLoading: false,
+    isStreaming: false,  // 是否正在接收流式数据
     error: null,
 
     // 结构化分析摘要
@@ -81,17 +85,26 @@ export const useAppStore = defineStore('app', {
       }
     },
 
-    // 持久化状态
+    // 持久化状态（安全化：永不向外抛出异常，charts 数据不存入 localStorage）
     $persist() {
-      const toSave = {
-        sessionId: this.sessionId,
-        messages: this.messages,
-        filename: this.filename,
-        datasets: this.datasets,
-        viewingHistoryCharts: this.viewingHistoryCharts,
-        viewingMessageIndex: this.viewingMessageIndex
+      try {
+        const toSave = {
+          sessionId: this.sessionId,
+          // 剥离 charts 数据：图表已保存在后端 meta.json，localStorage 仅存消息元数据
+          messages: this.messages.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp
+          })),
+          filename: this.filename,
+          datasets: this.datasets,
+          viewingHistoryCharts: false,
+          viewingMessageIndex: -1
+        }
+        localStorage.setItem('datavis_state', JSON.stringify(toSave))
+      } catch (e) {
+        console.warn('[persist] 持久化失败:', e.message)
       }
-      localStorage.setItem('datavis_state', JSON.stringify(toSave))
     },
 
     // 设置会话信息
@@ -134,8 +147,10 @@ export const useAppStore = defineStore('app', {
       this.datasets = []
       this.messages = []
       this.charts = []
+      this.chartsVisible = false
       this.pinnedCharts = []
       this.error = null
+      this.isStreaming = false
       this.analysisSummary = null
       this.summaryCollapsed = false
       this.suggestedQueries = []
@@ -161,9 +176,12 @@ export const useAppStore = defineStore('app', {
       }
     },
 
-    // 设置图表
+    // 设置图表（有数据时自动显示图表区域）
     setCharts(charts) {
       this.charts = charts || []
+      if (this.charts.length > 0) {
+        this.chartsVisible = true
+      }
     },
 
     // 固定历史图表（用于对比）
@@ -176,11 +194,12 @@ export const useAppStore = defineStore('app', {
       this.pinnedCharts = []
     },
 
-    // 查看历史图表
+    // 查看历史图表（深拷贝避免引用共享问题）
     viewHistoricalCharts(messageIndex) {
       const message = this.messages[messageIndex]
       if (message && message.charts && message.charts.length > 0) {
-        this.charts = [...message.charts]
+        this.charts = JSON.parse(JSON.stringify(message.charts))
+        this.chartsVisible = true
         this.viewingHistoryCharts = true
         this.viewingMessageIndex = messageIndex
       }
@@ -195,6 +214,11 @@ export const useAppStore = defineStore('app', {
     // 设置加载状态
     setLoading(loading) {
       this.isLoading = loading
+    },
+
+    // 设置流式状态
+    setStreaming(value) {
+      this.isStreaming = value
     },
 
     // 设置错误
@@ -234,6 +258,7 @@ export const useAppStore = defineStore('app', {
       this.datasets = sessionData.datasets || []
       this.messages = messages || []
       this.charts = []
+      this.chartsVisible = false
       this.pinnedCharts = []
       this.viewingHistoryCharts = false
       this.viewingMessageIndex = -1

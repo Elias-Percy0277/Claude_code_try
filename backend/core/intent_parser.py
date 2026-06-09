@@ -26,6 +26,7 @@ SUPPORTED_COMMANDS = {
     "ml_evaluate",   # ML 模型评估
     "ml_feature_imp",# ML 特征重要性
     "ml_fairness",   # ML 公平性审计
+    "ml_crossval",   # ML 交叉验证
 }
 
 # 支持的图表类型
@@ -100,6 +101,16 @@ ML_FEATURE_IMP_KEYWORDS = [
 ML_FAIRNESS_KEYWORDS = [
     "公平性", "公平性审计", "偏见检测", "歧视检测", "性别差异", "种族差异",
     "公平分析", "bias audit", "fairness", "模型偏见",
+    "假阳性率", "假阴性率", "真正率", "真阴性率",
+    "FPR", "FNR", "TPR", "TNR",
+    "假阳", "假阴", "真正", "真阴",
+]
+
+# ML 交叉验证关键词
+ML_CROSSVAL_KEYWORDS = [
+    "交叉验证", "交叉评估", "k折验证", "K折验证", "5折验证", "十折验证",
+    "cross validation", "cross-validation", "crossval",
+    "模型稳定性", "多模型对比", "模型比较", "模型对比",
 ]
 
 
@@ -218,6 +229,21 @@ async def parse_intent_async(
                 "params": {},
                 "chart_type": None,
                 "reasoning": "用户请求公平性审计"
+            }]
+        }
+
+    if any(kw in query_lower for kw in ML_CROSSVAL_KEYWORDS):
+        logger.info("检测到交叉验证查询，本地解析")
+        return {
+            "confidence": 0.95,
+            "tasks": [{
+                "intent": "ml_crossval",
+                "target_columns": [],
+                "groupby": None,
+                "groupby2": None,
+                "params": {},
+                "chart_type": None,
+                "reasoning": "用户请求交叉验证"
             }]
         }
 

@@ -616,8 +616,8 @@ function handleTitleBlur(index, event) {
 }
 
 function handleCloseCharts() {
-  store.setCharts([])
-  store.pinnedCharts = []
+  // 只隐藏图表区域，不销毁组件，不清空数据
+  store.chartsVisible = false
   store.viewingHistoryCharts = false
   store.viewingMessageIndex = -1
 }
@@ -627,14 +627,29 @@ watch(() => [store.charts, store.pinnedCharts], async () => {
     skipNextWatch = false
     return
   }
+  // 不可见时跳过渲染
+  if (!store.chartsVisible) return
   Object.keys(panelStates).forEach(k => delete panelStates[k])
   await nextTick()
-  renderCharts()
+  tryRenderCharts()
 }, { deep: true })
+
+// 尝试渲染图表（带重试机制，确保 DOM 容器已就绪）
+function tryRenderCharts(retries = 0) {
+  const hasCharts = allCharts.value.length > 0
+  const hasContainers = allCharts.value.every((_, index) => !!chartRefs.value[index])
+
+  if (hasCharts && hasContainers) {
+    renderCharts()
+  } else if (hasCharts && retries < 5) {
+    // DOM 容器尚未就绪，短暂延迟后重试
+    setTimeout(() => tryRenderCharts(retries + 1), 50)
+  }
+}
 
 onMounted(() => {
   if (allCharts.value.length > 0) {
-    nextTick(() => renderCharts())
+    nextTick(() => tryRenderCharts())
   }
 })
 
