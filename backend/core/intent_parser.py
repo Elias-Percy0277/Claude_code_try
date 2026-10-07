@@ -1,6 +1,11 @@
 """
 意图解析器
-使用 DeepSeek API 解析用户查询，配合本地关键词检测确保图表类型可靠
+
+模块职责：
+- 将用户自然语言查询解析为结构化分析命令（overview / trend / correlation / ML 等）。
+- 采用 LLM(DeepSeek) + 本地关键词规则混合策略：常见意图走本地前置检测，
+  兜底场景交给 LLM，并用本地 chart_type 关键词检测保证图表类型可靠。
+- 输出统一的 task 字典供后续分析执行器消费。
 """
 import logging
 import json
@@ -114,6 +119,7 @@ ML_CROSSVAL_KEYWORDS = [
 ]
 
 
+# AI-assisted: 使用 Claude 实现图表类型本地关键词检测，手动调整了关键词表与匹配优先级
 def detect_chart_type(query: str) -> Optional[str]:
     """
     从用户查询中本地检测图表类型关键词。
@@ -123,7 +129,7 @@ def detect_chart_type(query: str) -> Optional[str]:
         query: 用户自然语言查询
 
     Returns:
-        检测到的图表类型，未检测到返回 None
+        检测到的图表类型（如 "line"/"bar"/"pie"），未检测到返回 None
     """
     query_lower = query.lower()
     for chart_type, keywords in CHART_TYPE_KEYWORDS.items():
@@ -133,6 +139,7 @@ def detect_chart_type(query: str) -> Optional[str]:
     return None
 
 
+# AI-assisted: 使用 Claude 实现意图解析(LLM+规则混合)，手动调整了规则匹配关键词与列名校验逻辑
 async def parse_intent_async(
     query: str,
     df: pd.DataFrame,
@@ -142,13 +149,18 @@ async def parse_intent_async(
     使用 DeepSeek API 直接解析用户查询为分析命令，
     并用本地关键词检测保底 chart_type。
 
+    解析流程：先走建议/ML/相关性/季节性/交叉表等本地前置检测，
+    命中则直接返回；未命中再调用 LLM，并对返回结果做列名与
+    groupby 合法性校验、moving_avg 默认 window 兜底。
+
     Args:
         query: 用户自然语言查询
         df: 数据集 DataFrame
-        llm_client: LLM 客户端
+        llm_client: LLM 客户端，为 None 时使用全局单例
 
     Returns:
-        解析结果字典
+        解析结果字典，通常包含 confidence、tasks；
+        LLM 返回非结构化内容时携带 raw_response；出错时携带 error
     """
     if llm_client is None:
         from backend.agent.llm_client import get_llm_client
@@ -505,23 +517,44 @@ async def parse_intent_async(
         }
 
 
+# AI-assisted: 使用 Claude 封装同步意图解析入口，人工校验后保留 asyncio.run 原逻辑
 def parse_intent(
     query: str,
     df: pd.DataFrame,
     llm_client: Optional[LLMClient] = None
 ) -> Dict[str, Any]:
-    """同步解析用户查询"""
+    """同步解析用户查询（内部委托 parse_intent_async 并运行事件循环）
+
+    Args:
+        query: 用户自然语言查询
+        df: 数据集 DataFrame
+        llm_client: LLM 客户端
+
+    Returns:
+        解析结果字典
+    """
     import asyncio
     return asyncio.run(parse_intent_async(query, df, llm_client))
 
 
+# AI-assisted: 使用 Claude 实现交叉表意图本地解析，手动调整了双分类列的选取优先级
 def _parse_crosstab_intent(
     query: str,
     df: pd.DataFrame,
     numeric_cols: list,
     categorical_cols: list
 ) -> Optional[Dict[str, Any]]:
-    """本地解析交叉表查询意图"""
+    """本地解析交叉表查询意图，从查询或数据集中确定两个分类列
+
+    Args:
+        query: 用户自然语言查询
+        df: 数据集 DataFrame
+        numeric_cols: 数值列列表（当前未使用，保留参数兼容）
+        categorical_cols: 分类列列表
+
+    Returns:
+        构造好的 task 字典；分类列不足或无法确定时返回 None
+    """
     if len(categorical_cols) < 1:
         return None
 
@@ -551,6 +584,7 @@ def _parse_crosstab_intent(
     }
 
 
+# AI-assisted: 使用 Claude 实现数据集分析建议生成，人工校验后保留模板化文案
 def _generate_suggestions(
     query: str,
     df: pd.DataFrame,
@@ -558,7 +592,18 @@ def _generate_suggestions(
     categorical_cols: list,
     datetime_cols: list
 ) -> Dict[str, Any]:
-    """根据数据集特征生成分折建议，不调用 LLM"""
+    """根据数据集特征生成分折建议，不调用 LLM
+
+    Args:
+        query: 用户自然语言查询（仅透传，不参与模板）
+        df: 数据集 DataFrame
+        numeric_cols: 数值列列表
+        categorical_cols: 分类列列表
+        datetime_cols: 日期列列表
+
+    Returns:
+        携带 raw_response(Markdown 建议文本) 的结果字典
+    """
     lines = ["## 数据分析建议\n"]
     lines.append(f"当前数据集有 **{len(df)}** 行、**{len(df.columns)}** 列。\n")
 

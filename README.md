@@ -1,159 +1,265 @@
-# DataVis - 交互式数据分析平台
+# DataVis — 自然语言驱动的交互式数据分析平台
 
-一个基于自然语言驱动的数据分析平台，用户上传数据集后，可通过自然语言描述分析需求，系统自动拆解需求、执行数据处理与可视化，并生成智能回复。同时集成了机器学习建模、公平性审计和微信 AI 托管功能。
+一个用**自然语言对话**即可完成数据分析、可视化与机器学习建模的 Web 平台。
+用户上传数据集后，用一句话描述需求（如「按性别对比收入分布」「公平性审计」），
+系统自动识别意图、执行真实统计/机器学习计算、生成 ECharts 交互图表，
+并以 SSE 流式方式返回 AI 解读。
 
-## 功能特性
+> 本项目为 Python 课程期末作业。所有统计与模型指标均由 Python / scikit-learn 实际计算得出，
+> 大语言模型（DeepSeek）仅负责**意图识别**与**结果解读**，不参与数值计算。
 
-### 数据分析
-- **🗣️ 自然语言交互** - 用自然语言描述分析需求，系统自动识别意图
-- **📊 多种分析类型** - 支持趋势分析、相关性分析、分布分析、分组对比、移动平均、季节性分解、分类关联分析
-- **📈 可视化图表** - 自动生成 ECharts 交互式图表（折线、柱状、散点、饼图、热力图、雷达图、箱线图等）
-- **🔄 图表切换** - 支持运行时切换图表类型（bar/line/pie/scatter/area/radar/boxplot/histogram）
-- **🤖 AI 驱动** - 集成 DEEPSEEK API 进行智能意图识别和分析解读
-- **🔄 流式响应** - SSE 流式返回，先展示图表，文本流式补齐
-- **💬 聊天历史** - 持久化聊天记录，支持多轮对话上下文
-- **💾 智能缓存** - 相同查询直接返回缓存结果
-- **📁 多数据集管理** - 支持一个会话中添加多个数据集（最多 10 个）
-- **📂 会话管理** - 数据隔离，支持多会话并发、会话切换、重命名
+---
 
-### 机器学习（Adult Income 数据集）
-- **🔧 模型训练** - 支持逻辑回归和随机森林，自动特征工程
-- **📊 模型评估** - 准确率、精确率、召回率、F1、ROC-AUC、PR-AUC、混淆矩阵
-- **🔍 特征重要性** - 自动排序并可视化 Top-N 特征
-- **⚖️ 公平性审计** - 按敏感属性（性别、种族等）分组评估 TPR/FPR 差异
-- **📉 交叉验证** - 5 折交叉验证，多模型对比并推荐最优
+## 一、项目简介
 
-### 微信 AI 托管（wechat_agent）
-- **📱 自动回复** - 基于白名单自动回复微信私聊消息
-- **🧠 本地 AI** - 使用 Ollama + qwen2.5 模型
-- **🎭 风格学习** - 支持从聊天记录学习个人说话风格
-- **🖥️ 网页后台** - Flask 管理后台（端口 5001）
-- **📌 系统托盘** - 支持暂停/恢复，最小化到托盘
-- **🎯 模板检测** - 坐标模板快速检测（低 CPU 占用），OCR 作为补充
+### 1.1 选题背景
 
-## 技术栈
+传统数据分析门槛较高：使用者需要掌握 SQL / Pandas / 统计学知识，
+还要手动编写绘图代码，非专业用户难以快速从数据中获取洞见。
+近年来大语言模型（LLM）的成熟，让「用自然语言完成数据分析」成为可能。
 
-### 后端
-- **FastAPI** - 高性能 Web 框架
-- **Pandas / NumPy** - 数据处理
-- **Pyecharts** - 图表生成（ECharts JSON）
-- **scikit-learn** - 机器学习（模型训练、评估、公平性审计）
-- **statsmodels / SciPy** - 统计分析、季节性分解
-- **DEEPSEEK API** - LLM 意图识别与智能分析
-- **Pydantic** - 数据模型验证
-- **httpx** - 异步 HTTP 客户端
-- **SQLAlchemy** - 数据库（wechat_agent）
-- **APScheduler** - 定时任务调度
-- **colorama** - Windows 终端彩色输出
+本项目尝试构建一个端到端的**对话式数据分析平台**：
+把「数据加载 → 意图理解 → 统计计算 → 可视化 → 智能解读」全流程串联起来，
+让不具备编程基础的用户也能完成专业的数据分析与建模。
 
-### 前端
-- **Vue 3** - 渐进式框架
-- **Vite** - 构建工具
-- **Pinia** - 状态管理（会话、缓存、聊天历史）
-- **vue-echarts / ECharts** - 图表渲染
-- **Axios** - HTTP 客户端
-- **Marked** - Markdown 渲染
+### 1.2 分析目标
 
-## 项目结构
+以经典的 **UCI Adult Income（人口收入）数据集**为载体，目标包括：
+
+1. **探索性数据分析（EDA）**：数据概览、目标变量分布、数值/分类特征分布、相关性分析；
+2. **关联分析**：数值特征 Pearson 相关、分类特征 Cramér's V 关联、收入按敏感属性（性别/种族）分组差异；
+3. **机器学习建模**：逻辑回归 vs 随机森林，预测个人年收入是否 >50K；
+4. **模型评估与对比**：准确率/F1/ROC-AUC/PR-AUC/混淆矩阵、5 折交叉验证；
+5. **可解释性与公平性**：特征重要性排序、按性别/种族分组的 TPR/FPR 公平性审计。
+
+### 1.3 数据集
+
+| 项目 | 内容 |
+|------|------|
+| 名称 | Census Income（Adult） |
+| 来源 | UCI Machine Learning Repository |
+| **原始链接** | <https://archive.ics.uci.edu/dataset/20/census+income> |
+| 规模 | 约 48842 条记录，14 个属性 + 1 个目标变量（收入是否 >50K） |
+| 背景 | 1994 年美国人口普查抽取数据，用于预测个人年收入是否超过 5 万美元 |
+| 关键属性 | age（年龄）、workclass（工作类别）、education-num（教育年限）、occupation（职业）、hours-per-week（周工时）、capital-gain/loss（资本收益/损失）、sex（性别）、race（种族） |
+
+> 说明：本作业阶段聚焦单一公开数据集（Adult）完成端到端分析，未额外划分子集。
+> 平台本身支持任意 CSV / Excel / JSON / UCI 格式（.data/.test/.names）数据上传分析。
+
+---
+
+## 二、技术方案
+
+### 2.1 技术栈
+
+| 层 | 技术 | 用途 |
+|----|------|------|
+| 后端框架 | FastAPI + Uvicorn | 高性能异步 Web 框架，提供 REST API 与自动文档 |
+| 数据处理 | pandas / NumPy | 数据加载、清洗、分组统计、交叉表 |
+| 统计分析 | SciPy / statsmodels | 统计检验、时间序列季节性分解 |
+| 可视化 | pyecharts（ECharts） | 后端生成图表 JSON，前端交互渲染 |
+| 机器学习 | scikit-learn | 模型训练、评估、特征重要性、公平性审计、交叉验证 |
+| LLM 接入 | httpx + DeepSeek API | 异步调用大模型完成意图识别与结果解读 |
+| 数据校验 | Pydantic | 请求/响应模型定义与校验 |
+| 持久化 | pyarrow（Parquet） | 数据集与会话状态序列化存储 |
+| 前端框架 | Vue 3 + Vite | 渐进式前端框架与构建工具 |
+| 状态管理 | Pinia | 会话、缓存、聊天历史状态 |
+| 图表渲染 | vue-echarts / ECharts | 前端图表渲染 |
+| HTTP | Axios | 前端请求与 SSE 流式处理 |
+
+### 2.2 分析思路（整体架构）
 
 ```
-py_final_homework/
-├── backend/
-│   ├── main.py                    # FastAPI 入口，应用配置
-│   ├── api/
-│   │   ├── upload.py              # 文件上传 API（多文件、多数据集）
-│   │   ├── analysis.py            # 分析请求 API（SSE 流式 + 同步）
-│   │   └── session.py             # 会话管理 API（CRUD + 统计）
-│   ├── core/
-│   │   ├── data_loader.py         # 数据加载器（CSV/Excel/JSON/.data/.names/.index）
-│   │   ├── preprocessor.py        # 数据预处理
-│   │   ├── analyzer.py            # 分析引擎（统计/趋势/相关/分布/对比/移动平均/季节性）
-│   │   ├── intent_parser.py       # 意图解析（LLM + 规则混合）
-│   │   ├── visualizer.py          # 可视化生成器（ECharts JSON）
-│   │   ├── ml_engine.py           # 机器学习引擎（模型训练/评估/公平性/交叉验证）
-│   │   ├── logger_config.py       # 日志配置（彩色控制台 + 文件 + JSON）
-│   │   └── logging_middleware.py  # 请求日志中间件
-│   ├── agent/
-│   │   └── llm_client.py          # DEEPSEEK API 客户端（同步/异步/流式）
-│   ├── session/
-│   │   └── manager.py             # 会话管理器（多数据集、聊天历史持久化）
-│   ├── cache/
-│   │   └── cache.py               # 缓存管理器
-│   └── models/
-│       └── schemas.py             # Pydantic 数据模型
-├── frontend/
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-│       ├── main.js
-│       ├── App.vue                # 主应用（三栏布局）
-│       ├── stores/app.js          # Pinia 状态管理
-│       ├── api/client.js          # API 客户端（含 SSE 流式）
-│       └── components/
-│           ├── FileUpload.vue     # 文件上传组件
-│           ├── ChatPanel.vue      # 聊天面板
-│           ├── ChartViewer.vue    # 图表查看器
-│           ├── SessionSidebar.vue # 会话侧边栏
-│           └── ErrorMessage.vue   # 错误提示
-├── wechat_agent/                  # 微信 AI 托管子项目
-│   ├── main.py                    # 微信托管入口
-│   ├── config/                    # 配置模块
-│   ├── core/                      # 核心功能（微信客户端、AI引擎、模板检测）
-│   ├── storage/                   # 数据存储（SQLite）
-│   ├── web/                       # Flask 网页管理后台
-│   ├── tray/                      # 系统托盘
-│   ├── utils/                     # 工具函数（校准、日志）
-│   └── data/                      # 数据目录
-├── data/                          # 示例数据目录
-├── output/                        # 输出目录
-├── sessions/                      # 会话存储目录
-├── logs/                          # 日志目录
-├── tests/                         # 测试文件
-│   ├── test_analyzer.py
-│   ├── test_cache.py
-│   ├── test_data_loader.py
-│   ├── test_intent_parser.py
-│   ├── test_session.py
-│   ├── test_visualizer.py
-│   └── fixtures/                  # 测试数据
-├── .env                           # 环境变量配置
-├── .env.example                   # 环境变量模板
-├── requirements.txt               # Python 依赖
-├── start.bat                      # 一键启动脚本
-├── start-backend.bat              # 单独启动后端
-├── start-frontend.bat             # 单独启动前端
-├── start-debug.bat                # 调试模式启动
-├── install.bat                    # 一键安装依赖
-├── poster.png                     # 项目海报
-└── README.md
+用户输入自然语言查询
+        │
+        ▼
+┌───────────────────┐
+│ 1. 会话校验 + 缓存 │  ← 命中缓存直接回放结果
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 2. 意图解析        │  ← LLM + 规则混合：把一句话拆成若干分析任务(task)
+│  (intent_parser)  │     识别 分析类型/目标列/分组列/图表类型
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 3. 执行分析        │  ← pandas 统计 / scikit-learn 建模，真实计算
+│  (analyzer/ml)    │     产出 statistics 数据
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 4. 可视化生成      │  ← pyecharts 把统计结果转成 ECharts JSON
+│  (visualizer)     │     SSE 先推送 charts（图表立即可见）
+└───────────────────┘
+        │
+        ▼
+┌───────────────────┐
+│ 5. LLM 流式解读    │  ← 把统计结果 + 数据集上下文 + 聊天历史喂给 DeepSeek
+│  (llm_client)     │     流式逐字返回 Markdown 解读
+└───────────────────┘
+        │
+        ▼
+  缓存结果 + 写入聊天历史 → 结束
 ```
 
-## 快速开始
+**核心理念**：计算与解读分离——所有数字由确定性 Python 代码算出（可复现、不幻觉），
+LLM 只做语言层面的意图理解与自然语言总结。
 
-### 1. 克隆项目
+### 2.3 核心模块
+
+| 模块 | 职责 |
+|------|------|
+| `core/data_loader.py` | 多格式数据加载（CSV/Excel/JSON/UCI），自动识别 `.names` 元数据 |
+| `core/preprocessor.py` | 数据预处理（缺失值、类型推断、异常值） |
+| `core/intent_parser.py` | 意图解析（LLM + 规则混合） |
+| `core/analyzer.py` | 统计分析引擎（概览/趋势/相关/分布/对比/移动平均/季节性） |
+| `core/ml_engine.py` | 机器学习引擎（训练/评估/特征重要性/公平性/交叉验证） |
+| `core/visualizer.py` | 可视化生成器（ECharts JSON） |
+| `agent/llm_client.py` | DeepSeek API 客户端（同步/异步/流式） |
+| `session/manager.py` | 会话管理（多数据集、聊天历史、ML 状态持久化） |
+| `cache/cache.py` | 查询结果智能缓存 |
+| `api/analysis.py` | SSE 流式分析接口（核心入口） |
+
+---
+
+## 三、分析结果（基于 Adult 数据集）
+
+> 以下结论均可由平台通过自然语言查询复现，数值来自 Python / scikit-learn 真实计算。
+
+### 3.1 关键发现
+
+1. **类别不平衡**：目标变量中约 76% 为 `<=50K`，仅约 24% 为 `>50K`，
+   训练时需采用分层抽样与 `class_weight='balanced'` 以避免模型偏向多数类。
+
+2. **收入与个人属性强相关**：教育年限（education-num）、年龄（age）、
+   每周工时（hours-per-week）与高收入呈正相关。
+
+3. **资本收益是强预测因子**：`capital-gain` 虽大量为零，
+   但在随机森林特征重要性中通常位列前茅——非零的资本收益强烈指向高收入。
+
+4. **性别差距**：男性中 `>50K` 的比例显著高于女性，
+   反映在分组对比的归一化柱状图中。
+
+5. **种族差距**：不同种族间高收入占比存在差异，
+   公平性审计可量化这种差异。
+
+6. **公平性风险**：模型在不同性别/种族分组上的 TPR（真正率）、
+   FPR（假阳性率）存在差异（gap > 0.1 时系统自动告警），
+   提示模型可能存在偏向性。
+
+### 3.2 可视化图表说明
+
+平台可根据查询自动生成并支持运行时切换以下图表类型：
+
+| 图表 | 用途 |
+|------|------|
+| 饼图 | 目标变量 `>50K / <=50K` 占比，直观展示类别不平衡 |
+| 直方图 / 箱线图 | 数值特征（age、hours-per-week 等）的分布、异常值 |
+| 频数柱状图 | 分类特征（occupation、workclass 等）的频次分布 |
+| 相关性热力图 | 数值特征 Pearson 相关系数矩阵 |
+| Cramér's V 热力图 | 分类特征之间的关联强度 |
+| 堆叠/归一化柱状图 | 收入按性别、种族分组的占比对比（公平性可视化） |
+| 混淆矩阵 | 模型预测的 TP/FP/FN/TN 分布 |
+| ROC 曲线 | 模型分类性能（AUC） |
+| 特征重要性柱状图 | 随机森林 Top-N 重要特征排序 |
+| 公平性分组柱状图 | 各敏感属性分组的 TPR/FPR 对比 |
+
+---
+
+## 四、总结与反思
+
+### 4.1 遇到的问题与解决过程
+
+1. **SSE 流式响应被缓冲，图表迟迟不显示**
+   问题：uvicorn 默认会缓冲 SSE 数据块，导致前端要等全部生成完才一次性显示。
+   解决：实现 `_flushing_sse_wrapper`，在每个数据块 yield 后 `await asyncio.sleep(0)`
+   主动让出事件循环，强制服务器立即刷新到网络，实现「先出图、文本逐字补齐」。
+
+2. **多轮对话到第三轮卡住**
+   问题：前端 `handleSendMessage` 中 `await` 阻塞了整个函数，导致后续消息无法发送。
+   解决：将分析调用改为非阻塞（后台执行 + `.catch()` 兜底），并加入 SSE 超时保护（180s 无数据自动终止）。
+
+3. **图表关闭后无法重新打开**
+   问题：ChartViewer 用 `v-if` 控制，关闭时 ECharts 实例被销毁，再次打开初始化失败。
+   解决：改用 `v-show` + `chartsVisible` 状态，保留 ECharts 实例不销毁。
+
+4. **ML 模型状态无法跨请求保留**
+   问题：训练与评估是两次独立请求，模型对象不能直接传递。
+   解决：通过 `session_manager` 把模型状态序列化保存到会话，评估时再反序列化恢复。
+
+5. **类别不平衡影响模型**
+   问题：约 76% 为负类，模型容易全预测为 `<=50K`。
+   解决：80/20 分层拆分 + `class_weight='balanced'`，并关注 F1/PR-AUC 而非单纯准确率。
+
+6. **DeepSeek 偶尔返回非结构化文本**
+   问题：LLM 未按预期返回结构化意图 JSON。
+   解决：设置 `raw_response` 降级路径直接展示原文，同时保留规则匹配兜底。
+
+### 4.2 局限与改进方向
+
+- 公平性审计目前针对 Adult 数据集的 sex/race 固定属性，通用化需自动检测敏感属性；
+- 缓存基于「会话+查询+文件哈希」，对相似表述的不同问法无法去重；
+- 前端图表类型较多，部分图表在特殊数据分布下可读性有限，可进一步智能推荐。
+
+---
+
+## 五、AI 使用声明
+
+### 5.1 整体使用情况
+
+- **AI 代码贡献比例：约 98% 及以上**。项目绝大部分代码（后端引擎、API、前端组件、注释、文档）
+  由 AI 辅助生成或修改。
+- **使用工具**：Claude（Anthropic 的 Claude 模型，通过 Claude Code CLI 调用）。
+- **使用方式**：依据 `research_plan.md` 中规划的六阶段分析步骤
+  （探索性数据分析 → 关联分析 → 特征工程 → 建模与交叉验证 → 可解释性与公平性 → 报告与结论），
+  **将每个分析问题拆解为独立提问，逐个推进**，由 AI对用户需求进行分析并生成对应json文件进一步进行后端分析；
+  人工负责选题方向、需求拆解、分析计划制定、运行结果校验与少量逻辑修改。
+
+### 5.2 函数级标注规范
+
+代码中所有由 AI 辅助生成或修改的关键函数 / 代码块，均在定义前以注释形式标注，
+格式示例：
+
+```python
+# AI-assisted: 使用 Claude 生成初始框架，手动调整了数据过滤逻辑
+def analyze_overview(df):
+    ...
+```
+
+```python
+# AI-assisted: 使用 Claude 补全此可视化函数，调整了配色与坐标轴
+def create_correlation_heatmap(matrix, columns, title):
+    ...
+```
+
+标注覆盖范围：
+- **后端核心模块**：`data_loader` / `preprocessor` / `analyzer` / `intent_parser` /
+  `ml_engine` / `visualizer` / `session/manager` / `llm_client` / `cache` / `api`(upload, analysis, session)；
+- **前端核心组件**：`App.vue` / `ChartViewer.vue` / `ChatPanel.vue` /
+  `FileUpload.vue` / `SessionSidebar.vue` / `stores/app.js` / `api/client.js`。
+
+### 5.3 人机分工
+
+| 角色 | 工作 |
+|------|------|
+| AI（Claude） | 初始代码框架、算法实现、函数补全、注释与文档撰写 |
+| 人工 | 选题与目标定义、分析计划（`research_plan.md`）、提问拆解、结果验证、问题定位与调试方向把控、最终审阅 |
+
+---
+
+## 六、快速开始
+
+### 6.1 环境准备
 
 ```bash
-git clone <repository-url>
-cd py_final_homework
-```
-
-### 2. 配置环境变量
-
-```bash
-# 复制配置模板
-cp .env.example .env
-
-# 编辑 .env，填入你的 DEEPSEEK API Key
-# 获取 API Key: https://platform.deepseek.com/
-```
-
-### 3. 安装依赖
-
-```bash
-# 安装 Python 依赖（建议使用 conda 虚拟环境）
+# 建议使用 conda 虚拟环境（Python 3.10）
 conda create -n datavis python=3.10
 conda activate datavis
+
+# 安装后端依赖
 pip install -r requirements.txt
 
 # 安装前端依赖
@@ -161,156 +267,62 @@ cd frontend
 npm install
 ```
 
-### 4. 启动服务
+### 6.2 配置
 
-**方式一：一键启动（Windows）**
+复制 `.env.example` 为 `.env`，填入 DeepSeek API Key（获取：<https://platform.deepseek.com/>）：
+
 ```bash
-# 双击 start.bat 或运行：
+DEEPSEEK_API_KEY=your_key_here
+```
+
+### 6.3 启动
+
+```bash
+# 方式一：一键启动（Windows）
 start.bat
-```
 
-**方式二：手动启动**
-
-启动后端服务器：
-```bash
+# 方式二：手动分别启动
+# 后端
 uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+# 前端（新终端）
+cd frontend && npm run dev
 ```
 
-启动前端服务器（新终端）：
-```bash
-cd frontend
-npm run dev
+访问：
+- 前端界面：<http://localhost:5173>
+- API 文档：<http://localhost:8000/docs>
+- 健康检查：<http://localhost:8000/health>
+
+---
+
+## 七、项目结构
+
+```
+py_final_homework/
+├── backend/                     # 后端（FastAPI）
+│   ├── main.py                  # 应用入口
+│   ├── api/                     # 路由层（upload / analysis / session）
+│   ├── core/                    # 核心引擎（加载/预处理/分析/ML/可视化/意图/日志）
+│   ├── agent/                   # DeepSeek LLM 客户端
+│   ├── session/                 # 会话管理（持久化）
+│   ├── cache/                   # 查询缓存
+│   └── models/                  # Pydantic 数据模型
+├── frontend/                    # 前端（Vue 3 + Vite）
+│   └── src/
+│       ├── App.vue              # 主应用（三栏布局）
+│       ├── components/          # 组件（上传/聊天/图表/侧边栏/错误）
+│       ├── stores/app.js        # Pinia 状态管理
+│       └── api/client.js        # API 客户端（含 SSE 流式）
+├── py_final_homework_database/  # Adult 数据集（.data/.test/.names）
+├── tests/                       # 测试
+├── sessions/                    # 会话存储（运行时生成）
+├── logs/                        # 日志（运行时生成）
+├── research_plan.md             # 分析计划（六阶段，AI 使用的提问依据）
+├── requirements.txt             # Python 依赖
+├── .env.example                 # 环境变量模板
+└── README.md
 ```
 
-### 5. 访问应用
-
-- **前端界面**: http://localhost:5173
-- **API 文档**: http://localhost:8000/docs
-- **健康检查**: http://localhost:8000/health
-
-## 使用示例
-
-### 1. 上传数据
-
-支持多种格式：CSV、Excel (.xlsx, .xls)、JSON、UCI 格式 (.data, .test, .names, .index)，最大 60MB。
-
-支持多文件同时上传，系统自动识别 `.names` 元数据文件并与 `.data` 文件关联。
-
-### 2. 自然语言查询
-
-| 查询类型 | 示例 |
-|----------|------|
-| 数据概览 | "看看数据概览"、"数据有什么" |
-| 趋势分析 | "分析销售额趋势"、"利润变化趋势" |
-| 相关性 | "销售额和利润的相关性" |
-| 分组对比 | "各地区的销售额对比" |
-| 分布分析 | "销售额的分布情况" |
-| 移动平均 | "计算销售额的7天移动平均" |
-| 季节性分解 | "对销售额做季节性分解" |
-| 分类关联 | "各分类列之间的关联分析" |
-| 模型训练 | "训练模型"、"用随机森林训练" |
-| 模型评估 | "评估模型效果" |
-| 特征重要性 | "哪些特征最重要" |
-| 公平性审计 | "模型的公平性分析" |
-| 交叉验证 | "对比不同模型的效果" |
-
-## API 端点
-
-### 数据上传
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/api/upload` | POST | 上传数据文件（支持多文件） |
-| `/api/session/{id}/dataset/{did}` | DELETE | 从会话中删除数据集 |
-
-### 分析请求
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/api/analysis` | POST | 分析请求（SSE 流式响应） |
-| `/api/analysis/sync` | POST | 分析请求（同步响应，调试用） |
-| `/api/analysis/history/{id}` | GET | 获取会话聊天历史 |
-| `/api/analysis/rechart` | POST | 切换图表类型 |
-
-### 会话管理
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/api/session/{id}` | GET | 检查会话有效性 |
-| `/api/session/{id}` | DELETE | 删除会话 |
-| `/api/session/{id}` | PATCH | 重命名会话 |
-| `/api/sessions` | GET | 列出所有会话 |
-| `/api/sessions/stats` | GET | 获取会话统计信息 |
-| `/api/sessions/cleanup` | POST | 清理过期会话 |
-
-### 系统
-| 端点 | 方法 | 功能 |
-|------|------|------|
-| `/health` | GET | 健康检查 |
-| `/` | GET | 根路径 |
-
-## 配置说明
-
-### 环境变量
-
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `DEEPSEEK_API_KEY` | DEEPSEEK API 密钥 | 必填 |
-| `HOST` | 服务器地址 | 0.0.0.0 |
-| `PORT` | 服务器端口 | 8000 |
-| `DEBUG` | 调试模式 | False |
-| `ALLOWED_ORIGINS` | CORS 允许的来源 | localhost:5173 |
-| `SESSION_EXPIRE_MINUTES` | 会话过期时间 | 30 |
-| `MAX_CACHE_SIZE` | 最大缓存数 | 100 |
-
-### 文件上传限制
-
-- 文件大小：最大 60MB
-- 支持格式：`.csv`, `.xlsx`, `.xls`, `.json`, `.data`, `.test`, `.names`, `.index`
-- 每个会话最多 10 个数据集
-
-## 开发
-
-### 运行测试
-
-```bash
-# 运行所有测试
-python -m pytest tests/
-
-# 运行特定模块测试
-python tests/test_analyzer.py
-python tests/test_cache.py
-python tests/test_data_loader.py
-python tests/test_intent_parser.py
-python tests/test_session.py
-python tests/test_visualizer.py
-```
-
-### 代码规范
-
-- Python: 遵循 PEP 8
-- JavaScript: 遵循 ESLint 默认规则
-- 提交信息: 遵循 Conventional Commits
-
-### 日志系统
-
-日志文件存储在 `logs/` 目录下：
-- `datavis_YYYYMMDD.log` - 主日志（纯文本）
-- `errors.log` - 错误日志
-- `datavis_json.log` - JSON 格式日志（便于机器分析）
-
-控制台输出支持彩色显示（Windows 下使用 colorama）。
-
-## 注意事项
-
-1. **DEEPSEEK API Key** - 请妥善保管，不要提交到版本控制
-2. **会话数据** - 存储在 `sessions/` 目录，会自动清理过期会话
-3. **CORS 配置** - 生产环境需修改 `ALLOWED_ORIGINS`
-4. **ML 功能** - 依赖 scikit-learn，如未安装则 ML 相关功能不可用
-5. **季节性分解** - 依赖 statsmodels，如未安装则季节性分解功能不可用
-6. **微信托管** - wechat_agent 为独立子项目，需单独安装和配置，详见 `wechat_agent/README.md`
-
-## 许可证
+## 八、许可证
 
 MIT License
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！

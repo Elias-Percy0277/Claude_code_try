@@ -1,6 +1,17 @@
 """
 ML 引擎模块
 针对 Adult Income 数据集的机器学习建模与评估
+
+模块职责：
+    本模块围绕 UCI Adult Income 数据集，提供端到端的二分类建模能力，
+    由 AdultMLEngine 类统一封装，覆盖完整工作流：
+      - 自动目标列/特征列检测与特征工程（资本二值化、log1p 变换、低频合并、缺失填充）
+      - 训练/测试分层划分与 ColumnTransformer 预处理流水线
+      - 逻辑回归 / 随机森林训练与模型评估（准确率、F1、ROC-AUC、PR-AUC、混淆矩阵）
+      - 特征重要性排序与公平性审计（按敏感属性分组的 TPR/FPR 差异）
+      - 交叉验证与会话状态序列化/反序列化（pickle）
+    模块级辅助函数 _detect_target_column / _detect_feature_columns / _merge_rare_categories
+    负责数据自适应识别。scikit-learn 不可用时优雅降级并发出告警。
 """
 import pandas as pd
 import numpy as np
@@ -47,8 +58,17 @@ CATEGORICAL_FEATURES = [
 RARE_THRESHOLD = 50
 
 
+# AI-assisted: 使用 Claude 实现目标列自动检测逻辑，人工校验后保留原逻辑
 def _detect_target_column(df: pd.DataFrame) -> Optional[str]:
-    """自动检测目标列（包含 <=50K/>50K 值的列）"""
+    """
+    自动检测目标列：返回首个取值包含 <=50K/>50K（含带点变体）的列名。
+
+    Args:
+        df: 待识别的数据集。
+
+    Returns:
+        命中的目标列名；未找到时返回 None。
+    """
     for col in df.columns:
         unique_vals = df[col].dropna().astype(str).unique()
         if any(v in {'<=50K', '>50K', '<=50K.', '>50K.'} for v in unique_vals):
@@ -56,8 +76,18 @@ def _detect_target_column(df: pd.DataFrame) -> Optional[str]:
     return None
 
 
+# AI-assisted: 使用 Claude 实现特征列自动识别与剔除逻辑，人工校验后保留原逻辑
 def _detect_feature_columns(df: pd.DataFrame, target_col: str) -> Tuple[List[str], List[str]]:
-    """自动检测数值特征和分类特征列"""
+    """
+    自动检测特征列：剔除目标列与 ADULT_DROP_COLUMNS 后，按 dtype 划分数值/分类特征。
+
+    Args:
+        df: 待识别的数据集。
+        target_col: 已确定的目标列名，将被排除。
+
+    Returns:
+        元组 (numeric_cols, categorical_cols)。
+    """
     all_cols = [c for c in df.columns if c != target_col]
     drop_cols = [c for c in all_cols if c in ADULT_DROP_COLUMNS]
     keep_cols = [c for c in all_cols if c not in drop_cols]
@@ -73,8 +103,19 @@ def _detect_feature_columns(df: pd.DataFrame, target_col: str) -> Tuple[List[str
     return numeric_cols, categorical_cols
 
 
+# AI-assisted: 使用 Claude 实现低频类别合并逻辑，手动微调了默认阈值常量
 def _merge_rare_categories(df: pd.DataFrame, col: str, threshold: int = RARE_THRESHOLD) -> pd.DataFrame:
-    """合并低频类别为 'Other'"""
+    """
+    将出现次数低于 threshold 的类别统一替换为 'Other'，以降低稀疏维度噪声。
+
+    Args:
+        df: 待处理的数据集（就地修改并返回）。
+        col: 待合并的分类列名。
+        threshold: 低频判定阈值，默认 RARE_THRESHOLD（50）。
+
+    Returns:
+        处理后的 DataFrame（同一对象）。
+    """
     counts = df[col].value_counts()
     rare = counts[counts < threshold].index.tolist()
     if rare:
@@ -85,7 +126,19 @@ def _merge_rare_categories(df: pd.DataFrame, col: str, threshold: int = RARE_THR
 class AdultMLEngine:
     """Adult Income 数据集的机器学习引擎"""
 
+# AI-assisted: 使用 Claude 初始化引擎状态字段，人工校验后保留原逻辑
     def __init__(self):
+        """
+        初始化引擎：所有模型、预处理器与评估中间结果均置空，待 prepare/train 填充。
+
+        Attributes:
+            model: 训练后的 Pipeline（预处理器+分类器）。
+            preprocessor: ColumnTransformer 特征预处理对象。
+            feature_names: 参与建模的特征列名列表。
+            is_fitted: 是否已完成训练。
+            X_test / y_test / y_pred / y_proba: 测试集及预测结果，供评估与公平性审计复用。
+            training_stats: 数据准备阶段记录的训练统计信息。
+        """
         self.model = None
         self.model_name = None
         self.preprocessor = None
@@ -98,6 +151,7 @@ class AdultMLEngine:
         self.y_proba = None
         self.training_stats = {}
 
+# AI-assisted: 使用 Claude 实现特征工程与数据分割流程，手动微调了特征工程顺序与 test_size
     def prepare(
         self,
         df: pd.DataFrame,
@@ -106,10 +160,17 @@ class AdultMLEngine:
         random_state: int = 42
     ) -> Dict[str, Any]:
         """
-        数据准备：特征工程 + 数据分割
+        数据准备：目标编码、特征工程（资本二值化、log1p 变换、低频合并、缺失填充）、
+        分层划分训练/测试集，并构建 ColumnTransformer 预处理器。
+
+        Args:
+            df: 原始数据集。
+            target_col: 目标列名；为 None 时自动检测。
+            test_size: 测试集比例，默认 0.2。
+            random_state: 随机种子，默认 42。
 
         Returns:
-            包含训练/测试数据和统计信息的字典
+            包含 X_train/X_test/y_train/y_test 及 stats（分布、特征清单等）的字典。
         """
         if not HAS_SKLEARN:
             raise MLError("scikit-learn 未安装")
@@ -215,6 +276,7 @@ class AdultMLEngine:
             "stats": self.training_stats
         }
 
+# AI-assisted: 使用 Claude 实现随机森林/逻辑回归训练流程，手动微调了超参数默认值
     def train(
         self,
         X_train: pd.DataFrame,
@@ -223,10 +285,16 @@ class AdultMLEngine:
         **kwargs
     ) -> Dict[str, Any]:
         """
-        训练模型
+        组合预处理器与分类器训练模型，并在测试集上完成预测与概率输出。
 
         Args:
-            model_type: 'logistic_regression' 或 'random_forest'
+            X_train: 训练特征。
+            y_train: 训练标签。
+            model_type: 模型类型，'logistic_regression' 或 'random_forest'（默认）。
+            **kwargs: 透传给对应分类器的额外超参数。
+
+        Returns:
+            包含 model_name 与 status="trained" 的字典。
         """
         if self.preprocessor is None:
             raise MLError("请先调用 prepare()")
@@ -265,8 +333,15 @@ class AdultMLEngine:
         logger.info(f"模型训练完成: {self.model_name}")
         return {"model_name": self.model_name, "status": "trained"}
 
+# AI-assisted: 使用 Claude 实现模型评估与 ROC/PR 曲线指标计算，人工校验后保留原逻辑
     def evaluate(self) -> Dict[str, Any]:
-        """评估模型，返回完整指标"""
+        """
+        在测试集上评估模型，返回完整指标体系。
+
+        Returns:
+            包含 accuracy、precision、recall、f1_score、roc_auc、pr_auc、
+            confusion_matrix、roc_curve、pr_curve、classification_report 及 training_stats 的字典。
+        """
         if not self.is_fitted:
             raise MLError("模型未训练")
 
@@ -328,8 +403,17 @@ class AdultMLEngine:
             "training_stats": self.training_stats,
         }
 
+# AI-assisted: 使用 Claude 实现特征重要性提取与排序逻辑，手动微调了默认 top_n 上限
     def feature_importance(self, top_n: int = 15) -> Dict[str, Any]:
-        """获取特征重要性"""
+        """
+        提取并排序模型特征重要性（支持树模型的 feature_importances_ 与线性模型的 coef_）。
+
+        Args:
+            top_n: 返回重要性最高的前 N 个特征，默认 15。
+
+        Returns:
+            包含 model_name、top_features（含特征名与重要性）、feature_names 及 importances 的字典。
+        """
         if not self.is_fitted:
             raise MLError("模型未训练")
 
@@ -368,15 +452,19 @@ class AdultMLEngine:
             "importances": importances.tolist()
         }
 
+# AI-assisted: 使用 Claude 实现公平性审计指标计算（分组 TPR/FPR 及差异），人工校验后保留原逻辑
     def fairness_audit(
         self,
         sensitive_cols: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        公平性审计：按敏感属性分组计算指标
+        公平性审计：按敏感属性分组计算各组的混淆矩阵衍生指标及组间差异。
 
         Args:
-            sensitive_cols: 敏感属性列名列表，默认 ['sex', 'race']
+            sensitive_cols: 敏感属性列名列表；为 None 时默认 ['sex', 'race']。
+
+        Returns:
+            按敏感属性组织的分组指标、tpr_gap/fpr_gap，及差异过大时触发的公平性告警信息。
         """
         if not self.is_fitted:
             raise MLError("模型未训练")
@@ -446,13 +534,24 @@ class AdultMLEngine:
             ) else None
         }
 
+# AI-assisted: 使用 Claude 实现分层 K 折交叉验证逻辑，手动微调了默认折数与评分口径
     def cross_validate(
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
         cv: int = 5
     ) -> Dict[str, Any]:
-        """5 折交叉验证"""
+        """
+        使用分层 K 折交叉验证评估模型稳定性（以 F1 为评分）。
+
+        Args:
+            X_train: 训练特征。
+            y_train: 训练标签。
+            cv: 交叉验证折数，默认 5。
+
+        Returns:
+            包含 cv_folds、mean_f1、std_f1 及 fold_scores 的字典。
+        """
         if self.model is None:
             raise MLError("请先调用 train()")
 
@@ -469,8 +568,14 @@ class AdultMLEngine:
             "fold_scores": [round(float(s), 4) for s in scores]
         }
 
+# AI-assisted: 使用 Claude 实现引擎状态的 base64+pickle 序列化，人工校验后保留原逻辑
     def get_state(self) -> Dict[str, Any]:
-        """获取可序列化的状态（用于 session 持久化）
+        """
+        获取可序列化的引擎状态（用于 session 持久化）。
+
+        Returns:
+            未训练时返回 {"is_fitted": False}；已训练时返回 model、X_test/y_test/y_pred/y_proba
+            等经 pickle+base64 编码后的状态字典。
 
         注意：使用 pickle 序列化，仅在可信环境中使用。
         """
@@ -493,8 +598,17 @@ class AdultMLEngine:
             "y_proba_pkl": base64.b64encode(pickle.dumps(self.y_proba)).decode('ascii'),
         }
 
+# AI-assisted: 使用 Claude 实现从序列化状态恢复引擎，人工校验后保留原逻辑
     def load_state(self, state: Dict[str, Any]) -> None:
-        """从序列化状态恢复"""
+        """
+        从 get_state 产生的序列化字典恢复引擎状态（反序列化模型与测试集相关对象）。
+
+        Args:
+            state: get_state 返回的状态字典。
+
+        Returns:
+            None；恢复完成后将 is_fitted 置为 True。
+        """
         import pickle
         import base64
 

@@ -1,6 +1,13 @@
 """
 数据预处理器
 处理缺失值、类型推断、数据清洗
+
+模块职责：
+    本模块负责在数据加载之后、可视化/建模之前对 DataFrame 进行清洗与规范化。
+    主要能力包括：数据校验、列类型自动推断（数值/日期/分类/布尔）、缺失值处理
+    （丢弃或按均值/中位数/众数等策略填充）、日期列推断转换、列名规范化
+    （去空格、特殊字符替换、去重），并对外暴露一个聚合入口 preprocess_data
+    把上述步骤串成一个完整流水线。同时提供数据摘要生成供会话元数据使用。
 """
 import pandas as pd
 import numpy as np
@@ -11,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationError(Exception):
-    """数据验证错误"""
+    """数据验证错误：当数据集为空、行数不足或无列时抛出，阻止后续分析流程。"""
     pass
 
 
+# AI-assisted: 使用 Claude 实现数据有效性校验（空/行数/列数），未做大幅修改
 def validate_dataframe(df: pd.DataFrame, min_rows: int = 1) -> None:
     """
     验证 DataFrame 是否可进行分析
@@ -39,6 +47,7 @@ def validate_dataframe(df: pd.DataFrame, min_rows: int = 1) -> None:
     logger.info(f"数据验证通过: {len(df)} 行 x {len(df.columns)} 列")
 
 
+# AI-assisted: 使用 Claude 实现列类型自动推断（含日期列启发式判定），未做大幅修改
 def detect_column_types(df: pd.DataFrame) -> Dict[str, List[str]]:
     """
     检测各列的数据类型
@@ -80,6 +89,7 @@ def detect_column_types(df: pd.DataFrame) -> Dict[str, List[str]]:
     return result
 
 
+# AI-assisted: 使用 Claude 实现列统计信息生成（dtype/缺失/唯一值），未做大幅修改
 def analyze_columns(df: pd.DataFrame) -> Dict[str, Dict[str, Any]]:
     """
     分析列的统计信息（用于会话元数据）
@@ -115,6 +125,7 @@ def analyze_columns(df: pd.DataFrame) -> Dict[str, Dict[str, Any]]:
     return result
 
 
+# AI-assisted: 使用 Claude 生成缺失值填充逻辑，人工校验后保留原逻辑
 def handle_missing_values(
     df: pd.DataFrame,
     strategy: str = 'auto',
@@ -176,6 +187,7 @@ def handle_missing_values(
     return df
 
 
+# AI-assisted: 使用 Claude 实现日期列推断与转换（含成功率回退），未做大幅修改
 def infer_datetime_columns(
     df: pd.DataFrame,
     date_formats: Optional[List[str]] = None
@@ -246,6 +258,7 @@ def infer_datetime_columns(
     return df, converted_cols
 
 
+# AI-assisted: 使用 Claude 实现列名规范化（去空格/替换特殊字符/去重），未做大幅修改
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """
     清理列名：去除空格、统一大小写、处理特殊字符
@@ -286,6 +299,7 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+# AI-assisted: 使用 Claude 实现预处理流水线聚合入口，人工校验后保留原步骤顺序
 def preprocess_data(
     df: pd.DataFrame,
     clean_names: bool = True,
@@ -330,6 +344,7 @@ def preprocess_data(
     return df
 
 
+# AI-assisted: 使用 Claude 实现数据集摘要生成，未做大幅修改
 def get_data_summary(df: pd.DataFrame) -> Dict[str, Any]:
     """
     获取数据集摘要信息

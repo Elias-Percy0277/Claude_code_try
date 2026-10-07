@@ -1,3 +1,5 @@
+# 模块职责：文件上传 API，负责接收用户上传的数据文件（CSV/Excel/JSON 等）及元数据文件（.names/.index），
+# 完成文件校验、多编码解码、数据加载与预处理，并据此创建会话或向已有会话追加数据集。
 """
 文件上传 API
 处理数据文件上传、会话创建、多数据集管理
@@ -36,12 +38,21 @@ ALLOWED_EXTENSIONS = {'.csv', '.xlsx', '.json', '.xls', '.data', '.test', '.name
 MAX_DATASETS_PER_SESSION = 10  # 每个会话最多数据集数量
 
 
+# AI-assisted: 使用 Claude 实现单文件解析与预处理主流程，手动调整了多编码解码与 .names/.index 元数据分支
 def _process_uploaded_file(file: UploadFile, content: bytes) -> tuple:
     """
     处理单个上传文件
 
+    功能：校验扩展名、计算文件哈希，按文件类型分流——数据文件执行加载与预处理，
+    元数据文件（.names/.index）解析为元数据字典。校验或解析失败时抛出 HTTPException。
+
+    Args:
+        file: FastAPI UploadFile 对象（含文件名与文件流）
+        content: 已读取的文件字节内容
+
     Returns:
-        (dataframe, filename, file_hash) 或 (None, metadata_dict, file_hash) for .names files
+        tuple: 数据文件返回 (df, filename, file_hash)；
+               .names/.index 元数据文件返回 (None, metadata_dict, file_hash)
     """
     import io
     import pandas as pd
@@ -204,6 +215,7 @@ def _process_uploaded_file(file: UploadFile, content: bytes) -> tuple:
         )
 
 
+# AI-assisted: 使用 Claude 实现多文件上传与会话管理主流程，手动调整了元数据列名映射与数据集数量上限校验
 @router.post("/upload", response_model=UploadResponse)
 async def upload_files(
     files: List[UploadFile] = File(...),
@@ -211,6 +223,9 @@ async def upload_files(
 ):
     """
     上传数据文件并创建/更新会话
+
+    功能：接收多文件上传，区分数据文件与元数据文件，先解析元数据、再加载并预处理数据，
+    依据是否传入 session_id 决定新建会话或追加到现有会话，最终返回会话与数据集概要。
 
     Args:
         files: 上传的文件列表（支持多文件）
@@ -513,17 +528,21 @@ async def upload_files(
         )
 
 
+# AI-assisted: 使用 Claude 实现数据集删除接口，手动调整了禁止删除最后一个数据集的保护逻辑
 @router.delete("/session/{session_id}/dataset/{dataset_id}")
 async def delete_dataset(session_id: str, dataset_id: str):
     """
     从会话中删除数据集
+
+    功能：从指定会话移除某个数据集，禁止删除会话中唯一的数据集以保证会话可用性，
+    会话或数据集不存在时返回相应错误码。
 
     Args:
         session_id: 会话 ID
         dataset_id: 数据集 ID
 
     Returns:
-        成功/失败响应
+        dict: 成功时返回 {"success": True, "message": "数据集已删除"}，失败时抛出 HTTPException
     """
     session_manager = get_session_manager()
 

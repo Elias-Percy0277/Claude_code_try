@@ -1,6 +1,8 @@
 /**
  * Pinia 状态管理
  * 管理会话、消息、图表、加载状态等
+ * 职责：集中维护 DataVis 全局状态（会话/数据集/消息/图表/流式与 UI 状态），
+ * 提供 getters 派生数据与 actions 变更状态，并负责 localStorage 的持久化与恢复。
  */
 import { defineStore } from 'pinia'
 
@@ -68,6 +70,7 @@ export const useAppStore = defineStore('app', {
 
   actions: {
     // 初始化时恢复状态
+    // AI-assisted: 使用 Claude 实现 localStorage 状态恢复，手动调整了恢复字段范围（含 viewingHistory 等）
     $hydrate() {
       const saved = localStorage.getItem('datavis_state')
       if (saved) {
@@ -86,6 +89,7 @@ export const useAppStore = defineStore('app', {
     },
 
     // 持久化状态（安全化：永不向外抛出异常，charts 数据不存入 localStorage）
+    // AI-assisted: 使用 Claude 生成 Pinia 状态管理，手动调整了持久化字段（剥离 charts 仅存消息元数据）
     $persist() {
       try {
         const toSave = {
@@ -108,6 +112,7 @@ export const useAppStore = defineStore('app', {
     },
 
     // 设置会话信息
+    // AI-assisted: 使用 Claude 实现会话信息初始化，手动调整了 datasets 默认结构兜底
     setSession(sessionId, filename, rowCount, columns, datasets = null) {
       this.sessionId = sessionId
       this.filename = filename
@@ -127,18 +132,21 @@ export const useAppStore = defineStore('app', {
     },
 
     // 添加数据集
+    // AI-assisted: 使用 Claude 实现多数据集追加，未做大幅修改
     addDatasets(newDatasets) {
       this.datasets = [...this.datasets, ...newDatasets]
       this.$persist()
     },
 
     // 删除数据集
+    // AI-assisted: 使用 Claude 实现数据集按 ID 过滤删除，未做大幅修改
     removeDataset(datasetId) {
       this.datasets = this.datasets.filter(ds => ds.dataset_id !== datasetId)
       this.$persist()
     },
 
     // 清除会话
+    // AI-assisted: 使用 Claude 实现会话与相关状态清空，手动调整了清空字段范围及 localStorage 移除
     clearSession() {
       this.sessionId = null
       this.filename = null
@@ -158,6 +166,7 @@ export const useAppStore = defineStore('app', {
     },
 
     // 添加消息
+    // AI-assisted: 使用 Claude 实现消息追加并打时间戳，未做大幅修改
     addMessage(message) {
       this.messages.push({
         ...message,
@@ -167,6 +176,7 @@ export const useAppStore = defineStore('app', {
     },
 
     // 更新最后一条消息的内容
+    // AI-assisted: 使用 Claude 实现流式增量写入最新 assistant 消息，未做大幅修改
     updateLastMessageContent(content) {
       if (this.messages.length > 0) {
         const lastMsg = this.messages[this.messages.length - 1]
@@ -177,6 +187,7 @@ export const useAppStore = defineStore('app', {
     },
 
     // 设置图表（有数据时自动显示图表区域）
+    // AI-assisted: 使用 Claude 实现图表设置与可见性联动，未做大幅修改
     setCharts(charts) {
       this.charts = charts || []
       if (this.charts.length > 0) {
@@ -185,16 +196,19 @@ export const useAppStore = defineStore('app', {
     },
 
     // 固定历史图表（用于对比）
+    // AI-assisted: 使用 Claude 实现图表深拷贝固定，人工校验后保留深拷贝防引用共享
     pinChart(chart) {
       this.pinnedCharts.push(JSON.parse(JSON.stringify(chart)))
     },
 
     // 取消固定所有图表
+    // AI-assisted: 使用 Claude 实现清空固定图表，未做大幅修改
     clearPinnedCharts() {
       this.pinnedCharts = []
     },
 
     // 查看历史图表（深拷贝避免引用共享问题）
+    // AI-assisted: 使用 Claude 实现历史图表回看，人工校验后保留深拷贝逻辑
     viewHistoricalCharts(messageIndex) {
       const message = this.messages[messageIndex]
       if (message && message.charts && message.charts.length > 0) {
@@ -206,52 +220,62 @@ export const useAppStore = defineStore('app', {
     },
 
     // 返回当前最新图表
+    // AI-assisted: 使用 Claude 实现退出历史回看，未做大幅修改
     viewCurrentCharts() {
       this.viewingHistoryCharts = false
       this.viewingMessageIndex = -1
     },
 
     // 设置加载状态
+    // AI-assisted: 使用 Claude 实现加载状态开关，未做大幅修改
     setLoading(loading) {
       this.isLoading = loading
     },
 
     // 设置流式状态
+    // AI-assisted: 使用 Claude 实现流式状态开关，未做大幅修改
     setStreaming(value) {
       this.isStreaming = value
     },
 
     // 设置错误
+    // AI-assisted: 使用 Claude 实现错误信息设置，未做大幅修改
     setError(error) {
       this.error = error
     },
 
     // 清除错误
+    // AI-assisted: 使用 Claude 实现错误清除，未做大幅修改
     clearError() {
       this.error = null
     },
 
     // 设置查询输入
+    // AI-assisted: 使用 Claude 实现查询输入同步，未做大幅修改
     setQueryInput(query) {
       this.queryInput = query
     },
 
     // 设置分析摘要
+    // AI-assisted: 使用 Claude 实现结构化摘要存储，未做大幅修改
     setAnalysisSummary(data) {
       this.analysisSummary = data
     },
 
     // 切换摘要面板折叠
+    // AI-assisted: 使用 Claude 实现摘要折叠切换，未做大幅修改
     toggleSummaryCollapsed() {
       this.summaryCollapsed = !this.summaryCollapsed
     },
 
     // 设置建议查询
+    // AI-assisted: 使用 Claude 实现建议查询列表设置，未做大幅修改
     setSuggestedQueries(queries) {
       this.suggestedQueries = queries
     },
 
     // 切换会话时加载（原子替换状态）
+    // AI-assisted: 使用 Claude 实现切换会话的原子状态替换，人工校验后保留字段重置范围
     loadSession(sessionId, sessionData, messages) {
       this.sessionId = sessionId
       this.filename = sessionData.filename || ''

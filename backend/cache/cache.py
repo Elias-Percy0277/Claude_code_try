@@ -1,6 +1,11 @@
 """
 缓存管理器
-减少重复 LLM 调用，提升响应速度
+
+模块职责：
+- 基于 OrderedDict + TTL + LRU 实现请求级缓存，减少重复 LLM 调用。
+- 缓存键由 session_id + query + file_hash 组合并做 MD5 摘要。
+- 提供缓存命中统计、过期清理、模板化结果润色（不调用 LLM）等辅助能力。
+- 暴露全局单例 get_cache_manager() 与 cache_analysis_result 装饰器。
 """
 import hashlib
 import json
@@ -13,11 +18,13 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 
+# AI-assisted: 使用 Claude 实现请求缓存管理器，手动调整了缓存键计算与 LRU 淘汰策略
 class CacheManager:
     """
     请求缓存管理器
 
-    缓存键设计: session_id + query + file_hash
+    缓存键设计: session_id + query + file_hash（经 MD5 摘要）
+    支持 TTL 过期、LRU 淘汰、命中计数与统计。
     """
 
     def __init__(
@@ -38,6 +45,7 @@ class CacheManager:
         self._hits = 0
         self._misses = 0
 
+    # AI-assisted: 使用 Claude 生成缓存键计算逻辑，人工校验后保留 MD5 摘要方式
     def _generate_key(
         self,
         session_id: str,
@@ -60,6 +68,7 @@ class CacheManager:
         # 使用 MD5 哈希
         return hashlib.md5(key_parts.encode('utf-8')).hexdigest()
 
+    # AI-assisted: 使用 Claude 实现缓存读取(TTL+LRU)，人工校验后保留命中计数与日志
     def get(
         self,
         session_id: str,
@@ -103,6 +112,7 @@ class CacheManager:
         logger.info(f"缓存命中: {key[:8]}... (命中次数: {entry['hit_count']})")
         return entry["result"]
 
+    # AI-assisted: 使用 Claude 实现缓存写入(LRU 淘汰)，人工校验后保留条目元数据结构
     def set(
         self,
         session_id: str,
@@ -142,7 +152,7 @@ class CacheManager:
 
     def delete(self, session_id: str) -> int:
         """
-        删除会话的所有缓存
+        删除指定会话的所有缓存
 
         Args:
             session_id: 会话 ID
@@ -166,18 +176,20 @@ class CacheManager:
 
         return count
 
+    # AI-assisted: 使用 Claude 实现清空全部缓存，未做大幅修改
     def clear(self) -> None:
-        """清空所有缓存"""
+        """清空所有缓存（含命中计数等运行时状态）"""
         count = len(self._cache)
         self._cache.clear()
         logger.info(f"清空所有缓存: {count} 条")
 
+    # AI-assisted: 使用 Claude 实现过期缓存批量清理，人工校验后保留遍历删除逻辑
     def cleanup_expired(self) -> int:
         """
         清理过期缓存
 
         Returns:
-            清理的条目数
+            本次清理的条目数
         """
         now = time.time()
         keys_to_delete = []
@@ -194,12 +206,13 @@ class CacheManager:
 
         return len(keys_to_delete)
 
+    # AI-assisted: 使用 Claude 实现缓存统计信息聚合，手动调整了命中率计算与展示字段
     def get_stats(self) -> Dict[str, Any]:
         """
         获取缓存统计信息
 
         Returns:
-            统计信息字典
+            统计信息字典（含命中率、命中/未命中计数、前 10 条条目摘要）
         """
         total_requests = self._hits + self._misses
         hit_rate = self._hits / total_requests if total_requests > 0 else 0
@@ -224,15 +237,16 @@ class CacheManager:
             ]
         }
 
+    # AI-assisted: 使用 Claude 实现按会话查询缓存键，未做大幅修改
     def get_session_cache_keys(self, session_id: str) -> list:
         """
-        获取会话的所有缓存键
+        获取指定会话的所有缓存键
 
         Args:
             session_id: 会话 ID
 
         Returns:
-            缓存键列表
+            属于该会话的缓存键列表
         """
         keys = []
         for key, entry in self._cache.items():
@@ -246,7 +260,11 @@ _cache_manager: Optional[CacheManager] = None
 
 
 def get_cache_manager() -> CacheManager:
-    """获取全局缓存管理器单例"""
+    """获取全局缓存管理器单例（首次调用惰性创建，max_size=100, ttl=3600s）
+
+    Returns:
+        全局共享的 CacheManager 实例
+    """
     global _cache_manager
     if _cache_manager is None:
         _cache_manager = CacheManager(
@@ -256,6 +274,7 @@ def get_cache_manager() -> CacheManager:
     return _cache_manager
 
 
+# AI-assisted: 使用 Claude 实现文件哈希计算，手动截取 MD5 前 8 位作为缓存标识
 def calculate_file_hash(file_content: bytes) -> str:
     """
     计算文件内容的哈希值
@@ -269,10 +288,12 @@ def calculate_file_hash(file_content: bytes) -> str:
     return hashlib.md5(file_content).hexdigest()[:8]
 
 
-# 装饰器：缓存分析结果
+# AI-assisted: 使用 Claude 实现分析结果缓存装饰器，手动调整了签约定约以兼容 file_hash 参数
 def cache_analysis_result(func):
     """
     缓存分析结果的装饰器
+
+    命中缓存则直接返回，未命中时调用原函数并将结果写入缓存。
 
     使用方法:
     @cache_analysis_result
@@ -299,17 +320,17 @@ def cache_analysis_result(func):
     return wrapper
 
 
-# 简单结果润色（模板化，不调用 LLM）
+# AI-assisted: 使用 Claude 实现模板化结果润色分发，人工校验后保留意图到模板的映射
 def template_polish(result: Dict[str, Any], intent: str = "overview") -> str:
     """
-    使用模板生成分析结果描述（短路机制）
+    使用模板生成分析结果描述（短路机制，不调用 LLM）
 
     Args:
-        result: 分析结果
-        intent: 意图类型
+        result: 分析结果字典
+        intent: 意图类型，决定使用哪个模板
 
     Returns:
-        分析描述文本
+        分析描述文本（Markdown）
     """
     if intent == "overview":
         return _template_overview(result)
@@ -327,8 +348,9 @@ def template_polish(result: Dict[str, Any], intent: str = "overview") -> str:
         return _template_default(result)
 
 
+# AI-assisted: 使用 Claude 生成概览分析文案模板，人工校验后保留列信息渲染
 def _template_overview(result: Dict[str, Any]) -> str:
-    """概览模板"""
+    """概览模板：渲染数据规模与各列类型/缺失情况"""
     lines = ["## 数据概览", ""]
     lines.append(f"数据集包含 {result.get('row_count', 0)} 行和 {result.get('column_count', 0)} 列。")
     lines.append("")
@@ -341,8 +363,9 @@ def _template_overview(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成趋势分析文案模板，手动调整了 R² 强度分档阈值
 def _template_trend(result: Dict[str, Any]) -> str:
-    """趋势模板"""
+    """趋势模板：渲染方向、变化率与拟合优度分档"""
     direction = result.get('direction', '未知')
     change_rate = result.get('change_rate', 0)
     r_squared = result.get('r_squared', 0)
@@ -369,8 +392,9 @@ def _template_trend(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成相关性分析文案模板，手动调整了相关性强弱分档
 def _template_correlation(result: Dict[str, Any]) -> str:
-    """相关性模板"""
+    """相关性模板：渲染方法名与前 5 对变量关系（强度+方向+系数）"""
     method = result.get('method', 'pearson')
     pairs = result.get('pairs', [])
 
@@ -402,8 +426,9 @@ def _template_correlation(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成分布分析文案模板，人工校验后保留异常值提示
 def _template_distribution(result: Dict[str, Any]) -> str:
-    """分布模板"""
+    """分布模板：渲染均值/中位数/标准差与异常值计数"""
     lines = ["## 分布分析", ""]
     lines.append(f"数据均值为 **{result.get('mean', 0):.2f}**，")
     lines.append(f"中位数为 **{result.get('median', 0):.2f}**，")
@@ -419,8 +444,9 @@ def _template_distribution(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成分组对比文案模板，手动调整了 ANOVA 显著性表述
 def _template_comparison(result: Dict[str, Any]) -> str:
-    """分组对比模板"""
+    """分组对比模板：渲染各组统计与方差分析显著性"""
     lines = ["## 分组对比分析", ""]
 
     stats = result.get('statistics', [])
@@ -449,8 +475,9 @@ def _template_comparison(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成移动平均文案模板，未做大幅修改
 def _template_moving_avg(result: Dict[str, Any]) -> str:
-    """移动平均模板"""
+    """移动平均模板：渲染窗口期、方法与平滑说明"""
     method = result.get('method', 'simple')
     window = result.get('window', 7)
 
@@ -463,6 +490,7 @@ def _template_moving_avg(result: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 生成兜底文案模板，未做大幅修改
 def _template_default(result: Dict[str, Any]) -> str:
-    """默认模板"""
+    """默认模板：无专用模板时的通用提示"""
     return "分析已完成，请查看图表了解详情。"

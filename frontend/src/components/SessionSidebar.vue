@@ -84,6 +84,11 @@
 </template>
 
 <script setup>
+/**
+ * SessionSidebar 会话侧边栏组件
+ * 职责：展示历史会话列表并按时间分组，支持新建、切换、重命名、删除会话，
+ * 通过 newSession / sessionSwitched 事件与父组件通信；响应式适配移动端。
+ */
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { listSessions, deleteSession as deleteSessionApi, renameSession as renameSessionApi } from '@/api/client'
@@ -98,6 +103,7 @@ const renameInputRef = ref(null)
 const emit = defineEmits(['newSession', 'sessionSwitched'])
 
 // 按 created_at 时间分组
+// AI-assisted: 使用 Claude 实现会话按"今天/昨天/近7天/更早"分组，人工校验后保留原逻辑
 const groupedSessions = computed(() => {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -124,6 +130,7 @@ const groupedSessions = computed(() => {
 })
 
 // 显示名称：优先 session_name，再去扩展名
+// AI-assisted: 使用 Claude 实现会话显示名生成逻辑，人工校验后保留原逻辑
 function getDisplayName(session) {
   if (session.session_name) return session.session_name
   const name = session.filename || ''
@@ -131,6 +138,7 @@ function getDisplayName(session) {
 }
 
 // 双击开始重命名
+// AI-assisted: 使用 Claude 实现双击进入重命名输入态并自动聚焦选中，人工校验后保留原逻辑
 function startRename(session) {
   editingId.value = session.session_id
   editName.value = getDisplayName(session)
@@ -144,6 +152,7 @@ function startRename(session) {
 }
 
 // 确认重命名
+// AI-assisted: 使用 Claude 实现重命名提交与本地列表同步，人工校验后保留原逻辑
 async function confirmRename(sessionId) {
   const name = editName.value.trim()
   if (!name || editingId.value !== sessionId) {
@@ -163,10 +172,13 @@ async function confirmRename(sessionId) {
 }
 
 // 取消重命名
+// AI-assisted: 使用 Claude 实现取消重命名逻辑，未做大幅修改
 function cancelRename() {
   editingId.value = null
 }
 
+// 拉取会话列表（错误静默处理）
+// AI-assisted: 使用 Claude 实现会话列表拉取，人工校验后保留静默错误处理
 async function fetchSessions() {
   try {
     const result = await listSessions()
@@ -178,17 +190,23 @@ async function fetchSessions() {
   }
 }
 
+// 新建会话：通知父组件并关闭移动端抽屉
+// AI-assisted: 使用 Claude 实现新建会话事件派发，未做大幅修改
 function handleNewSession() {
   emit('newSession')
   mobileOpen.value = false
 }
 
+// 切换会话：避免重复切换，通知父组件
+// AI-assisted: 使用 Claude 实现会话切换逻辑，人工校验后保留去重判断
 async function handleSwitchSession(sessionId) {
   if (sessionId === store.sessionId) return
   emit('sessionSwitched', sessionId)
   mobileOpen.value = false
 }
 
+// 删除会话：二次确认后删除并清理本地与 store 状态
+// AI-assisted: 使用 Claude 实现会话删除与状态联动，人工校验后保留原逻辑
 async function handleDeleteSession(sessionId) {
   if (!confirm('确定要删除此会话吗？所有数据将被清除。')) return
   try {
@@ -203,6 +221,8 @@ async function handleDeleteSession(sessionId) {
   }
 }
 
+// 切换移动端侧边栏展开/收起
+// AI-assisted: 使用 Claude 实现移动端抽屉开关，未做大幅修改
 function toggleMobile() {
   mobileOpen.value = !mobileOpen.value
 }

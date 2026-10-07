@@ -101,6 +101,12 @@
 </template>
 
 <script setup>
+// ============================================================
+// 组件职责：ChatPanel —— 聊天面板
+// 负责：渲染对话消息列表（用户/助手/系统），支持 Markdown 渲染、
+// 流式接收期间的纯文本降级显示、进度消息（⏳ 前缀）的特殊样式、
+// 图表查看/固定按钮的事件抛出，以及消息滚动、跳转按钮等交互。
+// ============================================================
 import { ref, computed, watch, nextTick } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { marked } from 'marked'
@@ -116,6 +122,7 @@ marked.setOptions({
 })
 
 // 判断最后一条助手消息是否正在流式接收中（有内容且不是纯进度消息）
+// AI-assisted: 使用 Claude 实现流式状态判断计算属性，未做大幅修改
 const isLastAssistantStreaming = computed(() => {
   if (!store.isLoading || store.messages.length === 0) return false
   const lastMsg = store.messages[store.messages.length - 1]
@@ -123,6 +130,7 @@ const isLastAssistantStreaming = computed(() => {
 })
 
 // 流式传输期间跳过 Markdown 解析，避免主线程阻塞
+// AI-assisted: 使用 Claude 实现 Markdown 渲染与流式拼接，手动调整了流式期间转义与滚动行为
 function renderContent(message, index) {
   if (message.role === 'assistant') {
     // 进度消息：直接转义显示
@@ -150,20 +158,27 @@ function renderContent(message, index) {
 }
 
 // 判断消息是否是进度消息
+// AI-assisted: 使用 Claude 实现进度消息识别，未做大幅修改
 function isProgressMessage(message) {
   return message.role === 'assistant' &&
     store.isLoading &&
     message.content?.startsWith('⏳')
 }
 
+// 查看该消息关联的图表，向父组件抛出 viewCharts 事件
+// AI-assisted: 使用 Claude 实现查看图表事件抛出，未做大幅修改
 function handleViewCharts(messageIndex) {
   emit('viewCharts', messageIndex)
 }
 
+// 固定该消息关联的图表用于对比，向父组件抛出 pinCharts 事件
+// AI-assisted: 使用 Claude 实现固定对比事件抛出，未做大幅修改
 function handlePinCharts(messageIndex) {
   emit('pinCharts', messageIndex)
 }
 
+// 判断当前是否正在查看该消息的图表（用于高亮查看中按钮）
+// AI-assisted: 使用 Claude 实现查看状态判断，未做大幅修改
 function isViewingThisCharts(messageIndex) {
   return store.viewingHistoryCharts && store.viewingMessageIndex === messageIndex
 }
@@ -190,6 +205,8 @@ watch(() => {
   }
 })
 
+// 将消息容器滚动到底部
+// AI-assisted: 使用 Claude 实现滚动到底部，未做大幅修改
 function scrollToBottom() {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
@@ -199,6 +216,8 @@ function scrollToBottom() {
 const showJump = ref(false)
 const isNearBottom = ref(true)
 
+// 滚动监听：根据位置决定跳转按钮显隐，并记录是否处于底部附近
+// AI-assisted: 使用 Claude 实现滚动监听与跳转按钮显隐，未做大幅修改
 function onScroll() {
   const el = messagesContainer.value
   if (!el) return
@@ -207,6 +226,8 @@ function onScroll() {
   isNearBottom.value = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
 }
 
+// 跳转按钮：靠近底部时跳到顶部，否则平滑滚动到底部
+// AI-assisted: 使用 Claude 实现跳转顶部/底部逻辑，未做大幅修改
 function handleJump() {
   const el = messagesContainer.value
   if (!el) return

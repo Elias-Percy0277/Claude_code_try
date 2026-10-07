@@ -1,6 +1,11 @@
 """
 日志配置模块
-提供详细的日志记录功能，包括文件日志、彩色控制台输出、请求日志中间件
+
+模块职责：
+- 统一配置项目日志系统：彩色控制台输出 + 文本/错误/JSON 三类滚动文件。
+- 提供多种日志格式化器（彩色、JSON、纯文本）以适配控制台与机器分析场景。
+- 暴露 setup_logging() 初始化入口与 get_logger() 取用入口。
+- Windows 下自动处理 emoji → ASCII 替换，避免 GBK 编码报错。
 """
 import logging
 import sys
@@ -20,9 +25,10 @@ except ImportError:
     HAS_COLORAMA = False
 
 
+# AI-assisted: 使用 Claude 定义终端日志 ANSI 颜色常量表，人工校验后保留级别颜色映射
 # 日志颜色代码
 class LogColors:
-    """终端日志颜色配置"""
+    """终端日志颜色配置（ANSI 转义码与级别/模块/时间颜色映射）"""
     RESET = "\033[0m"
     RED = "\033[31m"
     GREEN = "\033[32m"
@@ -55,14 +61,31 @@ class LogColors:
     MESSAGE_COLOR = RESET
 
 
+# AI-assisted: 使用 Claude 实现彩色控制台日志格式化器，手动调整了 emoji 到 ASCII 的替换映射(GBK 兼容)
 class ColoredFormatter(logging.Formatter):
-    """彩色控制台日志格式化器"""
+    """彩色控制台日志格式化器（按级别着色并替换 emoji 以兼容 Windows GBK）"""
 
     def __init__(self, fmt: Optional[str] = None, datefmt: Optional[str] = None, use_colors: bool = True):
+        """
+        初始化彩色格式化器
+
+        Args:
+            fmt: 日志格式字符串
+            datefmt: 时间格式字符串
+            use_colors: 是否启用彩色输出
+        """
         super().__init__(fmt, datefmt)
         self.use_colors = use_colors
 
     def format(self, record):
+        """格式化日志记录：着色时手动拼接时间/级别/模块/消息；否则退回父类格式化
+
+        Args:
+            record: logging.LogRecord 实例
+
+        Returns:
+            格式化后的日志字符串
+        """
         if self.use_colors:
             # 获取颜色
             level_color = LogColors.LEVEL_COLORS.get(record.levelno, LogColors.RESET)
@@ -111,10 +134,19 @@ class ColoredFormatter(logging.Formatter):
             return super().format(record)
 
 
+# AI-assisted: 使用 Claude 实现 JSON 格式日志格式化器，手动补充了 user_id/session_id 等扩展字段
 class DetailedFormatter(logging.Formatter):
-    """详细的文件日志格式化器（JSON格式，便于分析）"""
+    """详细的文件日志格式化器（JSON 格式，便于机器分析）"""
 
     def format(self, record):
+        """将日志记录序列化为 JSON 字符串
+
+        Args:
+            record: logging.LogRecord 实例
+
+        Returns:
+            包含时间/级别/模块/异常等字段的 JSON 字符串
+        """
         log_data = {
             "timestamp": self.formatTime(record, self.datefmt),
             "level": record.levelname,
@@ -140,18 +172,25 @@ class DetailedFormatter(logging.Formatter):
         return json.dumps(log_data, ensure_ascii=False)
 
 
+# AI-assisted: 使用 Claude 实现纯文本日志格式化器，未做大幅修改
 class PlainTextFormatter(logging.Formatter):
-    """纯文本文件日志格式化器"""
+    """纯文本文件日志格式化器（固定列宽对齐）"""
 
     def __init__(self):
+        """初始化纯文本格式化器，设定固定 fmt 与 datefmt"""
         super().__init__(
             fmt='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S'
         )
 
 
+# AI-assisted: 使用 Claude 实现日志目录定位与创建，未做大幅修改
 def get_log_dir() -> Path:
-    """获取日志目录"""
+    """获取日志目录（项目根下 logs/，不存在则自动创建）
+
+    Returns:
+        日志目录 Path 对象
+    """
     # 项目根目录
     project_root = Path(__file__).parent.parent.parent
     log_dir = project_root / "logs"
@@ -161,6 +200,7 @@ def get_log_dir() -> Path:
     return log_dir
 
 
+# AI-assisted: 使用 Claude 实现日志系统初始化，手动调整了三类文件处理器与第三方库日志级别
 def setup_logging(
     level: int = logging.INFO,
     log_to_file: bool = True,
@@ -256,6 +296,7 @@ def setup_logging(
     root_logger.info("=" * 60)
 
 
+# AI-assisted: 使用 Claude 实现日志记录器取用封装，未做大幅修改
 def get_logger(name: str) -> logging.Logger:
     """
     获取指定名称的日志记录器
@@ -264,6 +305,6 @@ def get_logger(name: str) -> logging.Logger:
         name: 日志记录器名称（通常使用 __name__）
 
     Returns:
-        配置好的日志记录器
+        已由 setup_logging 配置好的 logging.Logger 实例
     """
     return logging.getLogger(name)

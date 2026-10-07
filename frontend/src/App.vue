@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <!-- 有会话：聊天优先布局 -->
+          <!-- 有会话：聊天优先布局（顶栏数据集 chips + 中部聊天/图表/摘要 + 底栏输入） -->
           <div v-else class="session-view">
             <!-- 顶栏：数据集信息 + 添加数据 -->
             <div class="session-topbar">
@@ -133,6 +133,7 @@
                 <span class="expand-hint">展开查看</span>
               </div>
 
+              <!-- 聊天面板：展示消息流，并发出查看/固定历史图表事件 -->
               <ChatPanel @viewCharts="handleViewCharts" @pinCharts="handlePinCharts" />
 
               <!-- 固定图表提示栏 -->
@@ -221,6 +222,13 @@
 </template>
 
 <script setup>
+/**
+ * App.vue —— DataVis 数据分析平台主应用组件
+ * 职责：
+ *  - 承载三栏布局（会话侧边栏 | 主区域），并在无会话时显示欢迎视图、有会话时显示聊天+图表视图
+ *  - 串联文件上传（新建会话/添加数据集）、聊天消息发送（SSE 流式）、图表展示、分析摘要、会话切换等核心流程
+ *  - 通过 useAppStore 集中管理状态，并在挂载时从 localStorage 与后端恢复会话历史
+ */
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import SessionSidebar from '@/components/SessionSidebar.vue'
@@ -247,7 +255,8 @@ const exampleQueries = computed(() => {
   return store.suggestedQueries.length > 0 ? store.suggestedQueries : defaultQueries
 })
 
-// 组件挂载时恢复状态
+// 组件挂载时恢复状态：先从 localStorage 水合，再向后端校验会话有效性并拉取完整历史（含 charts）
+// AI-assisted: 使用 Claude 实现挂载时的会话恢复与历史回填逻辑，人工校验后保留原逻辑
 onMounted(async () => {
   store.$hydrate()
 
@@ -280,13 +289,15 @@ onMounted(async () => {
   window.dispatchEvent(new Event('app-ready'))
 })
 
-// 新建会话（从侧边栏触发）
+// 新建会话（从侧边栏触发）：清空当前会话与图表，回到欢迎/初始状态
+// AI-assisted: 使用 Claude 生成新建会话逻辑，未做大幅修改
 function handleNewSessionFromSidebar() {
   store.clearSession()
   store.setCharts([])
 }
 
-// 切换会话
+// 切换会话：校验有效性、拉取历史并原子替换状态，切换中显示过渡遮罩；分析进行中需二次确认
+// AI-assisted: 使用 Claude 生成会话切换与历史加载逻辑，手动调整了进行中确认与过渡遮罩时序
 async function handleSessionSwitched(sessionId) {
   if (store.isLoading) {
     if (!confirm('分析正在进行中，确定要切换吗？')) return
@@ -330,7 +341,8 @@ async function handleSessionSwitched(sessionId) {
   }
 }
 
-// 处理文件上传（新建会话）
+// 处理文件上传（新建会话）：写入会话与数据集信息，追加系统消息并刷新侧边栏列表
+// AI-assisted: 使用 Claude 实现文件上传结果回写到 store，人工校验后保留原逻辑
 async function handleFileUploaded(result) {
   store.setSession(
     result.session_id,
@@ -347,7 +359,8 @@ async function handleFileUploaded(result) {
   sessionSidebar.value?.fetchSessions()
 }
 
-// 处理添加文件到现有会话
+// 处理添加文件到现有会话：追加数据集、追加系统消息并关闭添加对话框
+// AI-assisted: 使用 Claude 实现添加数据集到现有会话的逻辑，未做大幅修改
 async function handleFileAdded(result) {
   store.addDatasets(result.datasets)
   store.addMessage({
@@ -358,7 +371,8 @@ async function handleFileAdded(result) {
   sessionSidebar.value?.fetchSessions()
 }
 
-// 删除数据集
+// 删除数据集：二次确认后调用后端删除接口，同步更新 store 并追加系统消息
+// AI-assisted: 使用 Claude 实现数据集删除流程，人工校验后保留原逻辑
 async function handleDeleteDataset(datasetId) {
   if (!confirm('确定要删除这个数据集吗？')) return
 
@@ -375,6 +389,9 @@ async function handleDeleteDataset(datasetId) {
 }
 
 // 处理发送消息（非阻塞模式：不 await analyzeStream，让 SSE 流在后台执行）
+// 包含：状态重置、追加 user/assistant 消息、AbortController 控制、5 秒无数据慢响应提示，
+// 以及 onData/onError/onDone 回调对 charts、文本、摘要、建议查询、持久化的更新
+// AI-assisted: 使用 Claude 实现消息发送与非阻塞流式处理，手动调整了慢响应超时提示与 abort 错误分类
 function handleSendMessage() {
   const query = store.queryInput.trim()
   if (!query || store.isLoading) return
@@ -464,7 +481,8 @@ function handleSendMessage() {
   })
 }
 
-// 停止分析
+// 停止分析：通过 AbortController 中断流式请求，立即重置 UI 状态并在末条消息追加 [已停止] 标记
+// AI-assisted: 使用 Claude 实现中止分析的 UI 状态即时重置，人工校验后保留原逻辑
 function handleStopAnalysis() {
   if (abortController.value) {
     abortController.value.abort()
@@ -484,16 +502,19 @@ function handleStopAnalysis() {
 }
 
 // 输入框输入事件（移除了自动中止行为，避免用户正常输入时意外中断分析）
+// AI-assisted: 使用 Claude 生成输入事件占位，人工移除了原先的自动中止逻辑
 function onQueryInput() {
   // 仅做输入处理，不再自动中止正在进行的分析
 }
 
-// 查看历史图表
+// 查看历史图表：进入指定消息对应的历史图表视图
+// AI-assisted: 使用 Claude 生成历史图表查看逻辑，未做大幅修改
 function handleViewCharts(messageIndex) {
   store.viewHistoricalCharts(messageIndex)
 }
 
-// 固定历史图表用于对比
+// 固定历史图表用于对比：将该消息下的所有图表加入固定列表以便横向比较
+// AI-assisted: 使用 Claude 实现图表固定逻辑，未做大幅修改
 function handlePinCharts(messageIndex) {
   const message = store.messages[messageIndex]
   if (message && message.charts) {
@@ -503,12 +524,15 @@ function handlePinCharts(messageIndex) {
   }
 }
 
-// 返回当前最新图表
+// 返回当前最新图表：退出历史图表视图，回到最新一轮分析结果
+// AI-assisted: 使用 Claude 生成返回最新图表逻辑，未做大幅修改
 function handleBackToCurrent() {
   store.viewCurrentCharts()
 }
 
 // ---- 分析摘要提取 ----
+// 从 AI 返回的 Markdown 文本中解析 ## 标题、### 分组与 **键: 值** 条目，组装为顶部摘要面板数据
+// AI-assisted: 使用 Claude 实现基于正则的摘要结构化解析，手动调整了正则匹配与过长值过滤阈值
 function extractSummary(content) {
   if (!content || typeof content !== 'string') return null
 
@@ -566,6 +590,8 @@ function extractSummary(content) {
 }
 
 // ---- 动态建议查询 ----
+// 根据本次分析内容/查询关键词匹配（概览/趋势/相关/对比/分布/综合），结合数据集列名生成下一轮候选问题
+// AI-assisted: 使用 Claude 实现基于关键词分支的建议查询生成，人工调整了列名兜底与 fallback 文案
 function generateSuggestions(content, query) {
   const suggestions = []
   const cols = store.datasets?.[0]?.columns || []

@@ -1,3 +1,5 @@
+# 模块职责：分析请求 API，作为数据分析平台的核心路由层。接收用户自然语言查询，
+# 串联意图解析、统计分析、图表生成、LLM 报告生成与缓存持久化，并以 SSE 流式方式逐步推送进度与结果。
 """
 分析请求 API
 处理用户自然语言查询，返回分析结果和图表
@@ -60,8 +62,9 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
+# AI-assisted: 使用 Claude 定义同步分析响应数据模型，人工校验后保留原字段
 class AnalysisResponse(BaseModel):
-    """分析响应"""
+    """分析响应数据模型，用于 /analysis/sync 接口返回结果结构"""
     success: bool
     summary: str
     charts: list = []
@@ -69,15 +72,21 @@ class AnalysisResponse(BaseModel):
     warning: str = None
 
 
+# AI-assisted: 使用 Claude 生成 SSE 流式分析主流程，手动调整了缓存命中与事件刷新逻辑
 async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[str, None]:
     """
     生成 SSE 格式的流式响应
 
+    功能：核心分析主流程。依次完成会话校验、缓存命中判断、意图解析、分析任务执行、
+    图表推送与 LLM 报告流式生成，最终缓存结果并持久化聊天历史。
+    SSE 事件类型包括：progress（进度提示）、charts（图表数据）、text（报告增量）、
+    warning（警告）、error（错误）、done（结束）。
+
     Args:
-        request: 分析请求
+        request: 分析请求（含 session_id 与用户查询 query）
 
     Yields:
-        SSE 格式的数据行
+        str: SSE 格式的数据行（"data: {...}\\n\\n"）
     """
     try:
         session_manager = get_session_manager()
@@ -103,7 +112,7 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
         # 立即发送进度事件，让前端知道请求已被接收
         yield _format_sse({"type": "progress", "message": "正在解析分析意图..."})
 
-        # 检查缓存
+        # 检查缓存（命中则直接推送缓存结果，跳过意图解析与 LLM 调用）
         cached_result = cache_manager.get(request.session_id, request.query, file_hash)
         if cached_result:
             logger.info(f"✓ 使用缓存结果: {request.query[:50]}...")
@@ -294,9 +303,13 @@ async def analyze_stream_generator(request: AnalysisRequest) -> AsyncGenerator[s
         yield _format_sse({"type": "done"})
 
 
+# AI-assisted: 使用 Claude 构建 LLM 分析上下文消息，手动调整了系统提示词与历史注入逻辑
 def _build_analysis_messages(query: str, analysis_descriptions: list, session_id: str) -> list:
     """
     构建包含聊天历史的 LLM 分析上下文
+
+    功能：组装供 LLM 调用的消息序列，包含固定的系统提示词、可选的数据集上下文
+    （Adult 数据集自动检测）、最近 10 轮聊天历史，以及当前分析的统计结果描述。
 
     Args:
         query: 用户原始查询
@@ -304,7 +317,7 @@ def _build_analysis_messages(query: str, analysis_descriptions: list, session_id
         session_id: 会话 ID（用于获取聊天历史）
 
     Returns:
-        LLM messages 数组
+        list: LLM messages 数组（system + history + user）
     """
     # 系统提示词
     system_prompt = """你是 DataVis 平台内置的数据分析 AI 助手。系统已完成数据加载、统计计算和图表生成，你的任务是对统计结果进行完整的数据展示和解读。
@@ -404,11 +417,23 @@ def _build_analysis_messages(query: str, analysis_descriptions: list, session_id
     return messages
 
 
+# AI-assisted: 使用 Claude 实现 SSE 数据行格式化工具，人工校验后保留原逻辑
 def _format_sse(data: dict) -> str:
-    """格式化为 SSE 格式"""
+    """
+    将字典格式化为 SSE 数据行
+
+    功能：把事件字典序列化为 JSON 并加上 SSE 协议要求的 "data: ...\\n\\n" 包裹。
+
+    Args:
+        data: 待发送的事件字典
+
+    Returns:
+        str: 符合 SSE 规范的单条数据行字符串
+    """
     return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
+# AI-assisted: 使用 Claude 实现分析任务分发执行主逻辑，手动调整了多种图表类型分支与 ML 状态持久化
 async def _execute_analysis(
     df,
     intent: str,
@@ -423,17 +448,23 @@ async def _execute_analysis(
     """
     执行分析任务
 
+    功能：根据意图类型（overview/trend/correlation/moving_avg/distribution/comparison/
+    seasonality/ml_* 等）分发到对应的统计函数与图表生成器，支持用户指定的 chart_type
+    在多种图表间切换，ML 类意图会读写会话级模型状态。
+
     Args:
         df: 数据集
         intent: 意图类型
         target_columns: 目标列
         groupby: 分组列
-        params: 参数
+        groupby2: 第二分组列（多维交叉对比）
+        params: 参数（如移动平均窗口、模型类型等）
         query: 原始查询
-        chart_type: 图表类型（bar/line/pie/scatter/histogram）
+        chart_type: 图表类型（bar/line/pie/scatter/histogram/area/radar/boxplot）
+        query_session_id: 当前会话 ID（ML 意图用于加载/保存模型状态）
 
     Returns:
-        分析结果字典
+        dict: 分析结果字典，包含 charts、summary、statistics 三个键
     """
     params = params or {}
     result = {"charts": [], "summary": "", "statistics": {}}
@@ -1316,25 +1347,39 @@ async def _execute_analysis(
     return result
 
 
+# AI-assisted: 使用 Claude 实现 SSE 强制刷新包装器，手动调整了交出事件循环控制权的时机
 async def _flushing_sse_wrapper(gen: AsyncGenerator) -> AsyncGenerator[str, None]:
     """
     包装 SSE 生成器，每次 yield 后强制交出事件循环控制权。
 
+    功能：在生成器每次产出数据块后调用 asyncio.sleep(0)，确保 ASGI 服务器（uvicorn）
+    立即将该块刷新到网络，避免在内部缓冲区积压后批量发送。
+
     这确保 ASGI 服务器（uvicorn）在生成每个 SSE 数据块后立即将其刷新到网络，
     而不是在内部缓冲区中积压多个块后再批量发送。
+
+    Args:
+        gen: 被包装的异步生成器（产出 SSE 数据行）
+
+    Yields:
+        str: 透传的 SSE 数据行
     """
     async for chunk in gen:
         yield chunk
         await asyncio.sleep(0)
 
 
+# AI-assisted: 使用 Claude 实现分析 SSE 路由入口，手动调整了响应头（禁用缓冲）
 @router.post("/analysis")
 async def analyze(request: AnalysisRequest):
     """
     分析请求接口（SSE 流式响应）
 
+    功能：将分析请求包装为 StreamingResponse，以 text/event-stream 媒体类型返回，
+    设置禁用代理缓冲的响应头，确保前端能实时接收进度与图表数据。
+
     Args:
-        request: 分析请求
+        request: 分析请求（含 session_id 与 query）
 
     Returns:
         StreamingResponse: SSE 格式的流式响应
@@ -1350,16 +1395,20 @@ async def analyze(request: AnalysisRequest):
     )
 
 
+# AI-assisted: 使用 Claude 实现同步分析接口，人工校验后保留原逻辑（主要用于调试）
 @router.post("/analysis/sync")
 async def analyze_sync(request: AnalysisRequest):
     """
     分析请求接口（同步响应，用于调试）
 
+    功能：与 SSE 版本逻辑一致，但一次性返回完整结果而非流式推送，便于联调与排查问题。
+    同样支持缓存命中与 LLM 智能分析，失败时返回降级模板摘要。
+
     Args:
-        request: 分析请求
+        request: 分析请求（含 session_id 与 query）
 
     Returns:
-        AnalysisResponse: 分析结果
+        AnalysisResponse: 分析结果（success/summary/charts/statistics/warning）
     """
     try:
         session_manager = get_session_manager()
@@ -1510,16 +1559,19 @@ async def analyze_sync(request: AnalysisRequest):
         )
 
 
+# AI-assisted: 使用 Claude 实现分析历史查询接口，人工校验后保留原逻辑
 @router.get("/analysis/history/{session_id}")
 async def get_analysis_history(session_id: str):
     """
     获取会话的分析历史
 
+    功能：返回指定会话的全部聊天历史条目，供前端恢复对话上下文；会话不存在时返回 404。
+
     Args:
         session_id: 会话 ID
 
     Returns:
-        聊天历史条目列表
+        dict: {"success": True, "session_id": ..., "history": [...], "count": N}
     """
     session_manager = get_session_manager()
 
@@ -1544,17 +1596,21 @@ async def get_analysis_history(session_id: str):
         )
 
 
+# AI-assisted: 使用 Claude 实现图表类型切换接口，手动调整了 chart_type 覆盖逻辑
 @router.post("/analysis/rechart")
 async def rechart(request: RechartRequest):
     """
     图表类型切换接口
     复用已有的意图解析和分析执行逻辑，但覆盖 chart_type
 
+    功能：对同一查询重新执行分析，强制使用前端指定的 chart_type 重新生成图表，
+    不调用 LLM 报告，仅返回新的图表 JSON 数组。
+
     Args:
         request: RechartRequest 包含 session_id, query, chart_type
 
     Returns:
-        新的图表 JSON
+        dict: {"success": True, "charts": [...]} 或失败时的错误信息
     """
     try:
         session_manager = get_session_manager()
@@ -1633,9 +1689,19 @@ async def rechart(request: RechartRequest):
         )
 
 
+# AI-assisted: 使用 Claude 实现 Adult 数据集自动识别，手动调整了特征匹配阈值
 def _detect_dataset_context(df: pd.DataFrame) -> str:
     """
     检测数据集是否为 Adult Income 数据集，返回上下文提示词
+
+    功能：通过列名特征集合匹配判断当前数据集是否为 Adult Income（人口收入）数据集，
+    命中时返回一段背景知识提示词供 LLM 解读参考，未命中返回空字符串。
+
+    Args:
+        df: 待检测的数据集
+
+    Returns:
+        str: 数据集上下文提示词（命中时为多行文本，未命中为空串）
     """
     cols = set(df.columns.tolist())
     adult_indicators = {'age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week',
@@ -1671,8 +1737,19 @@ def _detect_dataset_context(df: pd.DataFrame) -> str:
     return "\n".join(context_parts)
 
 
+# AI-assisted: 使用 Claude 实现分类列频次统计摘要格式化，人工校验后保留原逻辑
 def _format_categorical_summary(cat_result: dict) -> str:
-    """格式化分类列频次统计摘要"""
+    """
+    格式化分类列频次统计摘要
+
+    功能：将分类分布统计结果转为 Markdown 摘要文本，包含总条目数、类别数、众数及各类别占比。
+
+    Args:
+        cat_result: analyze_categorical_distribution 返回的统计字典
+
+    Returns:
+        str: Markdown 格式的分类分布摘要
+    """
     lines = [f"**{cat_result['column']}** 分类分布（共 {cat_result['total_count']} 条，{cat_result['unique_count']} 个类别）：\n"]
     if cat_result["mode"]:
         lines.append(f"- 众数：**{cat_result['mode']}**\n")
@@ -1681,8 +1758,19 @@ def _format_categorical_summary(cat_result: dict) -> str:
     return "\n".join(lines)
 
 
+# AI-assisted: 使用 Claude 实现 Cramér's V 关联分析摘要格式化，手动调整了关联强度判定阈值
 def _format_categorical_correlation_summary(corr_result: dict) -> str:
-    """格式化 Cramér's V 关联分析摘要"""
+    """
+    格式化 Cramér's V 关联分析摘要
+
+    功能：将分类列关联矩阵转为 Markdown 摘要，列出每对分类列的 V 值及关联强度（强/中/弱）。
+
+    Args:
+        corr_result: analyze_categorical_correlation_matrix 返回的统计字典
+
+    Returns:
+        str: Markdown 格式的关联分析摘要
+    """
     lines = ["Cramér's V 分类关联分析结果：\n"]
     columns = corr_result["columns"]
     matrix = corr_result["matrix"]

@@ -1,6 +1,8 @@
 /**
  * API 客户端
  * 封装所有 API 请求
+ * 职责：统一 axios 实例与拦截器，提供上传、会话、分析（含 SSE 流式）、
+ * 数据集、统计与历史等接口；analyzeStream 负责解析 SSE 流并回调分发各事件。
  */
 import axios from 'axios'
 
@@ -43,6 +45,7 @@ api.interceptors.response.use(
 
 /**
  * 文件上传（单文件）
+ * AI-assisted: 使用 Claude 实现单文件上传转调，未做大幅修改
  */
 export async function uploadFile(file) {
   return uploadFiles([file])
@@ -50,6 +53,7 @@ export async function uploadFile(file) {
 
 /**
  * 文件上传（多文件）
+ * AI-assisted: 使用 Claude 实现 multipart 多文件上传与 session_id 拼接，人工校验后保留原逻辑
  */
 export async function uploadFiles(files, sessionId = null) {
   const formData = new FormData()
@@ -70,6 +74,7 @@ export async function uploadFiles(files, sessionId = null) {
 
 /**
  * 检查会话有效性
+ * AI-assisted: 使用 Claude 实现会话有效性查询，未做大幅修改
  */
 export async function checkSession(sessionId) {
   return await api.get(`/session/${sessionId}`)
@@ -77,6 +82,7 @@ export async function checkSession(sessionId) {
 
 /**
  * 分析请求（同步）
+ * AI-assisted: 使用 Claude 实现同步分析请求封装，未做大幅修改
  */
 export async function analyzeSync(sessionId, query) {
   return await api.post('/analysis/sync', {
@@ -87,6 +93,7 @@ export async function analyzeSync(sessionId, query) {
 
 /**
  * 分析请求（SSE 流式）
+ * AI-assisted: 使用 Claude 封装 SSE 流式请求解析（含超时/abort/兜底 done 处理），人工校验后保留原逻辑
  */
 export async function analyzeStream(sessionId, query, onData, onError, onDone, signal = null) {
   const response = await fetch(`${API_DIRECT}/analysis`, {
@@ -126,6 +133,8 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
     }, { once: true })
   }
 
+  // 解析单行 SSE 数据并按 type 分发到 onData/onError/onDone 回调
+  // AI-assisted: 使用 Claude 实现 SSE 行解析与事件分发，人工校验后保留原逻辑
   function processLine(line) {
     if (!line.trim() || !line.startsWith('data: ')) return
     const jsonStr = line.slice(6)
@@ -217,6 +226,7 @@ export async function analyzeStream(sessionId, query, onData, onError, onDone, s
 
 /**
  * 列出会话
+ * AI-assisted: 使用 Claude 实现会话列表拉取，未做大幅修改
  */
 export async function listSessions() {
   return await api.get('/sessions')
@@ -224,6 +234,7 @@ export async function listSessions() {
 
 /**
  * 删除会话
+ * AI-assisted: 使用 Claude 实现会话删除请求，未做大幅修改
  */
 export async function deleteSession(sessionId) {
   return await api.delete(`/session/${sessionId}`)
@@ -231,6 +242,7 @@ export async function deleteSession(sessionId) {
 
 /**
  * 重命名会话
+ * AI-assisted: 使用 Claude 实现会话重命名请求，未做大幅修改
  */
 export async function renameSession(sessionId, name) {
   return await api.patch(`/session/${sessionId}`, { name })
@@ -238,6 +250,7 @@ export async function renameSession(sessionId, name) {
 
 /**
  * 从会话中删除数据集
+ * AI-assisted: 使用 Claude 实现数据集删除请求，未做大幅修改
  */
 export async function deleteDataset(sessionId, datasetId) {
   return await api.delete(`/upload/session/${sessionId}/dataset/${datasetId}`)
@@ -245,6 +258,7 @@ export async function deleteDataset(sessionId, datasetId) {
 
 /**
  * 清理过期会话
+ * AI-assisted: 使用 Claude 实现过期会话清理请求，未做大幅修改
  */
 export async function cleanupSessions() {
   return await api.post('/sessions/cleanup')
@@ -252,6 +266,7 @@ export async function cleanupSessions() {
 
 /**
  * 获取会话统计
+ * AI-assisted: 使用 Claude 实现会话统计拉取，未做大幅修改
  */
 export async function getSessionStats() {
   return await api.get('/sessions/stats')
@@ -259,6 +274,7 @@ export async function getSessionStats() {
 
 /**
  * 获取会话的分析历史
+ * AI-assisted: 使用 Claude 实现分析历史拉取，未做大幅修改
  */
 export async function getAnalysisHistory(sessionId) {
   return await api.get(`/analysis/history/${sessionId}`)
@@ -266,6 +282,7 @@ export async function getAnalysisHistory(sessionId) {
 
 /**
  * 图表类型切换（后端重绘）
+ * AI-assisted: 使用 Claude 实现图表重绘请求，未做大幅修改
  */
 export async function rechart(sessionId, query, chartType) {
   return await api.post('/analysis/rechart', {

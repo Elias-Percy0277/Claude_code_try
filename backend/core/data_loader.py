@@ -2,6 +2,12 @@
 数据加载器
 支持 CSV、JSON、Excel (.xlsx, .xls)、.data、.names、.index 文件加载
 支持 SQL 数据库连接（预留接口）
+
+模块职责：
+    本模块负责「多格式数据集文件的统一加载」。它根据文件扩展名分发到对应的加载函数，
+    将 CSV / JSON / Excel / UCI .data / .names / .index 等异构格式统一转换为
+    pandas DataFrame（元数据类文件返回 dict）。同时提供文件格式校验、编码回退、
+    分隔符自动探测以及列类型（数值/日期/分类）查询等工具函数，是后端数据接入层的基础组件。
 """
 import pandas as pd
 from pathlib import Path
@@ -12,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 class FileFormatError(Exception):
-    """文件格式错误"""
+    """文件格式错误：当上传/请求的文件扩展名不在白名单时抛出。"""
     pass
 
 
 class FileParseError(Exception):
-    """文件解析错误"""
+    """文件解析错误：当文件虽格式正确但读取/解析（如编码、空文件）失败时抛出。"""
     pass
 
 
@@ -28,6 +34,7 @@ ALLOWED_EXTENSIONS = {'.csv', '.xlsx', '.json', '.xls', '.data', '.names', '.ind
 ALLOWED_FILENAMES = {'index'}
 
 
+# AI-assisted: 使用 Claude 实现文件扩展名白名单校验，手动增加了无扩展名 Index 文件的特殊判定
 def validate_file_extension(filename: str) -> str:
     """
     验证文件扩展名是否支持
@@ -62,6 +69,7 @@ def validate_file_extension(filename: str) -> str:
     return ext
 
 
+# AI-assisted: 使用 Claude 实现 CSV 文件加载（含 UTF-8/GBK 编码回退），人工校验后保留原逻辑
 def load_csv(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
     """
     加载 CSV 文件
@@ -97,6 +105,7 @@ def load_csv(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
         raise FileParseError(f"CSV 文件解析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现 JSON 文件加载，人工校验后保留原逻辑
 def load_json(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
     """
     加载 JSON 文件
@@ -120,6 +129,7 @@ def load_json(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
         raise FileParseError(f"JSON 文件解析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现 Excel 文件加载，人工校验后保留原逻辑
 def load_excel(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
     """
     加载 Excel 文件 (.xlsx, .xls)
@@ -145,6 +155,7 @@ def load_excel(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
         raise FileParseError(f"Excel 文件解析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现从内存文件对象加载数据，手动调整了 .names/.index 临时文件落盘逻辑
 def load_from_fileobj(file_obj, filename: str) -> pd.DataFrame:
     """
     从文件对象加载数据（用于上传文件处理）
@@ -272,6 +283,7 @@ def load_from_fileobj(file_obj, filename: str) -> pd.DataFrame:
         raise FileFormatError(f"不支持的文件格式: {ext}")
 
 
+# AI-assisted: 使用 Claude 实现通用数据加载分发函数，手动调整了 loader_map 扩展名映射
 def load_data(source: Union[str, Path], **kwargs) -> Union[pd.DataFrame, dict]:
     """
     通用数据加载函数，根据文件扩展名自动选择加载方式
@@ -315,6 +327,7 @@ def load_data(source: Union[str, Path], **kwargs) -> Union[pd.DataFrame, dict]:
     raise FileFormatError(f"不支持的文件格式: {ext}")
 
 
+# AI-assisted: 使用 Claude 实现数值列查询工具函数，未做大幅修改
 def get_numeric_columns(df: pd.DataFrame) -> list:
     """
     获取数值类型的列名列表
@@ -328,6 +341,7 @@ def get_numeric_columns(df: pd.DataFrame) -> list:
     return df.select_dtypes(include=['number']).columns.tolist()
 
 
+# AI-assisted: 使用 Claude 实现日期列查询工具函数，未做大幅修改
 def get_datetime_columns(df: pd.DataFrame) -> list:
     """
     获取日期时间类型的列名列表
@@ -341,6 +355,7 @@ def get_datetime_columns(df: pd.DataFrame) -> list:
     return df.select_dtypes(include=['datetime64']).columns.tolist()
 
 
+# AI-assisted: 使用 Claude 实现分类型列查询工具函数，未做大幅修改
 def get_categorical_columns(df: pd.DataFrame) -> list:
     """
     获取分类型（字符串/对象）的列名列表
@@ -354,6 +369,7 @@ def get_categorical_columns(df: pd.DataFrame) -> list:
     return df.select_dtypes(include=['object', 'category']).columns.tolist()
 
 
+# AI-assisted: 使用 Claude 实现 UCI .data 文件加载（含分隔符/注释行自动探测），人工校验后保留原逻辑
 def load_data_file(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
     """
     加载 .data 文件（UCI Machine Learning 数据集格式）
@@ -427,6 +443,7 @@ def load_data_file(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
         raise FileParseError(f".data 文件解析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现多格式数据加载，手动调整了 UCI .names 解析（属性/类别段落识别）
 def load_names_file(file_path: Union[str, Path], **kwargs) -> dict:
     """
     加载 .names 文件（UCI Machine Learning 元数据格式）
@@ -565,6 +582,7 @@ def load_names_file(file_path: Union[str, Path], **kwargs) -> dict:
     return result
 
 
+# AI-assisted: 使用 Claude 实现单个属性定义解析（名称+类型），未做大幅修改
 def _parse_attribute(attr_def: str) -> dict:
     """
     解析单个属性定义
@@ -649,6 +667,7 @@ def _parse_attribute(attr_def: str) -> dict:
     }
 
 
+# AI-assisted: 使用 Claude 实现类别值定义解析，未做大幅修改
 def _parse_class_values(class_def: str) -> list:
     """
     解析类别值定义
@@ -674,6 +693,7 @@ def _parse_class_values(class_def: str) -> list:
     return [class_def]
 
 
+# AI-assisted: 使用 Claude 实现简化 .names 格式回退解析，未做大幅修改
 def _parse_simple_names_format(content: str) -> list:
     """
     解析简化的 .names 格式（每行一个列名）
@@ -707,6 +727,7 @@ def _parse_simple_names_format(content: str) -> list:
     return attributes
 
 
+# AI-assisted: 使用 Claude 实现 UCI .index 索引文件加载（标题/文件列表/日期解析），人工校验后保留原逻辑
 def load_index_file(file_path: Union[str, Path], **kwargs) -> dict:
     """
     加载 .index 文件（UCI Machine Learning 索引文件格式）

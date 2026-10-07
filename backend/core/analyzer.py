@@ -1,6 +1,20 @@
 """
 分析引擎
 提供统计分析、相关性分析、时序分析、移动平均等功能
+
+模块职责：
+    本模块是 DataVis 平台的核心数据分析层，面向已加载的 pandas DataFrame，
+    提供一组无状态的分析函数，涵盖：
+      - 描述性统计 (calculate_statistics)
+      - 相关性分析 (analyze_correlation / analyze_categorical_association)
+      - 分类列 Cramér's V 矩阵 (analyze_categorical_correlation_matrix)
+      - 趋势与移动平均 (analyze_trend / calculate_moving_average)
+      - 时序预处理与 STL 季节性分解 (prepare_timeseries / safe_seasonal_decompose)
+      - 分布与异常值检测 (analyze_distribution / analyze_categorical_distribution)
+      - 分组与交叉对比 (analyze_comparison / analyze_cross_comparison)
+      - 数据概览 (analyze_overview)
+    所有函数以字典形式返回结构化结果，供后端 API 直接序列化后交付前端渲染。
+    分析过程中遇到的错误统一抛出 AnalysisError，便于上层捕获并转换为用户提示。
 """
 import pandas as pd
 import numpy as np
@@ -25,16 +39,17 @@ class AnalysisError(Exception):
     pass
 
 
+# AI-assisted: 使用 Claude 生成数值列统计摘要逻辑，人工校验后保留原逻辑
 def calculate_statistics(df: pd.DataFrame, columns: Optional[List[str]] = None) -> Dict[str, Any]:
     """
-    计算数值列的统计摘要
+    计算数值列的统计摘要（计数、均值、中位数、标准差、分位数、偏度、峰度等）。
 
     Args:
-        df: 数据集
-        columns: 要分析的列，默认为所有数值列
+        df: 待分析的数据集。
+        columns: 要分析的列名列表；为 None 时自动选取全部数值列。
 
     Returns:
-        统计摘要字典
+        以列名为键、统计指标字典为值的映射；空列或异常列以 {"error": ...} 标记。
     """
     if columns is None:
         columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -71,17 +86,18 @@ def calculate_statistics(df: pd.DataFrame, columns: Optional[List[str]] = None) 
     return result
 
 
+# AI-assisted: 使用 Claude 实现数值列相关性分析与上三角提取，人工校验后保留原逻辑
 def analyze_correlation(df: pd.DataFrame, columns: Optional[List[str]] = None, method: str = "pearson") -> Dict[str, Any]:
     """
-    分析相关性
+    分析数值列之间的相关性（Pearson / Spearman / Kendall）。
 
     Args:
-        df: 数据集
-        columns: 要分析的列，默认为所有数值列
-        method: 相关系数方法 ('pearson', 'spearman', 'kendall')
+        df: 待分析的数据集。
+        columns: 参与计算的列名列表；为 None 时自动选取全部数值列。
+        method: 相关系数方法，可选 'pearson'、'spearman'、'kendall'。
 
     Returns:
-        相关性分析结果
+        包含 method、columns、完整 matrix 及上三角 pairs（便于前端散点/热力渲染）的字典。
     """
     if columns is None:
         columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -131,21 +147,22 @@ def analyze_correlation(df: pd.DataFrame, columns: Optional[List[str]] = None, m
         raise AnalysisError(f"相关性分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 生成趋势分析逻辑，手动调整了方向判定阈值与变化率口径
 def analyze_trend(
     df: pd.DataFrame,
     value_column: str,
     date_column: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    分析趋势
+    基于线性回归分析数值列的整体趋势（方向、斜率、R²、变化率等）。
 
     Args:
-        df: 数据集
-        value_column: 数值列名
-        date_column: 日期列名（可选）
+        df: 待分析的数据集。
+        value_column: 用于趋势分析的数值列名。
+        date_column: 日期列名（可选），提供时按日期排序后再拟合。
 
     Returns:
-        趋势分析结果
+        包含 direction、slope、intercept、r_squared、p_value、change_rate 等指标的字典。
     """
     if value_column not in df.columns:
         raise AnalysisError(f"列 '{value_column}' 不存在")
@@ -203,6 +220,7 @@ def analyze_trend(
         raise AnalysisError(f"趋势分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现简单/指数移动平均计算，手动微调了窗口默认值
 def calculate_moving_average(
     df: pd.DataFrame,
     value_column: str,
@@ -210,16 +228,16 @@ def calculate_moving_average(
     method: str = "simple"
 ) -> Dict[str, Any]:
     """
-    计算移动平均
+    计算数值列的移动平均（SMA 或 EMA），用于平滑与短期波动可视化。
 
     Args:
-        df: 数据集
-        value_column: 数值列名
-        window: 窗口大小
-        method: 方法 ('simple', 'exponential')
+        df: 待分析的数据集。
+        value_column: 待平滑的数值列名。
+        window: 移动平均窗口大小，默认 7。
+        method: 计算方法，可选 'simple'（简单）或 'exponential'（指数）。
 
     Returns:
-        移动平均结果
+        包含 method、window、name 及按索引对齐的原始/平滑值序列的字典。
     """
     if value_column not in df.columns:
         raise AnalysisError(f"列 '{value_column}' 不存在")
@@ -259,21 +277,22 @@ def calculate_moving_average(
         raise AnalysisError(f"移动平均计算失败: {e}")
 
 
+# AI-assisted: 使用 Claude 编写时序预处理与频率推断逻辑，人工校验后保留原逻辑
 def prepare_timeseries(
     df: pd.DataFrame,
     date_column: str,
     value_column: str
 ) -> Tuple[pd.DataFrame, str]:
     """
-    预处理时间序列数据以满足 STL 分解要求
+    预处理时间序列数据以满足 STL 分解要求（类型转换、排序、重采样、缺失值填充）。
 
     Args:
-        df: 数据集
-        date_column: 日期列名
-        value_column: 数值列名
+        df: 原始数据集。
+        date_column: 日期/时间列名。
+        value_column: 待分解的数值列名。
 
     Returns:
-        (预处理后的 DataFrame, 时间间隔字符串)
+        元组 (预处理后的 DataFrame（日期已设为索引）, 最常见时间间隔字符串)。
     """
     df = df.copy()
 
@@ -322,6 +341,7 @@ def prepare_timeseries(
     return df, str(most_common_interval)
 
 
+# AI-assisted: 使用 Claude 实现 STL 季节性分解与降级策略，手动微调了周期推断阈值
 def safe_seasonal_decompose(
     df: pd.DataFrame,
     date_column: str,
@@ -329,16 +349,16 @@ def safe_seasonal_decompose(
     period: Optional[int] = None
 ) -> Dict[str, Any]:
     """
-    安全的季节性分解，失败时降级为简单趋势
+    安全的季节性分解：优先尝试 statsmodels 的 STL 分解，失败时降级为仅趋势结果。
 
     Args:
-        df: 数据集
-        date_column: 日期列名
-        value_column: 数值列名
-        period: 周期长度，自动推断为 None
+        df: 待分解的数据集。
+        date_column: 日期/时间列名。
+        value_column: 待分解的数值列名。
+        period: 季节性周期长度；为 None 时根据数据量自动推断。
 
     Returns:
-        分解结果
+        成功时返回 trend/seasonal/residual 等分解分量；失败时返回 success=False 与降级原因。
     """
     # 检查 statsmodels 是否可用
     if not HAS_STATSMODELS:
@@ -400,19 +420,20 @@ def safe_seasonal_decompose(
         }
 
 
+# AI-assisted: 使用 Claude 生成分箱直方图与箱线图/异常值检测逻辑，人工校验后保留原逻辑
 def analyze_distribution(
     df: pd.DataFrame,
     value_column: str
 ) -> Dict[str, Any]:
     """
-    分析数据分布
+    分析数值列的分布特征（分位数、IQR、异常值、自动分箱直方图）。
 
     Args:
-        df: 数据集
-        value_column: 数值列名
+        df: 待分析的数据集。
+        value_column: 数值列名。
 
     Returns:
-        分布分析结果
+        包含均值、分位数、IQR、上下界、异常值列表（最多 100 个）及直方图数据的字典。
     """
     if value_column not in df.columns:
         raise AnalysisError(f"列 '{value_column}' 不存在")
@@ -464,21 +485,22 @@ def analyze_distribution(
         raise AnalysisError(f"分布分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现分类列频次统计与低频合并逻辑，手动微调了默认合并上限
 def analyze_categorical_distribution(
     df: pd.DataFrame,
     column: str,
     max_categories: int = 20
 ) -> Dict[str, Any]:
     """
-    分类列频次分析
+    分类列频次分析：统计各类别计数与占比，超出上限的低频类别合并为 "Other"。
 
     Args:
-        df: 数据集
-        column: 分类列名
-        max_categories: 最大显示类别数，超出合并为 "Other"
+        df: 待分析的数据集。
+        column: 分类列名。
+        max_categories: 最大展示类别数，超出部分合并为 "Other"，默认 20。
 
     Returns:
-        频次统计结果
+        包含总数、唯一值数、众数及各类别 count/percentage 列表的字典。
     """
     if column not in df.columns:
         raise AnalysisError(f"列 '{column}' 不存在")
@@ -518,21 +540,22 @@ def analyze_categorical_distribution(
         raise AnalysisError(f"分类分布分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现分类列 Cramér's V 关联与卡方检验逻辑，人工校验后保留原逻辑
 def analyze_categorical_association(
     df: pd.DataFrame,
     col1: str,
     col2: str
 ) -> Dict[str, Any]:
     """
-    计算两个分类列之间的 Cramér's V 关联系数
+    计算两个分类列之间的 Cramér's V 关联系数及卡方检验显著性。
 
     Args:
-        df: 数据集
-        col1: 第一个分类列
-        col2: 第二个分类列
+        df: 待分析的数据集。
+        col1: 第一个分类列名。
+        col2: 第二个分类列名。
 
     Returns:
-        关联分析结果
+        包含 chi2、p_value、cramers_v 及关联强度评级（弱/中等/强）的字典。
     """
     for col in [col1, col2]:
         if col not in df.columns:
@@ -566,19 +589,20 @@ def analyze_categorical_association(
         raise AnalysisError(f"分类关联分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现分类列 Cramér's V 矩阵与对称缓存优化，人工校验后保留原逻辑
 def analyze_categorical_correlation_matrix(
     df: pd.DataFrame,
     columns: Optional[List[str]] = None
 ) -> Dict[str, Any]:
     """
-    计算所有分类列之间的 Cramér's V 矩阵
+    计算所有分类列两两之间的 Cramér's V 关联矩阵（利用对称性避免重复计算）。
 
     Args:
-        df: 数据集
-        columns: 要分析的分类列，默认所有 object/category 列
+        df: 待分析的数据集。
+        columns: 参与计算的分类列；为 None 时自动选取所有 object/category 列。
 
     Returns:
-        Cramér's V 矩阵
+        包含 method、columns 及对称 matrix 的字典，可直接用于热力图渲染。
     """
     if columns is None:
         columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
@@ -613,21 +637,22 @@ def analyze_categorical_correlation_matrix(
         raise AnalysisError(f"Cramér's V 矩阵计算失败: {e}")
 
 
+# AI-assisted: 使用 Claude 实现分组统计与 ANOVA 显著性检验逻辑，人工校验后保留原逻辑
 def analyze_comparison(
     df: pd.DataFrame,
     value_column: str,
     groupby_column: str
 ) -> Dict[str, Any]:
     """
-    分组对比分析
+    分组对比分析：按分组列对数值列计算各组统计量，组数≥2 时附 ANOVA 检验。
 
     Args:
-        df: 数据集
-        value_column: 数值列名
-        groupby_column: 分组列名
+        df: 待分析的数据集。
+        value_column: 数值列名。
+        groupby_column: 用于分组的列名。
 
     Returns:
-        分组对比结果
+        包含各组 count/mean/median/std/min/max，及 anova（F 统计量、p 值、显著性）的字典。
     """
     if value_column not in df.columns:
         raise AnalysisError(f"列 '{value_column}' 不存在")
@@ -679,15 +704,17 @@ def analyze_comparison(
         raise AnalysisError(f"分组对比分析失败: {e}")
 
 
+# AI-assisted: 使用 Claude 生成数据概览与列画像分析逻辑，人工校验后保留原逻辑
 def analyze_overview(df: pd.DataFrame) -> Dict[str, Any]:
     """
-    数据概览分析
+    数据概览分析：汇总行列规模、内存占用、各列类型与缺失情况，并附简要统计/枚举值。
 
     Args:
-        df: 数据集
+        df: 待分析的数据集。
 
     Returns:
-        概览分析结果
+        包含 row_count、column_count、shape、逐列 col_info（含缺失率/统计量/唯一值）、
+        memory_usage 的概览字典。
     """
     row_count = len(df)
     column_count = len(df.columns)
@@ -728,6 +755,7 @@ def analyze_overview(df: pd.DataFrame) -> Dict[str, Any]:
     return result
 
 
+# AI-assisted: 使用 Claude 实现双分类维度的交叉对比与系列裁剪逻辑，手动微调了默认系列上限
 def analyze_cross_comparison(
     df: pd.DataFrame,
     value_column: str,
@@ -736,17 +764,18 @@ def analyze_cross_comparison(
     max_series: int = 8
 ) -> Dict[str, Any]:
     """
-    多维交叉对比分析：按两个分类变量分组，计算数值列均值。
+    多维交叉对比分析：按两个分类变量分组，计算数值列的组内均值，输出可直接渲染的系列数据。
 
     Args:
-        df: 数据集
-        value_column: 数值列名
-        groupby: 主分组列（X 轴类别）
-        groupby2: 次分组列（每条线/系列）
-        max_series: 最大系列数（取 groupby2 中出现次数最多的类别）
+        df: 待分析的数据集。
+        value_column: 数值列名。
+        groupby: 主分组列（对应 X 轴类别）。
+        groupby2: 次分组列（每条系列对应一个该列取值）。
+        max_series: 最大系列数，取 groupby2 中出现次数最多的前若干类别，默认 8。
 
     Returns:
-        交叉对比结果，可直接传入 create_grouped_bar_chart
+        包含 groups（X 轴类别）、series_data（每系列名称与对齐数据）及元信息的字典，
+        可直接传入 create_grouped_bar_chart 进行可视化。
     """
     for col in [value_column, groupby, groupby2]:
         if col not in df.columns:

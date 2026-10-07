@@ -55,6 +55,11 @@
 </template>
 
 <script setup>
+/**
+ * FileUpload 文件上传组件
+ * 职责：提供拖拽/点击多文件上传交互，负责文件类型与大小校验，
+ * 通过 api/client 的 uploadFiles 上传至后端，并以 uploaded 事件通知父组件。
+ */
 import { ref } from 'vue'
 import { uploadFiles } from '@/api/client'
 
@@ -69,22 +74,30 @@ const selectedFiles = ref([])
 
 const isDragover = dragover
 
+// 触发隐藏的文件选择输入框
+// AI-assisted: 使用 Claude 实现点击上传入口，人工校验后保留原逻辑
 function selectFile() {
   fileInput.value.click()
 }
 
+// 处理 input 选择文件后的 change 事件
+// AI-assisted: 使用 Claude 实现 input 文件变更处理，未做大幅修改
 function handleFileChange(e) {
   const files = Array.from(e.target.files)
   addFiles(files)
   e.target.value = ''
 }
 
+// 处理拖拽放下事件，读取拖入的文件
+// AI-assisted: 使用 Claude 实现拖拽上传交互，人工校验后保留原逻辑
 function handleDrop(e) {
   dragover.value = false
   const files = Array.from(e.dataTransfer.files)
   addFiles(files)
 }
 
+// 校验并追加文件：检查扩展名与大小、去重后加入已选列表
+// AI-assisted: 使用 Claude 实现多文件上传与校验，手动调整了大小限制为 60MB 及允许的扩展名集合
 function addFiles(files) {
   const allowedExtensions = ['.csv', '.xlsx', '.json', '.xls', '.data', '.test', '.names', '.index']
   const maxSize = 60 * 1024 * 1024
@@ -102,6 +115,7 @@ function addFiles(files) {
       return
     }
 
+    // 按名称+大小去重，避免重复加入同一文件
     if (!selectedFiles.value.some(f => f.name === file.name && f.size === file.size)) {
       selectedFiles.value.push(file)
     }
@@ -110,20 +124,28 @@ function addFiles(files) {
   error.value = null
 }
 
+// 移除指定索引的已选文件
+// AI-assisted: 使用 Claude 实现已选文件移除，未做大幅修改
 function removeFile(index) {
   selectedFiles.value.splice(index, 1)
 }
 
+// 清空已选文件列表
+// AI-assisted: 使用 Claude 实现清空文件功能，未做大幅修改
 function clearFiles() {
   selectedFiles.value = []
 }
 
+// 将字节数格式化为 B/KB/MB 显示
+// AI-assisted: 使用 Claude 实现文件大小格式化，未做大幅修改
 function formatSize(bytes) {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / 1024 / 1024).toFixed(1) + ' MB'
 }
 
+// 执行上传：模拟进度条并调用 uploadFiles，成功后 emit 结果
+// AI-assisted: 使用 Claude 实现上传流程与进度反馈，人工微调了进度递增节奏与重置时机
 async function handleUpload() {
   if (selectedFiles.value.length === 0) return
 

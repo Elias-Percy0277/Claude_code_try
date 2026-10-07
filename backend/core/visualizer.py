@@ -1,6 +1,12 @@
 """
 可视化生成器
 使用 pyecharts 生成 ECharts JSON 配置
+
+模块职责：
+- 将统计分析 / 机器学习的结果（DataFrame、列表、字典）转换为 ECharts 前端可消费的 option JSON。
+- 集中维护各类图表（折线、柱状、饼图、热力图、散点图、箱线图、雷达图、ROC、混淆矩阵、公平性审计等）的配置生成逻辑。
+- 提供统一的基础配置（标题、提示框、图例）辅助函数，保证各图表风格一致。
+- 兼容 pyecharts 缺失场景：未安装时降级并记录告警，不影响其他模块导入。
 """
 import pandas as pd
 import numpy as np
@@ -28,8 +34,19 @@ class VisualizationError(Exception):
     pass
 
 
+# AI-assisted: 使用 Claude 生成统一标题配置函数，人工校验后保留默认样式
 def _create_base_title(title: str, subtitle: str = "") -> Dict:
-    """创建基础标题配置"""
+    """创建基础标题配置
+
+    生成 ECharts title 配置，统一控制标题居中显示与字号。
+
+    Args:
+        title: 主标题文本
+        subtitle: 副标题文本（可选，用于补充说明如 AUC、差异值等）
+
+    Returns:
+        Dict: ECharts title 配置字典
+    """
     return {
         "text": title,
         "subtext": subtitle,
@@ -38,16 +55,33 @@ def _create_base_title(title: str, subtitle: str = "") -> Dict:
     }
 
 
+# AI-assisted: 使用 Claude 生成统一 tooltip 配置函数，人工校验后保留十字准星样式
 def _create_base_tooltip() -> Dict:
-    """创建基础提示框配置"""
+    """创建基础提示框配置
+
+    返回 axis 触发、十字准星指针的通用 tooltip 配置。
+
+    Returns:
+        Dict: ECharts tooltip 配置字典
+    """
     return {
         "trigger": "axis",
         "axisPointer": {"type": "cross"}
     }
 
 
+# AI-assisted: 使用 Claude 生成统一图例配置函数，人工校验后保留滚动式布局
 def _create_base_legend(data: Optional[List[str]] = None) -> Dict:
-    """创建基础图例配置"""
+    """创建基础图例配置
+
+    生成顶部滚动式图例配置，可选地注入系列名称。
+
+    Args:
+        data: 系列名称列表；为空则不写入 data 字段，交由 ECharts 自动推断
+
+    Returns:
+        Dict: ECharts legend 配置字典
+    """
     config = {
         "top": "8%",
         "type": "scroll"
@@ -57,6 +91,7 @@ def _create_base_legend(data: Optional[List[str]] = None) -> Dict:
     return config
 
 
+# AI-assisted: 使用 Claude 生成折线图配置，未做大幅修改
 def create_line_chart(
     df: pd.DataFrame,
     x_column: str,
@@ -68,6 +103,8 @@ def create_line_chart(
 ) -> Dict[str, Any]:
     """
     创建折线图（用于趋势分析）
+
+    基于 DataFrame 生成支持多系列的折线图 ECharts option。
 
     Args:
         df: 数据集
@@ -118,6 +155,7 @@ def create_line_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成移动平均图表配置，人工调整了平滑曲线与原始数据的透明度对比
 def create_moving_average_chart(
     original_data: List,
     smoothed_data: List,
@@ -127,6 +165,8 @@ def create_moving_average_chart(
 ) -> Dict[str, Any]:
     """
     创建移动平均图表
+
+    将原始序列与平滑序列叠加展示，便于观察趋势走向。
 
     Args:
         original_data: 原始数据
@@ -179,6 +219,7 @@ def create_moving_average_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成相关性热力图配置，手动调整了蓝-红渐变配色区间
 def create_correlation_heatmap(
     corr_matrix: Dict[str, Dict[str, float]],
     columns: List[str],
@@ -186,6 +227,8 @@ def create_correlation_heatmap(
 ) -> Dict[str, Any]:
     """
     创建相关性热力图
+
+    将相关系数矩阵展开为 [x, y, value] 三元组并映射到 [-1, 1] 色阶。
 
     Args:
         corr_matrix: 相关系数矩阵
@@ -249,6 +292,7 @@ def create_correlation_heatmap(
     }
 
 
+# AI-assisted: 使用 Claude 生成散点图配置，人工调整了点尺寸与透明度
 def create_scatter_plot(
     x_data: List,
     y_data: List,
@@ -258,6 +302,8 @@ def create_scatter_plot(
 ) -> Dict[str, Any]:
     """
     创建散点图（用于相关性分析）
+
+    将成对的 X、Y 数据合并为坐标点并配置提示框格式化函数。
 
     Args:
         x_data: X 轴数据
@@ -306,6 +352,7 @@ def create_scatter_plot(
     }
 
 
+# AI-assisted: 使用 Claude 生成柱状图配置，人工调整了线性渐变配色方向
 def create_bar_chart(
     categories: List[str],
     values: List[float],
@@ -316,6 +363,8 @@ def create_bar_chart(
 ) -> Dict[str, Any]:
     """
     创建柱状图（用于分组对比）
+
+    根据 horizontal 参数切换垂直 / 水平方向，并应用统一的线性渐变柱体样式。
 
     Args:
         categories: 类别列表
@@ -380,6 +429,7 @@ def create_bar_chart(
         }
 
 
+# AI-assisted: 使用 Claude 生成分组柱状图配置，手动指定了多系列配色循环
 def create_grouped_bar_chart(
     groups: List[str],
     series_data: List[Dict[str, Any]],
@@ -389,6 +439,8 @@ def create_grouped_bar_chart(
 ) -> Dict[str, Any]:
     """
     创建分组柱状图（用于多组对比）
+
+    将多组系列数据并排渲染为柱状图，按预设色板循环着色。
 
     Args:
         groups: 分组名称列表
@@ -426,6 +478,7 @@ def create_grouped_bar_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成分组折线图配置，人工校验了分组数据到单条折线的转换逻辑
 def create_grouped_line_chart(
     groups: List[str],
     series_data: List[Dict[str, Any]],
@@ -487,6 +540,7 @@ def create_grouped_line_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成分布直方图配置，人工校验了分箱中点计算
 def create_histogram_chart(
     bin_edges: List[float],
     counts: List[int],
@@ -496,6 +550,8 @@ def create_histogram_chart(
 ) -> Dict[str, Any]:
     """
     创建直方图（用于分布分析）
+
+    以分箱中点为 X 轴、频数为 Y 轴，并配置区间 tooltip 格式化。
 
     Args:
         bin_edges: 分箱边界
@@ -537,6 +593,7 @@ def create_histogram_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成箱线图配置，人工调整了箱体边框与填充配色
 def create_box_plot(
     categories: List[str],
     box_data: List[List[float]],
@@ -544,6 +601,8 @@ def create_box_plot(
 ) -> Dict[str, Any]:
     """
     创建箱线图（用于分布分析）
+
+    接收 [min, Q1, median, Q3, max] 五元组列表，渲染分组分布对比。
 
     Args:
         categories: 类别列表
@@ -573,6 +632,7 @@ def create_box_plot(
     }
 
 
+# AI-assisted: 使用 Claude 生成饼图配置，人工支持了环形图半径切换
 def create_pie_chart(
     data: List[Dict[str, Any]],
     title: str = "饼图",
@@ -580,6 +640,8 @@ def create_pie_chart(
 ) -> Dict[str, Any]:
     """
     创建饼图
+
+    根据是否环形调整半径，并展示名称与百分比标签。
 
     Args:
         data: 数据列表 [{name, value}, ...]
@@ -612,6 +674,7 @@ def create_pie_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成季节性分解图表配置，人工调整了趋势/季节序列的颜色与线型
 def create_seasonal_chart(
     dates: List[str],
     original: List[float],
@@ -623,6 +686,8 @@ def create_seasonal_chart(
 ) -> Dict[str, Any]:
     """
     创建季节性分解图表
+
+    将原始、趋势、季节三条序列叠加在同一坐标系，直观呈现时间序列分解结果。
 
     Args:
         dates: 日期列表
@@ -678,22 +743,51 @@ def create_seasonal_chart(
 
 
 # JavaScript 格式化函数
+# AI-assisted: 使用 Claude 生成热力图 tooltip 的 JS 格式化函数，未做大幅修改
 def function_formatter_heatmap() -> str:
-    """热力图 tooltip 格式化函数"""
+    """热力图 tooltip 格式化函数
+
+    返回一段 ECharts 可执行的 JavaScript，将单元格数值保留 4 位小数后展示。
+
+    Returns:
+        str: JavaScript 格式化函数字符串
+    """
     return "function(params) { return params.value[2].toFixed(4); }"
 
 
+# AI-assisted: 使用 Claude 生成散点图 tooltip 的 JS 格式化函数，人工校验了标签注入
 def function_formatter_scatter(x_name: str, y_name: str) -> str:
-    """散点图 tooltip 格式化函数"""
+    """散点图 tooltip 格式化函数
+
+    返回一段 ECharts 可执行的 JavaScript，展示 X、Y 轴名称及其数值（保留 2 位小数）。
+
+    Args:
+        x_name: X 轴名称
+        y_name: Y 轴名称
+
+    Returns:
+        str: JavaScript 格式化函数字符串
+    """
     return f"function(params) {{ return '{x_name}: ' + params.value[0].toFixed(2) + '<br/>{y_name}: ' + params.value[1].toFixed(2); }}"
 
 
+# AI-assisted: 使用 Claude 生成直方图 tooltip 的 JS 格式化函数，人工校验了区间边界拼接
 def function_formatter_histogram(bin_edges: List[float]) -> str:
-    """直方图 tooltip 格式化函数"""
+    """直方图 tooltip 格式化函数
+
+    将分箱边界嵌入返回的 JavaScript，使 tooltip 显示当前数据点所属的左闭右开区间及频数。
+
+    Args:
+        bin_edges: 分箱边界列表
+
+    Returns:
+        str: JavaScript 格式化函数字符串
+    """
     edges_str = str(bin_edges)
     return f"function(params) {{ const edges = {edges_str}; return '区间: [' + edges[params.dataIndex].toFixed(2) + ', ' + edges[params.dataIndex + 1].toFixed(2) + ')<br/>频数: ' + params.value; }}"
 
 
+# AI-assisted: 使用 Claude 生成分组饼图配置，手动扩充了多类目配色色板
 def create_grouped_pie_chart(
     groups: List[str],
     series_data: List[Dict[str, Any]],
@@ -701,6 +795,8 @@ def create_grouped_pie_chart(
 ) -> Dict[str, Any]:
     """
     创建分组饼图（用于展示占比）
+
+    将分组对比结果转换为环形饼图，直观比较各组占比。
 
     Args:
         groups: 分组名称列表
@@ -757,6 +853,7 @@ def create_grouped_pie_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成面积图配置，人工调整了垂直方向渐变填充
 def create_area_chart(
     categories: List[str],
     series_data: List[Dict[str, Any]],
@@ -766,6 +863,8 @@ def create_area_chart(
 ) -> Dict[str, Any]:
     """
     创建面积图（用于展示趋势和占比）
+
+    将分组首项数据渲染为带渐变填充的平滑折线，突出整体走势。
 
     Args:
         categories: 类别列表（X轴）
@@ -823,6 +922,7 @@ def create_area_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成雷达图配置，人工校验了指示器最大值的 1.2 倍系数
 def create_radar_chart(
     groups: List[str],
     series_data: List[Dict[str, Any]],
@@ -830,6 +930,8 @@ def create_radar_chart(
 ) -> Dict[str, Any]:
     """
     创建雷达图（用于多维度对比）
+
+    根据分组名称构建各维度指示器，并将首项数据映射为单个雷达数据点。
 
     Args:
         groups: 分组名称列表（维度）
@@ -885,6 +987,7 @@ def create_radar_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成分组散点图配置，人工调整了 X 轴标签旋转角度与点尺寸
 def create_grouped_scatter_chart(
     groups: List[str],
     series_data: List[Dict[str, Any]],
@@ -894,6 +997,8 @@ def create_grouped_scatter_chart(
 ) -> Dict[str, Any]:
     """
     创建分组散点图（用于展示分组数据分布）
+
+    以分组索引为 X 坐标、首项数值为 Y 坐标生成散点，便于横向比较各组取值。
 
     Args:
         groups: 分组名称列表（作为X轴类别）
@@ -943,6 +1048,7 @@ def create_grouped_scatter_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成混淆矩阵热力图配置，人工校验了行列与实际/预测的映射顺序
 def create_confusion_matrix_chart(
     cm_data: dict,
     title: str = "混淆矩阵"
@@ -950,9 +1056,14 @@ def create_confusion_matrix_chart(
     """
     创建混淆矩阵热力图
 
+    将二分类结果（tn/fp/fn/tp）展开为 2x2 热力图，并附带带标签的 tooltip。
+
     Args:
         cm_data: 包含 tn, fp, fn, tp 的字典
         title: 图表标题
+
+    Returns:
+        Dict[str, Any]: ECharts option JSON
     """
     tn = cm_data["tn"]
     fp = cm_data["fp"]
@@ -999,6 +1110,7 @@ def create_confusion_matrix_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成 ROC 曲线图配置，人工添加了对角基线参考与 AUC 副标题
 def create_roc_curve_chart(
     fpr: list,
     tpr: list,
@@ -1007,6 +1119,17 @@ def create_roc_curve_chart(
 ) -> Dict[str, Any]:
     """
     创建 ROC 曲线图
+
+    将 FPR/TPR 点序列绘制为折线，并叠加随机基线、以 AUC 作为副标题。
+
+    Args:
+        fpr: 假阳性率序列
+        tpr: 真阳性率序列
+        auc_score: AUC 分数，展示在副标题
+        title: 图表标题
+
+    Returns:
+        Dict[str, Any]: ECharts option JSON
     """
     roc_points = [[float(f), float(t)] for f, t in zip(fpr, tpr)]
     diagonal = [[0, 0], [1, 1]]
@@ -1053,6 +1176,7 @@ def create_roc_curve_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成特征重要性水平柱状图配置，人工调整了 top_n 截断与右侧标签
 def create_feature_importance_chart(
     features: list,
     title: str = "特征重要性",
@@ -1060,6 +1184,16 @@ def create_feature_importance_chart(
 ) -> Dict[str, Any]:
     """
     创建特征重要性水平柱状图
+
+    截取前 top_n 个特征并倒序排列，使重要性最高的特征显示在顶部。
+
+    Args:
+        features: 特征列表，每个元素含 {feature, importance}
+        title: 图表标题
+        top_n: 展示的特征数量上限
+
+    Returns:
+        Dict[str, Any]: ECharts option JSON
     """
     features = features[:top_n]
     features.reverse()
@@ -1102,12 +1236,22 @@ def create_feature_importance_chart(
     }
 
 
+# AI-assisted: 使用 Claude 生成公平性审计对比柱状图配置，人工调整了 TPR/FPR 双系列配色
 def create_fairness_chart(
     fairness_result: dict,
     title: str = "公平性审计"
 ) -> list:
     """
     创建公平性审计对比柱状图（每个敏感属性一张图）
+
+    遍历所有敏感属性，为每个属性生成一张并列对比 TPR 与 FPR 的柱状图。
+
+    Args:
+        fairness_result: 公平性审计结果，含 sensitive_attributes 子结构
+        title: 图表标题（仅作占位，实际标题按属性名生成）
+
+    Returns:
+        list: 各敏感属性对应的图表配置列表
     """
     charts = []
 

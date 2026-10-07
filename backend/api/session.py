@@ -1,3 +1,5 @@
+# 模块职责：会话管理 API，提供会话重命名、有效性检查、列表查询、删除及过期清理等接口，
+# 负责将 HTTP 请求转发至会话管理器（SessionManager）并统一包装响应与错误码。
 """
 会话管理 API
 提供会话检查、列表、删除等接口
@@ -20,9 +22,22 @@ class RenameRequest(BaseModel):
     name: str
 
 
+# AI-assisted: 使用 Claude 生成会话重命名路由，人工校验后保留原逻辑
 @router.patch("/session/{session_id}")
 async def rename_session(session_id: str, body: RenameRequest):
-    """重命名会话"""
+    """
+    重命名会话
+
+    功能：更新指定会话的显示名称，会话不存在时返回 404，内部错误返回 500。
+
+    Args:
+        session_id: 目标会话 ID
+        body: RenameRequest 对象，包含新的会话名称 name
+
+    Returns:
+        dict: 重命名成功时返回 {"success": True, "message": "已重命名"}；
+              失败时抛出 HTTPException（404 或 500）
+    """
     session_manager = get_session_manager()
 
     try:
@@ -38,16 +53,20 @@ async def rename_session(session_id: str, body: RenameRequest):
         raise HTTPException(status_code=500, detail={"success": False, "error": {"message": str(e)}})
 
 
+# AI-assisted: 使用 Claude 实现会话有效性检查接口，人工校验后保留原逻辑
 @router.get("/session/{session_id}")
 async def check_session(session_id: str):
     """
     检查会话是否有效
 
+    功能：查询会话是否存在且有效，返回主数据集的文件名、行数、列名等概要信息；
+    会话不存在时返回 valid=False 而非抛异常，便于前端静默处理。
+
     Args:
         session_id: 会话 ID
 
     Returns:
-        会话信息
+        dict: 会话有效性标志及概要信息（filename、row_count、columns 等）
     """
     session_manager = get_session_manager()
 
@@ -78,6 +97,7 @@ async def check_session(session_id: str):
         }
 
 
+# AI-assisted: 使用 Claude 实现会话列表查询接口，手动调整了过期会话过滤逻辑
 @router.get("/sessions")
 async def list_sessions(
     include_expired: bool = Query(False, description="是否包含过期会话")
@@ -85,11 +105,13 @@ async def list_sessions(
     """
     列出所有会话
 
+    功能：返回当前所有会话的概要列表，默认过滤掉已过期会话，可通过参数保留。
+
     Args:
-        include_expired: 是否包含过期会话
+        include_expired: 是否在结果中包含已过期的会话（默认 False）
 
     Returns:
-        会话列表
+        dict: {"success": True, "sessions": [...], "count": N}
     """
     session_manager = get_session_manager()
 
@@ -105,16 +127,19 @@ async def list_sessions(
     }
 
 
+# AI-assisted: 使用 Claude 实现会话删除接口，手动调整了删除失败的错误码
 @router.delete("/session/{session_id}")
 async def delete_session(session_id: str):
     """
     删除会话
 
+    功能：删除指定会话及其关联的资源（数据集、聊天历史等），失败时返回 500。
+
     Args:
-        session_id: 会话 ID
+        session_id: 待删除的会话 ID
 
     Returns:
-        删除结果
+        dict: 删除成功时返回 {"success": True, "message": "会话 {id} 已删除"}
     """
     session_manager = get_session_manager()
 
@@ -138,13 +163,16 @@ async def delete_session(session_id: str):
         )
 
 
+# AI-assisted: 使用 Claude 实现过期会话批量清理接口，人工校验后保留原逻辑
 @router.post("/sessions/cleanup")
 async def cleanup_sessions():
     """
     清理过期会话
 
+    功能：触发会话管理器的过期清理流程，回收失效会话占用的资源。
+
     Returns:
-        清理结果
+        dict: {"success": True, "message": "已清理 N 个过期会话", "deleted_count": N}
     """
     session_manager = get_session_manager()
 
@@ -157,13 +185,16 @@ async def cleanup_sessions():
     }
 
 
+# AI-assisted: 使用 Claude 实现会话统计信息接口，人工校验后保留原逻辑
 @router.get("/sessions/stats")
 async def get_session_stats():
     """
     获取会话统计信息
 
+    功能：返回会话管理器的聚合统计（总数、活跃数、过期数等），用于前端展示运行状态。
+
     Returns:
-        统计信息
+        dict: {"success": True, "stats": {...}}
     """
     session_manager = get_session_manager()
 

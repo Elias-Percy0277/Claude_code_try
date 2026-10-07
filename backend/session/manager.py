@@ -1,6 +1,12 @@
 """
 会话管理器
 管理用户会话和数据隔离，支持服务重启恢复
+
+模块职责：
+    本模块负责「用户会话的全生命周期管理与数据隔离」。每个会话对应一个 UUID，
+    可挂载多个 Dataset（多数据集），数据以 Parquet 持久化落盘、元数据以 JSON 落盘，
+    内存中采用 LRU 缓存以加速访问。会话支持过期清理、聊天历史追加、ML 引擎状态存取
+    以及会话列表/统计查询，是后端「上传-分析-对话」链路的状态中枢。
 """
 import os
 import json
@@ -22,13 +28,18 @@ MAX_CACHE_SIZE = 10  # 内存中最多缓存 10 个 DataFrame
 
 
 class SessionNotFoundError(Exception):
-    """会话不存在错误"""
+    """会话不存在错误：当请求的会话 ID 在内存/磁盘均不存在或已过期时抛出。"""
     pass
 
 
 class Dataset:
-    """单个数据集类"""
+    """单个数据集类。
 
+    封装一个被上传的 DataFrame 及其元信息（ID、原始文件名、哈希、名称、自定义元数据），
+    作为 Session 中数据隔离的最小单元。
+    """
+
+    # AI-assisted: 使用 Claude 实现 Dataset 构造与字段绑定，未做大幅修改
     def __init__(
         self,
         dataset_id: str,
@@ -45,16 +56,21 @@ class Dataset:
         self.dataset_name = dataset_name or original_filename
         self.metadata = metadata or {}
 
+    # AI-assisted: 使用 Claude 实现 row_count 属性，未做大幅修改
     @property
     def row_count(self) -> int:
+        """行数（只读属性，返回 DataFrame 的行数）。"""
         return len(self.dataframe)
 
+    # AI-assisted: 使用 Claude 实现 columns 属性，未做大幅修改
     @property
     def columns(self) -> List[str]:
+        """列名列表（只读属性）。"""
         return self.dataframe.columns.tolist()
 
+    # AI-assisted: 使用 Claude 实现 Dataset 序列化为字典，手动调整了对外暴露的字段
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+        """转换为可 JSON 序列化的字典（不含 DataFrame 本身）。"""
         return {
             "dataset_id": self.dataset_id,
             "dataset_name": self.dataset_name,
@@ -67,8 +83,13 @@ class Dataset:
 
 
 class Session:
-    """会话数据类（支持多数据集）"""
+    """会话数据类（支持多数据集）。
 
+    一个会话持有一组 Dataset（dict 映射 dataset_id -> Dataset），并记录创建/最后访问时间、
+    磁盘路径以及可选的 ML 引擎状态。通过属性提供主数据集的便捷访问（向后兼容单数据集场景）。
+    """
+
+    # AI-assisted: 使用 Claude 实现 Session 构造与默认值设定，手动调整了 ml_state 字段
     def __init__(
         self,
         session_id: str,
@@ -85,58 +106,68 @@ class Session:
         self.disk_path = disk_path or os.path.join(SESSIONS_DIR, session_id)
         self.ml_state = ml_state  # ML 引擎状态（序列化的 AdultMLEngine）
 
+    # AI-assisted: 使用 Claude 实现主数据集访问属性，未做大幅修改
     @property
     def primary_dataset(self) -> Optional[Dataset]:
-        """获取主数据集（第一个添加的数据集）"""
+        """获取主数据集（第一个添加的数据集）。"""
         if self.datasets:
             return next(iter(self.datasets.values()))
         return None
 
+    # AI-assisted: 使用 Claude 实现行数向后兼容属性，未做大幅修改
     @property
     def row_count(self) -> int:
-        """主数据集的行数（向后兼容）"""
+        """主数据集的行数（向后兼容单数据集场景）。"""
         if self.primary_dataset:
             return self.primary_dataset.row_count
         return 0
 
+    # AI-assisted: 使用 Claude 实现列名向后兼容属性，未做大幅修改
     @property
     def columns(self) -> List[str]:
-        """主数据集的列名（向后兼容）"""
+        """主数据集的列名（向后兼容单数据集场景）。"""
         if self.primary_dataset:
             return self.primary_dataset.columns
         return []
 
+    # AI-assisted: 使用 Claude 实现所有数据集总行数属性，未做大幅修改
     @property
     def total_rows(self) -> int:
-        """所有数据集的总行数"""
+        """所有数据集的总行数。"""
         return sum(ds.row_count for ds in self.datasets.values())
 
+    # AI-assisted: 使用 Claude 实现数据集计数属性，未做大幅修改
     @property
     def dataset_count(self) -> int:
-        """数据集数量"""
+        """数据集数量。"""
         return len(self.datasets)
 
+    # AI-assisted: 使用 Claude 实现向会话添加数据集，未做大幅修改
     def add_dataset(self, dataset: Dataset) -> None:
-        """添加数据集"""
+        """添加数据集到会话（按 dataset_id 存入字典）。"""
         self.datasets[dataset.dataset_id] = dataset
 
+    # AI-assisted: 使用 Claude 实现从会话移除数据集，未做大幅修改
     def remove_dataset(self, dataset_id: str) -> bool:
-        """移除数据集"""
+        """移除指定数据集，返回是否成功移除。"""
         if dataset_id in self.datasets:
             del self.datasets[dataset_id]
             return True
         return False
 
+    # AI-assisted: 使用 Claude 实现按 ID 取数据集，未做大幅修改
     def get_dataset(self, dataset_id: str) -> Optional[Dataset]:
-        """获取指定数据集"""
+        """获取指定数据集，不存在时返回 None。"""
         return self.datasets.get(dataset_id)
 
+    # AI-assisted: 使用 Claude 实现批量提取 DataFrame，未做大幅修改
     def get_all_dataframes(self) -> Dict[str, pd.DataFrame]:
-        """获取所有数据集的 DataFrame"""
+        """获取所有数据集的 DataFrame（dataset_id -> DataFrame）。"""
         return {ds.dataset_id: ds.dataframe for ds in self.datasets.values()}
 
+    # AI-assisted: 使用 Claude 实现 Session 序列化为字典，手动调整了时间字段 iso 格式化
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+        """转换为可 JSON 序列化的字典（含各数据集摘要与计数）。"""
         return {
             "session_id": self.session_id,
             "created_at": self.created_at.isoformat(),
@@ -152,12 +183,13 @@ class SessionManager:
     会话管理器
 
     功能：
-    - 创建会话并持久化到磁盘
-    - 从内存或磁盘加载会话
+    - 创建会话并持久化到磁盘（Parquet 存数据、JSON 存元数据）
+    - 从内存或磁盘加载会话（内存命中优先，磁盘回填）
     - 清理过期会话
     - LRU 内存管理
     """
 
+    # AI-assisted: 使用 Claude 实现管理器初始化与 LRU 缓存配置，未做大幅修改
     def __init__(
         self,
         sessions_dir: str = SESSIONS_DIR,
@@ -184,28 +216,34 @@ class SessionManager:
 
         logger.info(f"会话管理器初始化完成: 目录={sessions_dir}, 过期={expire_minutes}分钟")
 
+    # AI-assisted: 使用 Claude 实现会话目录路径拼接，未做大幅修改
     def _get_session_dir(self, session_id: str) -> str:
-        """获取会话目录路径"""
+        """获取会话目录路径（sessions_dir / session_id）。"""
         return os.path.join(self.sessions_dir, session_id)
 
+    # AI-assisted: 使用 Claude 实现元数据文件路径拼接，未做大幅修改
     def _get_meta_path(self, session_id: str) -> str:
-        """获取元数据文件路径"""
+        """获取元数据文件路径（会话目录下的 meta.json）。"""
         return os.path.join(self._get_session_dir(session_id), "meta.json")
 
+    # AI-assisted: 使用 Claude 实现数据文件路径拼接，手动调整了 Parquet 文件命名
     def _get_data_path(self, session_id: str, dataset_id: str) -> str:
-        """获取数据文件路径"""
+        """获取数据文件路径（会话目录下的 {dataset_id}.parquet）。"""
         return os.path.join(self._get_session_dir(session_id), f"{dataset_id}.parquet")
 
+    # AI-assisted: 使用 Claude 实现缓存文件路径拼接，未做大幅修改
     def _get_cache_path(self, session_id: str) -> str:
-        """获取缓存文件路径"""
+        """获取缓存文件路径（会话目录下的 cache.json）。"""
         return os.path.join(self._get_session_dir(session_id), "cache.json")
 
+    # AI-assisted: 使用 Claude 实现 ML 状态文件路径拼接，未做大幅修改
     def _get_ml_state_path(self, session_id: str) -> str:
-        """获取 ML 状态文件路径"""
+        """获取 ML 状态文件路径（会话目录下的 ml_state.json）。"""
         return os.path.join(self._get_session_dir(session_id), "ml_state.json")
 
+    # AI-assisted: 使用 Claude 实现 ML 引擎状态落盘，手动调整了内存缓存同步逻辑
     def save_ml_state(self, session_id: str, ml_state: Dict[str, Any]) -> None:
-        """保存 ML 引擎状态到磁盘"""
+        """保存 ML 引擎状态到磁盘（并同步更新内存中的会话）。"""
         ml_path = self._get_ml_state_path(session_id)
         with open(ml_path, 'w', encoding='utf-8') as f:
             json.dump(ml_state, f, ensure_ascii=False)
@@ -214,8 +252,9 @@ class SessionManager:
             self._memory_cache[session_id].ml_state = ml_state
         logger.info(f"ML 状态已保存: {session_id}")
 
+    # AI-assisted: 使用 Claude 实现从磁盘加载 ML 状态，手动调整了内存缓存回填逻辑
     def load_ml_state(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """从磁盘加载 ML 引擎状态"""
+        """从磁盘加载 ML 引擎状态，文件不存在或解析失败时返回 None。"""
         ml_path = self._get_ml_state_path(session_id)
         if not os.path.exists(ml_path):
             return None
@@ -230,8 +269,9 @@ class SessionManager:
             logger.warning(f"加载 ML 状态失败: {e}")
             return None
 
+    # AI-assisted: 使用 Claude 实现会话内列信息分析（dtype/缺失/唯一值），未做大幅修改
     def _analyze_columns(self, df: pd.DataFrame) -> Dict[str, Dict[str, Any]]:
-        """分析列信息"""
+        """分析列信息，生成每列的 dtype、可空性、唯一值数量与缺失比例。"""
         result = {}
         for col in df.columns:
             info = {
@@ -252,6 +292,7 @@ class SessionManager:
             result[col] = info
         return result
 
+    # AI-assisted: 使用 Claude 实现会话 Parquet 持久化，手动调整了元数据序列化字段
     def create_session(
         self,
         dataframe: pd.DataFrame,
@@ -333,6 +374,7 @@ class SessionManager:
 
         return session
 
+    # AI-assisted: 使用 Claude 实现会话加载（内存优先/磁盘回填/过期清理），未做大幅修改
     def get_session(self, session_id: str) -> Session:
         """
         获取会话
@@ -402,6 +444,7 @@ class SessionManager:
 
         return session
 
+    # AI-assisted: 使用 Claude 实现 LRU 内存缓存管理，未做大幅修改
     def _add_to_memory_cache(self, session: Session) -> None:
         """
         添加会话到内存缓存（LRU 淘汰）
@@ -423,6 +466,7 @@ class SessionManager:
         # 添加新会话
         self._memory_cache[session.session_id] = session
 
+    # AI-assisted: 使用 Claude 实现向已有会话追加数据集，手动调整了元数据合并与缓存同步
     def add_dataset_to_session(
         self,
         session_id: str,
@@ -494,8 +538,9 @@ class SessionManager:
 
         return dataset
 
+    # AI-assisted: 使用 Claude 实现会话最后访问时间更新，未做大幅修改
     def _update_last_accessed(self, session_id: str) -> None:
-        """更新会话最后访问时间"""
+        """更新会话最后访问时间（写回 meta.json）。"""
         meta_path = self._get_meta_path(session_id)
         if os.path.exists(meta_path):
             with open(meta_path, 'r', encoding='utf-8') as f:
@@ -506,6 +551,7 @@ class SessionManager:
             with open(meta_path, 'w', encoding='utf-8') as f:
                 json.dump(meta, f, ensure_ascii=False, indent=2)
 
+    # AI-assisted: 使用 Claude 实现会话元数据更新，未做大幅修改
     def update_session(self, session_id: str, **updates) -> None:
         """
         更新会话元数据
@@ -530,8 +576,9 @@ class SessionManager:
 
         logger.info(f"会话元数据已更新: {session_id}")
 
+    # AI-assisted: 使用 Claude 实现会话重命名，未做大幅修改
     def rename_session(self, session_id: str, new_name: str) -> None:
-        """重命名会话"""
+        """重命名会话（写入 session_name 字段并落盘）。"""
         meta_path = self._get_meta_path(session_id)
         if not os.path.exists(meta_path):
             raise SessionNotFoundError(f"会话不存在: {session_id}")
@@ -546,6 +593,7 @@ class SessionManager:
 
         logger.info(f"会话已重命名: {session_id} -> {new_name}")
 
+    # AI-assisted: 使用 Claude 实现会话删除（内存+磁盘目录），未做大幅修改
     def delete_session(self, session_id: str) -> None:
         """
         删除会话
@@ -563,6 +611,7 @@ class SessionManager:
             shutil.rmtree(session_dir)
             logger.info(f"会话已删除: {session_id}")
 
+    # AI-assisted: 使用 Claude 实现从会话移除单个数据集，手动调整了数据文件与元数据一致性处理
     def remove_dataset_from_session(self, session_id: str, dataset_id: str) -> bool:
         """
         从会话中移除数据集
@@ -604,6 +653,7 @@ class SessionManager:
         logger.info(f"数据集已从会话移除: {session_id}/{dataset_id}")
         return True
 
+    # AI-assisted: 使用 Claude 实现过期会话批量清理，手动调整了损坏目录兜底删除
     def cleanup_expired_sessions(self) -> int:
         """
         清理过期会话
@@ -649,6 +699,7 @@ class SessionManager:
 
         return count
 
+    # AI-assisted: 使用 Claude 实现轻量会话信息查询（不加载 DataFrame），未做大幅修改
     def get_session_info(self, session_id: str) -> Dict[str, Any]:
         """
         获取会话信息（不加载完整数据）
@@ -689,6 +740,7 @@ class SessionManager:
             "total_rows": total_rows
         }
 
+    # AI-assisted: 使用 Claude 实现会话列表查询（含过期标记与排序），未做大幅修改
     def list_sessions(self) -> List[Dict[str, Any]]:
         """
         列出所有会话
@@ -734,6 +786,7 @@ class SessionManager:
         sessions.sort(key=lambda x: x['created_at'], reverse=True)
         return sessions
 
+    # AI-assisted: 使用 Claude 实现聊天历史条目追加，手动调整了 charts 可选字段
     def add_chat_entry(self, session_id: str, role: str, content: str, charts: list = None) -> None:
         """
         向会话的聊天历史添加条目
@@ -770,6 +823,7 @@ class SessionManager:
 
         logger.info(f"聊天历史条目已添加到会话: {session_id}")
 
+    # AI-assisted: 使用 Claude 实现聊天历史读取，未做大幅修改
     def get_chat_history(self, session_id: str) -> list:
         """
         获取会话的聊天历史
@@ -789,6 +843,7 @@ class SessionManager:
 
         return meta.get('chat_history', [])
 
+    # AI-assisted: 使用 Claude 实现管理器统计信息聚合，未做大幅修改
     def get_stats(self) -> Dict[str, Any]:
         """
         获取会话管理器统计信息
@@ -825,8 +880,9 @@ class SessionManager:
 _session_manager: Optional[SessionManager] = None
 
 
+# AI-assisted: 使用 Claude 实现全局单例懒加载工厂，未做大幅修改
 def get_session_manager() -> SessionManager:
-    """获取全局会话管理器单例"""
+    """获取全局会话管理器单例（首次调用时惰性创建）。"""
     global _session_manager
     if _session_manager is None:
         _session_manager = SessionManager()

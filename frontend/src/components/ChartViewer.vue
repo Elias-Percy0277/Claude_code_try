@@ -202,6 +202,13 @@
 </template>
 
 <script setup>
+// ============================================================
+// 组件职责：ChartViewer —— 图表渲染与交互中心
+// 负责：基于 ECharts 渲染分析图表/历史图表，管理 ECharts 实例的
+// 初始化、销毁、resize；提供图表设置面板（坐标轴标签、Y 轴范围、
+// X 轴间距、图表类型切换、数据标签、平滑曲线、配色方案、标题编辑、
+// 固定/取消固定）等可交互能力，并同步当前图表与固定图表的合并展示。
+// ============================================================
 import { ref, reactive, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import * as echarts from 'echarts'
@@ -231,6 +238,7 @@ let skipNextWatch = false
 
 
 // 合并当前图表 + 固定图表为一个统一列表
+// AI-assisted: 使用 Claude 实现当前图表与固定图表的合并计算属性，人工校验后保留原逻辑
 const allCharts = computed(() => {
   const result = []
   store.charts.forEach((chart, i) => {
@@ -292,24 +300,34 @@ const darkBaseOption = {
   }
 }
 
+// 判断图表类型是否含有笛卡尔坐标轴（饼图/雷达/热力图除外）
+// AI-assisted: 使用 Claude 实现图表类型判断工具函数，人工校验后保留原逻辑
 function hasYAxis(chart) {
   const t = (chart.chart_type || '').toLowerCase()
   return !['pie', 'radar', 'heatmap'].includes(t)
 }
 
+// 判断图表是否为折线类（折线/面积），用于控制平滑曲线开关的显隐
+// AI-assisted: 使用 Claude 实现折线类图表判断，未做大幅修改
 function isLineLike(chart) {
   const t = (chart.chart_type || '').toLowerCase()
   return ['line', 'area'].includes(t)
 }
 
+// 获取图表标题，缺省返回 '图表'
+// AI-assisted: 使用 Claude 实现图表标题读取，未做大幅修改
 function getChartTitle(chart) {
   return chart.option?.title?.text || '图表'
 }
 
+// 收集每个图表的 DOM 容器引用，供 ECharts 初始化使用
+// AI-assisted: 使用 Claude 实现 ref 回调收集图表容器，未做大幅修改
 function setChartRef(el, index) {
   if (el) chartRefs.value[index] = el
 }
 
+// 根据图表类型返回容器高度（热力图/饼图更高，其余默认）
+// AI-assisted: 使用 Claude 实现图表高度自适应，未做大幅修改
 function getChartHeight(chart) {
   const type = chart.chart_type
   if (type === 'heatmap' || type === 'pie') return '400px'
@@ -317,6 +335,8 @@ function getChartHeight(chart) {
 }
 
 
+// 将暗色基础配置深合并到原始 option 中，补齐缺失的暗色样式字段
+// AI-assisted: 使用 Claude 实现暗色主题深合并逻辑，手动调整了 tooltip 字段合并细节
 function mergeDarkOption(originalOption) {
   const merged = JSON.parse(JSON.stringify(originalOption))
   for (const key of Object.keys(darkBaseOption)) {
@@ -340,6 +360,8 @@ function mergeDarkOption(originalOption) {
   return merged
 }
 
+// 增强 option：注入工具栏（缩放/还原/保存图片）与 Y 轴滑动 dataZoom
+// AI-assisted: 使用 Claude 实现 toolbox 与 dataZoom 增强，人工校验后保留原逻辑
 function enhanceOption(option, chart) {
   const enhanced = JSON.parse(JSON.stringify(option))
   enhanced.toolbox = {
@@ -371,6 +393,8 @@ function enhanceOption(option, chart) {
   return enhanced
 }
 
+// 核心渲染：销毁旧实例与旧 resize 监听，逐个初始化 ECharts 实例并 setOption，注册 resize
+// AI-assisted: 使用 Claude 实现 ECharts 实例初始化与销毁，手动调整了 resize 监听注册/清理逻辑
 function renderCharts() {
   resizeHandlers.value.forEach(h => window.removeEventListener('resize', h))
   resizeHandlers.value = []
@@ -408,6 +432,8 @@ function renderCharts() {
 
 // ---- 固定/取消固定图表 ----
 
+// 取消固定图表：从 pinnedCharts 移除后重新渲染
+// AI-assisted: 使用 Claude 实现取消固定逻辑，人工校验后保留原逻辑
 function unpinChart(index) {
   const currentCount = store.charts.length
   const pinnedIndex = index - currentCount
@@ -419,15 +445,21 @@ function unpinChart(index) {
 
 // ---- 控制面板操作 ----
 
+// 切换设置面板的展开/收起状态
+// AI-assisted: 使用 Claude 实现面板折叠切换，未做大幅修改
 function togglePanel(index) {
   if (panelStates[index]) panelStates[index].open = !panelStates[index].open
 }
 
+// 更新指定图表面板的某个状态字段（受控输入）
+// AI-assisted: 使用 Claude 实现面板状态更新，未做大幅修改
 function updatePanelState(index, key, value) {
   if (!panelStates[index]) return
   panelStates[index][key] = value
 }
 
+// 读取图表指定坐标轴（x/y）当前名称，用于回显输入框
+// AI-assisted: 使用 Claude 实现坐标轴名称读取，未做大幅修改
 function getAxisName(chart, axis) {
   if (!chart?.option) return ''
   const ax = chart.option[axis === 'x' ? 'xAxis' : 'yAxis']
@@ -435,6 +467,8 @@ function getAxisName(chart, axis) {
   return ax.name || ''
 }
 
+// 应用 X/Y 轴标签到图表实例并写回原始 option
+// AI-assisted: 使用 Claude 实现坐标轴名称应用，人工校验后保留原逻辑
 function applyAxisNames(index) {
   const instance = chartInstances.value[index]
   const item = allCharts.value[index]
@@ -459,6 +493,8 @@ function applyAxisNames(index) {
   instance.setOption(option)
 }
 
+// 应用 Y 轴最小/最大范围到图表实例
+// AI-assisted: 使用 Claude 实现 Y 轴范围应用，未做大幅修改
 function applyYAxis(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -469,6 +505,8 @@ function applyYAxis(index) {
   instance.setOption(option)
 }
 
+// 重置 Y 轴范围，清除面板输入与实例上的 min/max
+// AI-assisted: 使用 Claude 实现 Y 轴范围重置，未做大幅修改
 function resetYAxis(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -477,6 +515,8 @@ function resetYAxis(index) {
   instance.setOption({ yAxis: { min: undefined, max: undefined } }, false)
 }
 
+// 应用 X 轴刻度间距，校验非法值后写入实例
+// AI-assisted: 使用 Claude 实现 X 轴间距应用与校验，未做大幅修改
 function applyXInterval(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -487,6 +527,8 @@ function applyXInterval(index) {
   instance.setOption({ xAxis: { interval } })
 }
 
+// 重置 X 轴刻度间距为自动
+// AI-assisted: 使用 Claude 实现 X 轴间距重置，未做大幅修改
 function resetXInterval(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -494,6 +536,8 @@ function resetXInterval(index) {
   instance.setOption({ xAxis: { interval: undefined } }, false)
 }
 
+// 切换图表类型：更新状态并通过后端重新生成数据，期间显示加载遮罩
+// AI-assisted: 使用 Claude 生成图表类型切换主流程，人工校验后保留原逻辑
 async function switchType(index, newType) {
   const item = allCharts.value[index]
   const instance = chartInstances.value[index]
@@ -510,6 +554,8 @@ async function switchType(index, newType) {
   }
 }
 
+// 调用后端 rechart 接口以新类型重新生成图表，并用新 option 重建对应 ECharts 实例
+// AI-assisted: 使用 Claude 实现后端切换图表类型与实例重建，手动调整了错误日志与定位逻辑
 async function switchTypeBackend(index, newType) {
   if (!store.sessionId) return
   const userMessages = store.messages.filter(m => m.role === 'user')
@@ -542,6 +588,8 @@ async function switchTypeBackend(index, newType) {
   }
 }
 
+// 切换数据标签显示，遍历所有 series 设置 label.show
+// AI-assisted: 使用 Claude 实现数据标签开关，未做大幅修改
 function toggleLabels(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -555,6 +603,8 @@ function toggleLabels(index) {
   })
 }
 
+// 切换折线平滑曲线，遍历所有 series 设置 smooth
+// AI-assisted: 使用 Claude 实现平滑曲线开关，未做大幅修改
 function toggleSmooth(index) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -566,6 +616,8 @@ function toggleSmooth(index) {
   instance.setOption({ series: series.map(s => ({ ...s, smooth })) })
 }
 
+// 切换配色方案：饼图按数据项着色，其余按 series 着色
+// AI-assisted: 使用 Claude 实现配色方案切换，手动调整了饼图与普通图的着色分支
 function switchColorTheme(index, themeName) {
   const instance = chartInstances.value[index]
   const item = allCharts.value[index]
@@ -602,6 +654,8 @@ function switchColorTheme(index, themeName) {
   }
 }
 
+// 标题编辑失焦：将新标题写入 ECharts 实例与原始 option
+// AI-assisted: 使用 Claude 实现可编辑标题保存，未做大幅修改
 function handleTitleBlur(index, event) {
   const instance = chartInstances.value[index]
   if (!instance) return
@@ -615,6 +669,8 @@ function handleTitleBlur(index, event) {
   }
 }
 
+// 关闭图表区：仅隐藏可见性标志，不销毁组件、不清空数据
+// AI-assisted: 使用 Claude 实现图表区关闭逻辑，未做大幅修改
 function handleCloseCharts() {
   // 只隐藏图表区域，不销毁组件，不清空数据
   store.chartsVisible = false
@@ -635,6 +691,7 @@ watch(() => [store.charts, store.pinnedCharts], async () => {
 }, { deep: true })
 
 // 尝试渲染图表（带重试机制，确保 DOM 容器已就绪）
+// AI-assisted: 使用 Claude 实现带重试的渲染调度，手动调整了重试次数与延迟参数
 function tryRenderCharts(retries = 0) {
   const hasCharts = allCharts.value.length > 0
   const hasContainers = allCharts.value.every((_, index) => !!chartRefs.value[index])

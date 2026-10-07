@@ -19,6 +19,10 @@
 </template>
 
 <script setup>
+/**
+ * ErrorMessage 错误提示组件
+ * 职责：以红色告警样式展示单条错误信息，提供关闭按钮通过 close 事件通知父组件移除提示。
+ */
 defineProps({
   message: {
     type: String,
