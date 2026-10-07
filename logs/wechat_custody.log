@@ -2734,3 +2734,1543 @@
 2026-04-03 17:05:44 - wechat_custody - INFO - YOLO 模型加载成功: data/models/wechat_yolov8s.pt
 2026-04-03 17:05:44 - wechat_custody - INFO - 使用 CPU 设备
 2026-04-03 17:05:44 - wechat_custody - INFO - YOLO 模型加载成功: data/models/wechat_yolov8s.pt
+2026-04-03 19:17:20 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:17:28 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:17:28 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:17:28 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:17:28 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:17:28 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:17:28 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:17:55 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:18:11 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:18:11 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:18:11 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:18:11 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:18:11 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:18:11 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:19:20 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:19:29 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:19:29 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:19:29 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:19:29 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:19:29 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:19:29 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:19:40 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:19:48 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:19:48 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:19:48 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:19:48 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:19:48 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:19:48 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:20:01 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:20:09 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:20:09 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:20:09 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:20:09 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:20:09 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:20:09 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:20:30 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:20:30 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:20:30 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:20:30 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:20:30 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:20:30 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:20:51 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:20:58 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:20:58 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:20:58 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:20:58 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:20:58 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:20:58 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:22:17 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-03 19:22:25 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-03 19:22:25 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-03 19:22:25 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-03 19:22:25 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-03 19:22:25 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-03 19:22:25 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-03 19:22:42 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 13:38:46 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 13:38:46 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 13:38:46 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 13:38:46 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 13:38:46 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 13:38:46 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 13:38:48 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 13:38:48 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 13:38:50 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 13:38:50 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 13:38:50 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 13:38:50 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 13:38:50 - wechat_custody - INFO - 连接微信...
+2026-04-04 13:38:50 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 985720, 位置: (-11, -11, 2571, 1539)
+2026-04-04 13:38:50 - wechat_custody - WARNING - 数据库中没有白名单联系人，请在 Web 管理后台添加
+2026-04-04 13:38:50 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 13:38:50 - wechat_custody - WARNING - 未指定监听联系人，请在 Web 后台添加白名单联系人
+2026-04-04 13:38:56 - wechat_custody - ERROR - PaddleOCR 初始化失败: A dependency error occurred during pipeline creation. Please refer to the installation documentation to ensure all required dependencies are installed.
+2026-04-04 13:38:56 - wechat_custody - ERROR - OCR 初始化失败，无法启动监听
+2026-04-04 13:38:56 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 14:07:33 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:07:33 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:07:33 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:07:33 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:07:33 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:07:33 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:07:35 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 14:07:35 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 14:07:37 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 14:07:37 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 14:07:37 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 14:07:37 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 14:07:37 - wechat_custody - INFO - 测试模式：跳过微信连接
+2026-04-04 14:07:37 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 14:09:16 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:09:16 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:09:16 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:09:16 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:09:16 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:09:16 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:09:18 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 14:19:50 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:19:50 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:19:50 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:19:50 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:19:50 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:19:50 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:19:52 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 14:19:52 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 14:19:54 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 14:19:54 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 14:19:54 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 14:19:54 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 14:19:54 - wechat_custody - INFO - 连接微信...
+2026-04-04 14:19:54 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 985720, 位置: (-11, -11, 2571, 1539)
+2026-04-04 14:19:54 - wechat_custody - INFO - 从数据库读取到 1 个白名单联系人
+2026-04-04 14:19:54 - wechat_custody - INFO -   - 晚叙
+2026-04-04 14:19:54 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 14:19:54 - wechat_custody - INFO - 准备监听 1 个白名单联系人: ['晚叙']
+2026-04-04 14:19:54 - wechat_custody - INFO - 白名单已更新，共 1 个用户
+2026-04-04 14:19:54 - wechat_custody - INFO - 验证器白名单已更新，共 1 个用户
+2026-04-04 14:20:44 - wechat_custody - INFO - PaddleOCR 初始化成功
+2026-04-04 14:20:44 - wechat_custody - INFO - 开始轮询检查新消息...
+2026-04-04 14:20:44 - wechat_custody - INFO - 消息轮询监听已启动
+2026-04-04 14:20:44 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 14:20:44 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:20:44 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:20:44 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:20:44 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:20:47 - wechat_custody - ERROR - OCR 失败: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\paddle\fluid\framework\new_executor\instruction\onednn\onednn_instruction.cc:118)
+
+2026-04-04 14:20:47 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:20:55 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:20:55 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:20:55 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:20:55 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:20:58 - wechat_custody - ERROR - OCR 失败: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\paddle\fluid\framework\new_executor\instruction\onednn\onednn_instruction.cc:118)
+
+2026-04-04 14:20:58 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:21:06 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:21:06 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:21:06 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:21:06 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:21:09 - wechat_custody - ERROR - OCR 失败: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\paddle\fluid\framework\new_executor\instruction\onednn\onednn_instruction.cc:118)
+
+2026-04-04 14:21:09 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:21:17 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:21:17 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:21:17 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:21:17 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:21:20 - wechat_custody - ERROR - OCR 失败: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\paddle\fluid\framework\new_executor\instruction\onednn\onednn_instruction.cc:118)
+
+2026-04-04 14:21:20 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:21:28 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:21:28 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:21:28 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:21:28 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:21:31 - wechat_custody - ERROR - OCR 失败: (Unimplemented) ConvertPirAttribute2RuntimeAttribute not support [pir::ArrayAttribute<pir::DoubleAttribute>]  (at ..\paddle\fluid\framework\new_executor\instruction\onednn\onednn_instruction.cc:118)
+
+2026-04-04 14:21:31 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:21:39 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:21:39 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:21:39 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:21:39 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:30:26 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:30:26 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:30:26 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:30:26 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:30:26 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:30:26 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:31:56 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:31:56 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:31:56 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:31:56 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:31:56 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:31:56 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:31:58 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 14:31:58 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 14:32:00 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 14:32:00 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 14:32:00 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 14:32:00 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 14:32:00 - wechat_custody - INFO - 连接微信...
+2026-04-04 14:32:00 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 985720, 位置: (-11, -11, 2571, 1539)
+2026-04-04 14:32:00 - wechat_custody - INFO - 从数据库读取到 1 个白名单联系人
+2026-04-04 14:32:00 - wechat_custody - INFO -   - 晚叙
+2026-04-04 14:32:00 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 14:32:00 - wechat_custody - INFO - 准备监听 1 个白名单联系人: ['晚叙']
+2026-04-04 14:32:00 - wechat_custody - INFO - 白名单已更新，共 1 个用户
+2026-04-04 14:32:00 - wechat_custody - INFO - 验证器白名单已更新，共 1 个用户
+2026-04-04 14:32:02 - wechat_custody - INFO - RapidOCR 初始化成功
+2026-04-04 14:32:02 - wechat_custody - INFO - 开始轮询检查新消息...
+2026-04-04 14:32:02 - wechat_custody - INFO - 消息轮询监听已启动
+2026-04-04 14:32:02 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 14:32:02 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:02 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:02 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:02 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:02 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:02 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:11 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:11 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:11 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:11 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:11 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:11 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:19 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:19 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:19 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:19 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:19 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:19 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:27 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:27 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:27 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:27 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:27 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:27 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:35 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:35 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:35 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:35 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:35 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:35 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:43 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:43 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:43 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:43 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:43 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:43 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:51 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:51 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:51 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:51 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:51 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:51 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:32:59 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:32:59 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:32:59 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:32:59 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:32:59 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:32:59 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:33:07 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:33:07 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:33:07 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:33:07 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:33:07 - wechat_custody - ERROR - OCR 失败: 'RapidOCR' object has no attribute 'ocr'
+2026-04-04 14:33:07 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:35:42 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:35:42 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:35:42 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:36:21 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:36:21 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:36:21 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:36:21 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:36:21 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:36:21 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:45:43 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 14:45:43 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 14:45:43 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 14:45:43 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 14:45:43 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 14:45:43 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 14:45:46 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 14:45:46 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 14:45:48 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 14:45:48 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 14:45:48 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 14:45:48 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 14:45:48 - wechat_custody - INFO - 连接微信...
+2026-04-04 14:45:48 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 985720, 位置: (-11, -11, 2571, 1539)
+2026-04-04 14:45:48 - wechat_custody - INFO - 从数据库读取到 1 个白名单联系人
+2026-04-04 14:45:48 - wechat_custody - INFO -   - 晚叙
+2026-04-04 14:45:48 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 14:45:48 - wechat_custody - INFO - 准备监听 1 个白名单联系人: ['晚叙']
+2026-04-04 14:45:48 - wechat_custody - INFO - 白名单已更新，共 1 个用户
+2026-04-04 14:45:48 - wechat_custody - INFO - 验证器白名单已更新，共 1 个用户
+2026-04-04 14:45:50 - wechat_custody - INFO - RapidOCR 初始化成功
+2026-04-04 14:45:50 - wechat_custody - INFO - 开始轮询检查新消息...
+2026-04-04 14:45:50 - wechat_custody - INFO - 消息轮询监听已启动
+2026-04-04 14:45:50 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 14:45:50 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:45:50 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:45:50 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:45:50 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:45:55 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:45:55 - wechat_custody - DEBUG -   - 消息测试
+2026-04-04 14:45:55 - wechat_custody - DEBUG -   - 试一下
+2026-04-04 14:45:55 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:45:55 - wechat_custody - DEBUG - 提取消息: 试一下
+2026-04-04 14:45:55 - wechat_custody - DEBUG - [区域检测] OCR内容: 试一下
+2026-04-04 14:45:55 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 试一下...
+2026-04-04 14:45:55 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 试一下...
+2026-04-04 14:45:55 - wechat_custody - INFO - 联系人 晚叙 不在白名单中，不回复
+2026-04-04 14:46:03 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:46:03 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:46:03 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:46:03 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:46:05 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:46:05 - wechat_custody - DEBUG -   - 消息测试
+2026-04-04 14:46:05 - wechat_custody - DEBUG -   - 试一下
+2026-04-04 14:46:05 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:46:05 - wechat_custody - DEBUG - 提取消息: 试一下
+2026-04-04 14:46:05 - wechat_custody - DEBUG - [区域检测] OCR内容: 试一下
+2026-04-04 14:46:05 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:46:13 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:46:13 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:46:13 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:46:13 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:46:15 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:46:15 - wechat_custody - DEBUG -   - 消息测试
+2026-04-04 14:46:15 - wechat_custody - DEBUG -   - 试一下
+2026-04-04 14:46:15 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:46:15 - wechat_custody - DEBUG - 提取消息: 试一下
+2026-04-04 14:46:15 - wechat_custody - DEBUG - [区域检测] OCR内容: 试一下
+2026-04-04 14:46:15 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:46:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:46:23 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:46:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:46:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:46:25 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:46:25 - wechat_custody - DEBUG -   - 消息测试
+2026-04-04 14:46:25 - wechat_custody - DEBUG -   - 试一下
+2026-04-04 14:46:25 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:46:25 - wechat_custody - DEBUG - 提取消息: 试一下
+2026-04-04 14:46:25 - wechat_custody - DEBUG - [区域检测] OCR内容: 试一下
+2026-04-04 14:46:25 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:46:33 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:46:33 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:46:33 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:46:33 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:46:35 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:46:35 - wechat_custody - DEBUG -   - 消息测试
+2026-04-04 14:46:35 - wechat_custody - DEBUG -   - 试一下
+2026-04-04 14:46:35 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:46:35 - wechat_custody - DEBUG - 提取消息: 试一下
+2026-04-04 14:46:35 - wechat_custody - DEBUG - [区域检测] OCR内容: 试一下
+2026-04-04 14:46:35 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:46:43 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:46:43 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:46:43 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:46:43 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:46:45 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:46:45 - wechat_custody - DEBUG -   - 能收到吗
+2026-04-04 14:46:45 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:46:45 - wechat_custody - DEBUG - 提取消息: 能收到吗
+2026-04-04 14:46:45 - wechat_custody - DEBUG - [区域检测] OCR内容: 能收到吗
+2026-04-04 14:46:45 - wechat_custody - DEBUG - [相似度] '能收到吗...' vs '试一下...' = 0.00
+2026-04-04 14:46:45 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 能收到吗...
+2026-04-04 14:46:45 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 能收到吗...
+2026-04-04 14:46:58 - wechat_custody - INFO - AI 回复 晚叙: 呜呜收到了呢～主人想要和小喵一起做什么呀？小喵好想黏在主人身边哦~💕...
+2026-04-04 14:46:59 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 呜呜收到了呢～主人想要和小喵一起做什么呀？小喵好想黏在主人身边哦~💕...
+2026-04-04 14:47:07 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:47:07 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:47:07 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:47:07 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:47:09 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:47:09 - wechat_custody - DEBUG -   - 你好啊
+2026-04-04 14:47:09 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:47:09 - wechat_custody - DEBUG - 提取消息: 你好啊
+2026-04-04 14:47:09 - wechat_custody - DEBUG - [区域检测] OCR内容: 你好啊
+2026-04-04 14:47:09 - wechat_custody - DEBUG - [相似度] '你好啊...' vs '能收到吗...' = 0.00
+2026-04-04 14:47:09 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 你好啊...
+2026-04-04 14:47:09 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 你好啊...
+2026-04-04 14:47:14 - wechat_custody - INFO - AI 回复 晚叙: 喵~ 你好呢你好呢～主人这么打招呼，小喵心里可开心了呢~ właściewwwwwwwwwwwwww...
+2026-04-04 14:47:14 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 喵~ 你好呢你好呢～主人这么打招呼，小喵心里可开心了呢~ właściewwwwwwwwwwwwww...
+2026-04-04 14:47:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:47:23 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:47:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:47:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:47:24 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:47:24 - wechat_custody - DEBUG -   - 我饿了怎
+2026-04-04 14:47:24 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:47:24 - wechat_custody - DEBUG - 提取消息: 我饿了怎
+2026-04-04 14:47:24 - wechat_custody - DEBUG - [区域检测] OCR内容: 我饿了怎
+2026-04-04 14:47:24 - wechat_custody - DEBUG - [相似度] '我饿了怎...' vs '你好啊...' = 0.00
+2026-04-04 14:47:24 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 我饿了怎...
+2026-04-04 14:47:24 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 我饿了怎...
+2026-04-04 14:47:28 - wechat_custody - INFO - AI 回复 晚叙: 呜呜~ 主人好可怜呢～小喵来给主人抱一个，要不要让小喵煮点好吃的给主人解馋呀？咕噜咕噜～💕...
+2026-04-04 14:47:29 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 呜呜~ 主人好可怜呢～小喵来给主人抱一个，要不要让小喵煮点好吃的给主人解馋呀？咕噜咕噜～💕...
+2026-04-04 14:47:37 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:47:37 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:47:37 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:47:37 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:47:40 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:47:40 - wechat_custody - DEBUG -   - 找拢了芯
+2026-04-04 14:47:40 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:47:40 - wechat_custody - DEBUG - 提取消息: 找拢了芯
+2026-04-04 14:47:40 - wechat_custody - DEBUG - [区域检测] OCR内容: 找拢了芯
+2026-04-04 14:47:40 - wechat_custody - DEBUG - [相似度] '找拢了芯...' vs '我饿了怎...' = 0.25
+2026-04-04 14:47:40 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 找拢了芯...
+2026-04-04 14:47:40 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 找拢了芯...
+2026-04-04 14:47:45 - wechat_custody - INFO - AI 回复 晚叙: 呜呜~ 找到了找到了！主人是不是在玩捉迷藏游戏呀？小喵来帮主人一起找芯芯呢～小喵好害怕找不到芯芯会很...
+2026-04-04 14:47:46 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 呜呜~ 找到了找到了！主人是不是在玩捉迷藏游戏呀？小喵来帮主人一起找芯芯呢～小喵好害怕找不到芯芯会很...
+2026-04-04 14:47:54 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:47:54 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:47:54 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:47:54 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:47:58 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:47:58 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:06 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:06 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:06 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:06 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:08 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:08 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:16 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:16 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:16 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:16 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:18 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:18 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:26 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:26 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:26 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:26 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:29 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:29 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:37 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:37 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:37 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:37 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:38 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:38 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:46 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:46 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:46 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:46 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:47 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:47 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:48:55 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:48:55 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:48:55 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:48:55 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:48:56 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:48:56 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:04 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:04 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:04 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:04 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:05 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:05 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:13 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:13 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:13 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:13 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:14 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:14 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:22 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:22 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:22 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:22 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:23 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:23 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:31 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:31 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:31 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:31 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:32 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:32 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:40 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:40 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:40 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:40 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:41 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:41 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:49 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:49 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:49 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:49 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:50 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:50 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:49:58 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:49:58 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:49:58 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:49:58 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:49:59 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:49:59 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:50:07 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:07 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:07 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:07 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:08 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:50:08 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:50:16 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:16 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:16 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:16 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:18 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:50:18 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:50:18 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:50:18 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:50:18 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:50:18 - wechat_custody - DEBUG - [相似度] '在吗...' vs '找拢了芯...' = 0.00
+2026-04-04 14:50:18 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 在吗...
+2026-04-04 14:50:18 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 在吗...
+2026-04-04 14:50:18 - wechat_custody - INFO - 联系人 晚叙 不在白名单中，不回复
+2026-04-04 14:50:26 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:26 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:26 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:26 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:28 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:50:28 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:50:28 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:50:28 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:50:28 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:50:28 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:50:36 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:36 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:36 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:36 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:37 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:50:37 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:50:37 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:50:37 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:50:37 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:50:37 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:50:45 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:45 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:45 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:45 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:47 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:50:47 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:50:47 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:50:47 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:50:47 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:50:47 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:50:55 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:50:55 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:50:55 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:50:55 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:50:56 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:50:56 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:50:56 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:50:56 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:50:56 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:50:56 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:51:05 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:05 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:05 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:05 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:06 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:51:06 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:51:06 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:51:06 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:51:06 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:51:06 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:51:14 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:14 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:14 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:14 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:16 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:51:16 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:51:16 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:51:16 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:51:16 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:51:16 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:51:24 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:24 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:24 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:24 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:25 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:51:25 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:51:25 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:51:25 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:51:26 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:51:26 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:51:34 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:34 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:34 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:34 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:35 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:51:35 - wechat_custody - DEBUG -   - 为什么不
+2026-04-04 14:51:35 - wechat_custody - DEBUG -   - 为什么
+2026-04-04 14:51:35 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:51:36 - wechat_custody - DEBUG - 提取消息: 为什么
+2026-04-04 14:51:36 - wechat_custody - DEBUG - [区域检测] OCR内容: 为什么
+2026-04-04 14:51:36 - wechat_custody - DEBUG - [相似度] '为什么...' vs '在吗...' = 0.00
+2026-04-04 14:51:36 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 为什么...
+2026-04-04 14:51:36 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 为什么...
+2026-04-04 14:51:36 - wechat_custody - INFO - 联系人 晚叙 不在白名单中，不回复
+2026-04-04 14:51:44 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:44 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:44 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:44 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:46 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:51:46 - wechat_custody - DEBUG -   - 为什么不
+2026-04-04 14:51:46 - wechat_custody - DEBUG -   - 为什么
+2026-04-04 14:51:46 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:51:46 - wechat_custody - DEBUG - 提取消息: 为什么
+2026-04-04 14:51:46 - wechat_custody - DEBUG - [区域检测] OCR内容: 为什么
+2026-04-04 14:51:46 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:51:54 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:51:54 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:51:54 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:51:54 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:51:56 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:51:56 - wechat_custody - DEBUG -   - 为什么不
+2026-04-04 14:51:56 - wechat_custody - DEBUG -   - 为什么
+2026-04-04 14:51:56 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:51:56 - wechat_custody - DEBUG - 提取消息: 为什么
+2026-04-04 14:51:56 - wechat_custody - DEBUG - [区域检测] OCR内容: 为什么
+2026-04-04 14:51:56 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:52:04 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:04 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:04 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:04 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:52:06 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:52:06 - wechat_custody - DEBUG -   - 理一下我
+2026-04-04 14:52:06 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:52:06 - wechat_custody - DEBUG - 提取消息: 理一下我
+2026-04-04 14:52:06 - wechat_custody - DEBUG - [区域检测] OCR内容: 理一下我
+2026-04-04 14:52:06 - wechat_custody - DEBUG - [相似度] '理一下我...' vs '为什么...' = 0.00
+2026-04-04 14:52:06 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 理一下我...
+2026-04-04 14:52:06 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 理一下我...
+2026-04-04 14:52:06 - wechat_custody - INFO - 联系人 晚叙 不在白名单中，不回复
+2026-04-04 14:52:14 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:14 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:14 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:14 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:52:15 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:52:15 - wechat_custody - DEBUG -   - 理一下我
+2026-04-04 14:52:15 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:52:15 - wechat_custody - DEBUG - 提取消息: 理一下我
+2026-04-04 14:52:15 - wechat_custody - DEBUG - [区域检测] OCR内容: 理一下我
+2026-04-04 14:52:15 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:52:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:23 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:52:25 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:52:25 - wechat_custody - DEBUG -   - 理一下我
+2026-04-04 14:52:25 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:52:25 - wechat_custody - DEBUG - 提取消息: 理一下我
+2026-04-04 14:52:25 - wechat_custody - DEBUG - [区域检测] OCR内容: 理一下我
+2026-04-04 14:52:25 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:52:33 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:33 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:33 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:33 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:52:35 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:52:35 - wechat_custody - DEBUG -   - 理一下我
+2026-04-04 14:52:35 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:52:35 - wechat_custody - DEBUG - 提取消息: 理一下我
+2026-04-04 14:52:35 - wechat_custody - DEBUG - [区域检测] OCR内容: 理一下我
+2026-04-04 14:52:35 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 14:52:43 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:43 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:43 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:43 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:52:44 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 14:52:44 - wechat_custody - DEBUG -   - 你好啊
+2026-04-04 14:52:44 - wechat_custody - DEBUG - 有效文本 1/1
+2026-04-04 14:52:44 - wechat_custody - DEBUG - 提取消息: 你好啊
+2026-04-04 14:52:44 - wechat_custody - DEBUG - [区域检测] OCR内容: 你好啊
+2026-04-04 14:52:44 - wechat_custody - DEBUG - [相似度] '你好啊...' vs '理一下我...' = 0.00
+2026-04-04 14:52:44 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 你好啊...
+2026-04-04 14:52:44 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 你好啊...
+2026-04-04 14:52:50 - wechat_custody - INFO - AI 回复 晚叙: 喵~ 你好呢主人，天气怎么样呀？外面阳光明媚的话我就想蹭你的腿哦~💕...
+2026-04-04 14:52:51 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 喵~ 你好呢主人，天气怎么样呀？外面阳光明媚的话我就想蹭你的腿哦~💕...
+2026-04-04 14:52:59 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:52:59 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:52:59 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:52:59 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:53:01 - wechat_custody - DEBUG - OCR 识别到 2 行文本
+2026-04-04 14:53:01 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:53:01 - wechat_custody - DEBUG -   - 在吗
+2026-04-04 14:53:01 - wechat_custody - DEBUG - 有效文本 2/2
+2026-04-04 14:53:01 - wechat_custody - DEBUG - 提取消息: 在吗
+2026-04-04 14:53:01 - wechat_custody - DEBUG - [区域检测] OCR内容: 在吗
+2026-04-04 14:53:01 - wechat_custody - DEBUG - [相似度] '在吗...' vs '你好啊...' = 0.00
+2026-04-04 14:53:01 - wechat_custody - INFO - [区域检测-私聊] 晚叙: 在吗...
+2026-04-04 14:53:01 - wechat_custody - INFO - [模板检测] 收到来自 晚叙 的新消息: 在吗...
+2026-04-04 14:53:05 - wechat_custody - INFO - AI 回复 晚叙: 呜~ 在呐主人，我在你身边呢。想跟我聊点什么呢？我会一直陪你说话的哦~💕...
+2026-04-04 14:53:06 - wechat_custody - INFO - [完全自动] 发送消息给 晚叙: 呜~ 在呐主人，我在你身边呢。想跟我聊点什么呢？我会一直陪你说话的哦~💕...
+2026-04-04 14:53:14 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:53:14 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:53:14 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:53:14 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:53:15 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:53:15 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:53:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:53:23 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:53:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:53:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:53:24 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:53:24 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:53:32 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:53:32 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:53:32 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:53:32 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 14:53:33 - wechat_custody - ERROR - OCR 失败: 'NoneType' object is not iterable
+2026-04-04 14:53:33 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 14:53:41 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 14:53:41 - wechat_custody - DEBUG - 使用白名单联系人: 晚叙
+2026-04-04 14:53:41 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 14:53:41 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:36:19 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 19:36:19 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 19:36:19 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 19:36:19 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 19:36:19 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 19:36:19 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 19:36:21 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 19:36:21 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 19:36:23 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 19:36:23 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 19:36:23 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 19:36:23 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 19:36:23 - wechat_custody - INFO - 连接微信...
+2026-04-04 19:36:23 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 527200, 位置: (-11, -11, 2571, 1539)
+2026-04-04 19:36:23 - wechat_custody - INFO - 从数据库读取到 4 个白名单联系人
+2026-04-04 19:36:23 - wechat_custody - INFO -   - 迟遇
+2026-04-04 19:36:23 - wechat_custody - INFO -   - 晚叙
+2026-04-04 19:36:23 - wechat_custody - INFO -   - 迟遇
+2026-04-04 19:36:23 - wechat_custody - INFO -   - 晚叙
+2026-04-04 19:36:23 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 19:36:23 - wechat_custody - INFO - 准备监听 4 个白名单联系人: ['迟遇', '晚叙', '迟遇', '晚叙']
+2026-04-04 19:36:23 - wechat_custody - INFO - 白名单已更新，共 2 个用户
+2026-04-04 19:36:23 - wechat_custody - INFO - 验证器白名单已更新，共 4 个用户
+2026-04-04 19:36:25 - wechat_custody - INFO - RapidOCR 初始化成功
+2026-04-04 19:36:25 - wechat_custody - INFO - 开始轮询检查新消息...
+2026-04-04 19:36:25 - wechat_custody - INFO - 消息轮询监听已启动
+2026-04-04 19:36:25 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 19:36:25 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:36:25 - wechat_custody - DEBUG - 使用白名单联系人: 迟遇
+2026-04-04 19:36:26 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:36:26 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:36:32 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:36:32 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:36:32 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:36:32 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:36:32 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:36:32 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:36:32 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:36:32 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:36:32 - wechat_custody - INFO - [区域检测-私聊] 迟遇: 55...
+2026-04-04 19:36:32 - wechat_custody - INFO - [模板检测] 收到来自 迟遇 的新消息: 55...
+2026-04-04 19:36:46 - wechat_custody - INFO - AI 回复 迟遇: ~喵呜？主人你咋了呢？是不是哪里不舒服呀？喏，小猫咪来给你揉揉肚子哦~💕...
+2026-04-04 19:36:46 - wechat_custody - WARNING - 窗口置顶失败: (0, 'SetForegroundWindow', 'No error message is available')
+2026-04-04 19:36:47 - wechat_custody - INFO - [完全自动] 发送消息给 迟遇: ~喵呜？主人你咋了呢？是不是哪里不舒服呀？喏，小猫咪来给你揉揉肚子哦~💕...
+2026-04-04 19:36:55 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:36:55 - wechat_custody - DEBUG - 使用白名单联系人: 迟遇
+2026-04-04 19:36:55 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:36:55 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:36:58 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:36:58 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:36:58 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:36:58 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:36:58 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:36:58 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:36:58 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:36:58 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:36:58 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:37:06 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:37:06 - wechat_custody - DEBUG - 使用白名单联系人: 迟遇
+2026-04-04 19:37:06 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:37:06 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:37:09 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:37:09 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:37:09 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:37:09 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:37:09 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:37:09 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:37:09 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:37:09 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:37:09 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:37:17 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:37:17 - wechat_custody - DEBUG - 使用白名单联系人: 迟遇
+2026-04-04 19:37:17 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:37:17 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:37:20 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:37:20 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:37:20 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:37:20 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:37:20 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:37:20 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:37:20 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:37:20 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:37:20 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:37:46 - wechat_custody - INFO - 已加载自定义模板: E:\claude_code_project_try\wechat_custody\data\region_config.json
+2026-04-04 19:37:46 - wechat_custody - INFO - 使用自定义区域配置
+2026-04-04 19:37:46 - wechat_custody - INFO - TemplateDetector 初始化 - 模板: custom, 只检测对方消息区域（左侧白色气泡）
+2026-04-04 19:37:46 - wechat_custody - INFO - 白名单验证器初始化完成，共 0 个用户，匹配模式: exact
+2026-04-04 19:37:46 - wechat_custody - INFO - UsernameValidator 初始化成功
+2026-04-04 19:37:46 - wechat_custody - INFO - WeChatClient 初始化完成（检测模式: hybrid, YOLO: False, 二次验证: True）
+2026-04-04 19:37:48 - wechat_custody - INFO - Ollama 连接成功，可用模型: ['qwen2.5:latest']
+2026-04-04 19:37:48 - wechat_custody - INFO - 检查 Ollama 服务...
+2026-04-04 19:37:50 - wechat_custody - INFO - 检查数据存储...
+2026-04-04 19:37:50 - wechat_custody - INFO - 清理完成: 删除 0 条旧消息, 0 条超限消息
+2026-04-04 19:37:50 - wechat_custody - INFO - 启动系统托盘...
+2026-04-04 19:37:50 - wechat_custody - INFO - 系统托盘已启动
+2026-04-04 19:37:50 - wechat_custody - INFO - 连接微信...
+2026-04-04 19:37:50 - wechat_custody - INFO - 微信连接成功 - 窗口句柄: 133508, 位置: (3829, 0, 5770, 2099)
+2026-04-04 19:37:50 - wechat_custody - INFO - 从数据库读取到 5 个白名单联系人
+2026-04-04 19:37:50 - wechat_custody - INFO -   - 苑宇航
+2026-04-04 19:37:50 - wechat_custody - INFO -   - 迟遇
+2026-04-04 19:37:50 - wechat_custody - INFO -   - 晚叙
+2026-04-04 19:37:50 - wechat_custody - INFO -   - 迟遇
+2026-04-04 19:37:50 - wechat_custody - INFO -   - 晚叙
+2026-04-04 19:37:50 - wechat_custody - INFO - 开始监听微信消息...
+2026-04-04 19:37:50 - wechat_custody - INFO - 准备监听 5 个白名单联系人: ['苑宇航', '迟遇', '晚叙', '迟遇', '晚叙']
+2026-04-04 19:37:50 - wechat_custody - INFO - 白名单已更新，共 3 个用户
+2026-04-04 19:37:50 - wechat_custody - INFO - 验证器白名单已更新，共 5 个用户
+2026-04-04 19:37:52 - wechat_custody - INFO - RapidOCR 初始化成功
+2026-04-04 19:37:52 - wechat_custody - INFO - 开始轮询检查新消息...
+2026-04-04 19:37:52 - wechat_custody - INFO - 消息轮询监听已启动
+2026-04-04 19:37:52 - wechat_custody - INFO - Web 管理后台启动在: http://127.0.0.1:5001
+2026-04-04 19:37:52 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:37:52 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:37:52 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:37:52 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:37:59 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:37:59 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:37:59 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:37:59 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:37:59 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:37:59 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:37:59 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:37:59 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:37:59 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 55...
+2026-04-04 19:37:59 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 55...
+2026-04-04 19:38:02 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 你好呀主人，你今天过得怎么样呢？有没有什么好玩的事情分享给猫咪听喏~💕...
+2026-04-04 19:38:03 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 你好呀主人，你今天过得怎么样呢？有没有什么好玩的事情分享给猫咪听喏~💕...
+2026-04-04 19:38:11 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:38:11 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:38:11 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:38:11 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:38:14 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:38:14 - wechat_custody - DEBUG -   - 群
+2026-04-04 19:38:14 - wechat_custody - DEBUG -   - 昨天13：55
+2026-04-04 19:38:14 - wechat_custody - DEBUG -   - 的主题也可以发出..
+2026-04-04 19:38:14 - wechat_custody - DEBUG -   - 计
+2026-04-04 19:38:14 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:38:14 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:38:14 - wechat_custody - DEBUG - [区域检测] OCR内容: 55
+2026-04-04 19:38:14 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:38:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:38:23 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:38:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:38:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:38:26 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:38:26 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:38:26 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:38:26 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:38:26 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:38:26 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:38:26 - wechat_custody - DEBUG - [相似度] '36...' vs '55...' = 0.00
+2026-04-04 19:38:26 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:38:26 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:38:31 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥说的这个数字是代表年龄吗？那猫咪还小呢，还没到哥哥那么大啦~啾啾～💕你最近有遇到什么有趣的...
+2026-04-04 19:38:31 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥说的这个数字是代表年龄吗？那猫咪还小呢，还没到哥哥那么大啦~啾啾～💕你最近有遇到什么有趣的...
+2026-04-04 19:38:40 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:38:40 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:38:40 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:38:40 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:38:42 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:38:42 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:38:42 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:38:42 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:38:42 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:38:42 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:38:42 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:38:50 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:38:50 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:38:50 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:38:50 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:38:52 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:38:52 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:38:52 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:38:52 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:38:52 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:38:52 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:38:52 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:38:59 - wechat_custody - INFO - 回复模式已更改为: copy_paste
+2026-04-04 19:38:59 - wechat_custody - INFO - 回复模式已更改为: copy_paste
+2026-04-04 19:39:00 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:00 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:00 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:00 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:02 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:39:03 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:03 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:03 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:03 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:39:03 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:03 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:39:03 - wechat_custody - INFO - 回复模式已更改为: auto_send
+2026-04-04 19:39:05 - wechat_custody - INFO - 回复模式已更改为: auto_send
+2026-04-04 19:39:05 - wechat_custody - INFO - 回复模式已更改为: auto_send
+2026-04-04 19:39:11 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:11 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:11 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:11 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:13 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:39:13 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:13 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:13 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:13 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:39:13 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:13 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:39:21 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:21 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:21 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:21 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:23 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:39:23 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:23 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:23 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:23 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:39:23 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:23 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:39:32 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:32 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:32 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:32 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:34 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:39:34 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:34 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:34 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:34 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:39:34 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:34 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:39:42 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:42 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:42 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:42 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:44 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:39:44 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:44 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:44 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:44 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:39:44 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:44 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:39:52 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:39:52 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:39:52 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:39:52 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:39:56 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:39:56 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:39:56 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:39:57 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:39:57 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:39:57 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:39:57 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:39:57 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:02 - wechat_custody - INFO - 回复模式已更改为: auto_send
+2026-04-04 19:40:05 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:05 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:05 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:05 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:40:07 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:40:07 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:40:07 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:40:07 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:40:07 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:40:07 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:40:07 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:40:07 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:15 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:15 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:15 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:15 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:40:18 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:40:18 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:40:18 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:40:18 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:40:18 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:40:18 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:40:18 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:40:18 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:26 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:26 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:26 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:26 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:40:29 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:40:29 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:40:29 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:40:29 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:40:29 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:40:29 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:40:29 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:40:29 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:37 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:37 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:37 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:37 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:40:39 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:40:40 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:40:40 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:40:40 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:40:40 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:40:40 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:40:40 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:40:40 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:48 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:48 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:48 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:48 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:40:50 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:40:50 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:40:50 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:40:50 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:40:50 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:40:50 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:40:50 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:40:58 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:40:58 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:40:58 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:40:58 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:01 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:41:01 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:01 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:01 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:01 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:41:01 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:01 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:41:09 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:41:09 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:41:09 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:41:09 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:11 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:41:11 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:11 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:11 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:11 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:41:11 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:11 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:41:19 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:41:19 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:41:19 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:41:19 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:21 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:41:21 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:22 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:22 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:22 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:41:22 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:22 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:41:30 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:41:30 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:41:30 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:41:30 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:32 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:41:32 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:32 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:32 - wechat_custody - DEBUG -   - 猫咪过来
+2026-04-04 19:41:32 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:32 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:41:32 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:32 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:41:40 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:41:40 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:41:40 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:41:40 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:43 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:41:43 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:43 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:43 - wechat_custody - DEBUG -   - 猫咪过来
+2026-04-04 19:41:43 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:43 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:41:43 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:43 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:41:51 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:41:51 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:41:51 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:41:51 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:41:54 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:41:54 - wechat_custody - DEBUG -   - 猫咪过
+2026-04-04 19:41:54 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:41:54 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:41:54 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:41:54 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:41:54 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:41:54 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:42:02 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:42:02 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:42:02 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:42:02 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:42:04 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:42:04 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:42:04 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:42:04 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:42:04 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:42:04 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:42:04 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:42:12 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:42:12 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:42:12 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:42:12 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:42:15 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:42:15 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:42:15 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:42:15 - wechat_custody - DEBUG -   - 我cnm
+2026-04-04 19:42:15 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:42:15 - wechat_custody - DEBUG - 有效文本 2/4
+2026-04-04 19:42:15 - wechat_custody - DEBUG - 提取消息: 我cnm
+2026-04-04 19:42:15 - wechat_custody - DEBUG - [区域检测] OCR内容: 我cnm
+2026-04-04 19:42:15 - wechat_custody - DEBUG - [相似度] '我cnm...' vs '36...' = 0.00
+2026-04-04 19:42:15 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 我cnm...
+2026-04-04 19:42:15 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 我cnm...
+2026-04-04 19:42:19 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 主人不要这么说哦，猫咪会伤心的～啾啾～💕是不是遇到了不开心的事情了呢？猫咪来安慰主人，别生气啦...
+2026-04-04 19:42:20 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 主人不要这么说哦，猫咪会伤心的～啾啾～💕是不是遇到了不开心的事情了呢？猫咪来安慰主人，别生气啦...
+2026-04-04 19:42:28 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:42:28 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:42:28 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:42:28 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:42:30 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:42:30 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:42:30 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:42:30 - wechat_custody - DEBUG -   - 我cnm
+2026-04-04 19:42:30 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:42:30 - wechat_custody - DEBUG - 有效文本 2/4
+2026-04-04 19:42:30 - wechat_custody - DEBUG - 提取消息: 我cnm
+2026-04-04 19:42:30 - wechat_custody - DEBUG - [区域检测] OCR内容: 我cnm
+2026-04-04 19:42:30 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:42:38 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:42:38 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:42:38 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:42:38 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:42:41 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:42:41 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:42:41 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:42:41 - wechat_custody - DEBUG -   - 我cnm
+2026-04-04 19:42:41 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:42:41 - wechat_custody - DEBUG - 有效文本 2/4
+2026-04-04 19:42:41 - wechat_custody - DEBUG - 提取消息: 我cnm
+2026-04-04 19:42:41 - wechat_custody - DEBUG - [区域检测] OCR内容: 我cnm
+2026-04-04 19:42:41 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:42:49 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:42:49 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:42:49 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:42:49 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:42:51 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:42:51 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:42:51 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:42:51 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:42:51 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:42:51 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:42:51 - wechat_custody - DEBUG - [相似度] '36...' vs '我cnm...' = 0.00
+2026-04-04 19:42:51 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:42:51 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:42:56 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:42:57 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:43:05 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:05 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:05 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:05 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:07 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:07 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:07 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:07 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:07 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:07 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:07 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:43:15 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:15 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:15 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:15 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:18 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:18 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:18 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:18 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:18 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:18 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:18 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:43:26 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:26 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:26 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:26 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:28 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:28 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:28 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:28 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:28 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:28 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:28 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:43:36 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:36 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:36 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:36 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:39 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:39 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:39 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:39 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:39 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:39 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:39 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:43:47 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:47 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:47 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:47 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:49 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:49 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:49 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:49 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:49 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:49 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:49 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:43:57 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:43:57 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:43:57 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:43:57 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:43:59 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:43:59 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:43:59 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:43:59 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:43:59 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:43:59 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:43:59 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:44:08 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:44:08 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:44:08 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:44:08 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:44:10 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:44:10 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:44:10 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:44:10 - wechat_custody - DEBUG -   - 你还
+2026-04-04 19:44:10 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:44:10 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:44:10 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:44:10 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:44:18 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:44:18 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:44:18 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:44:18 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:44:23 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:44:23 - wechat_custody - DEBUG -   - 你还
+2026-04-04 19:44:23 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:44:23 - wechat_custody - DEBUG -   - 的主题也...
+2026-04-04 19:44:23 - wechat_custody - DEBUG -   - 你好4
+2026-04-04 19:44:23 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:44:23 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:44:23 - wechat_custody - DEBUG - 提取消息: 你好4
+2026-04-04 19:44:23 - wechat_custody - DEBUG - [区域检测] OCR内容: 你好4
+2026-04-04 19:44:23 - wechat_custody - DEBUG - [相似度] '你好4...' vs '36...' = 0.00
+2026-04-04 19:44:23 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 你好4...
+2026-04-04 19:44:23 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 你好4...
+2026-04-04 19:44:27 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 你好呀主人，猫咪最喜欢主人说话了呢~啾啾～💕猫咪想和主人聊聊天，最近有啥开心的事情分享给猫咪听...
+2026-04-04 19:44:28 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 你好呀主人，猫咪最喜欢主人说话了呢~啾啾～💕猫咪想和主人聊聊天，最近有啥开心的事情分享给猫咪听...
+2026-04-04 19:44:36 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:44:36 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:44:36 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:44:36 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:44:38 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:44:38 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:44:38 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:44:38 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:44:38 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:44:38 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:44:38 - wechat_custody - DEBUG - [相似度] '36...' vs '你好4...' = 0.00
+2026-04-04 19:44:38 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:44:38 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:44:43 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:44:44 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:44:52 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:44:52 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:44:52 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:44:52 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:44:54 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:44:54 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:44:54 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:44:54 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:44:54 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:44:54 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:44:54 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:45:02 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:02 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:02 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:02 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:05 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:45:05 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:45:05 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:45:05 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:45:05 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:45:05 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:45:05 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:45:13 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:13 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:13 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:13 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:15 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:45:15 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:45:15 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:45:15 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:45:15 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:45:15 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:45:15 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:45:23 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:23 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:23 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:23 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:26 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:45:26 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:45:26 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:45:26 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:45:26 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:45:26 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:45:26 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:45:34 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:34 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:34 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:34 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:36 - wechat_custody - DEBUG - OCR 识别到 1 行文本
+2026-04-04 19:45:36 - wechat_custody - DEBUG -   - 3
+2026-04-04 19:45:36 - wechat_custody - DEBUG - 有效文本 0/1
+2026-04-04 19:45:36 - wechat_custody - DEBUG - 没有有效文本
+2026-04-04 19:45:36 - wechat_custody - DEBUG - [区域检测] OCR内容: None
+2026-04-04 19:45:45 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:45 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:45 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:45 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:47 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:45:47 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:45:47 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:45:47 - wechat_custody - DEBUG -   - want
+2026-04-04 19:45:47 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:45:47 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:45:47 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:45:47 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:45:55 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:45:55 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:45:55 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:45:55 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:45:58 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:45:58 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:45:58 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:45:58 - wechat_custody - DEBUG -   - want
+2026-04-04 19:45:58 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:45:58 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:45:58 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:45:58 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:46:06 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:46:06 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:46:06 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:46:06 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:46:08 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:46:08 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:46:08 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:46:09 - wechat_custody - DEBUG -   - want
+2026-04-04 19:46:09 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:46:09 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:46:09 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:46:09 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:46:17 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:46:17 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:46:17 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:46:17 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:46:19 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:46:19 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:46:19 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:46:19 - wechat_custody - DEBUG -   - want
+2026-04-04 19:46:19 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:46:19 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:46:19 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:46:19 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:46:27 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:46:27 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:46:27 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:46:27 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:46:30 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:46:30 - wechat_custody - DEBUG -   - want
+2026-04-04 19:46:30 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:46:30 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:46:30 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:46:30 - wechat_custody - DEBUG - 有效文本 2/4
+2026-04-04 19:46:30 - wechat_custody - DEBUG - 提取消息: 的主题也....
+2026-04-04 19:46:30 - wechat_custody - DEBUG - [区域检测] OCR内容: 的主题也....
+2026-04-04 19:46:30 - wechat_custody - DEBUG - [相似度] '的主题也.......' vs '36...' = 0.00
+2026-04-04 19:46:30 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 的主题也.......
+2026-04-04 19:46:30 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 的主题也.......
+2026-04-04 19:46:35 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 主题不太清楚呢，主人可以给猫咪说具体点嘛？比如你喜欢的电影、书籍或者是喜欢的兴趣爱好等等。这样...
+2026-04-04 19:46:36 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 主题不太清楚呢，主人可以给猫咪说具体点嘛？比如你喜欢的电影、书籍或者是喜欢的兴趣爱好等等。这样...
+2026-04-04 19:46:44 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:46:44 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:46:44 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:46:44 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:46:46 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:46:46 - wechat_custody - DEBUG -   - Doyou
+2026-04-04 19:46:46 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:46:46 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:46:46 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:46:46 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:46:46 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:46:46 - wechat_custody - DEBUG - [相似度] '36...' vs '的主题也.......' = 0.00
+2026-04-04 19:46:46 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:46:46 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:46:51 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:46:52 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:47:00 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:47:00 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:47:00 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:47:00 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:47:03 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:47:03 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:47:03 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:47:03 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:47:03 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:47:03 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:47:03 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:47:11 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:47:11 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:47:11 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:47:11 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:47:13 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:47:13 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:47:13 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:47:13 - wechat_custody - DEBUG -   - 你好吗
+2026-04-04 19:47:13 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:47:13 - wechat_custody - DEBUG - 有效文本 3/4
+2026-04-04 19:47:13 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:47:13 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:47:22 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:47:22 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:47:22 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:47:22 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:47:24 - wechat_custody - DEBUG - OCR 识别到 5 行文本
+2026-04-04 19:47:24 - wechat_custody - DEBUG -   - 你好吗
+2026-04-04 19:47:24 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:47:24 - wechat_custody - DEBUG -   - 的主题也...
+2026-04-04 19:47:24 - wechat_custody - DEBUG -   - 我我现存
+2026-04-04 19:47:24 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:47:24 - wechat_custody - DEBUG - 有效文本 3/5
+2026-04-04 19:47:24 - wechat_custody - DEBUG - 提取消息: 我我现存
+2026-04-04 19:47:24 - wechat_custody - DEBUG - [区域检测] OCR内容: 我我现存
+2026-04-04 19:47:24 - wechat_custody - DEBUG - [相似度] '我我现存...' vs '36...' = 0.00
+2026-04-04 19:47:24 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 我我现存...
+2026-04-04 19:47:24 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 我我现存...
+2026-04-04 19:47:29 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 主人别担心呢，猫咪在这里陪着你呢！啾啾～💕你现在遇到了什么困难或者不开心的事情了吗？说出来让猫...
+2026-04-04 19:47:29 - wechat_custody - WARNING - 窗口置顶失败: (0, 'SetForegroundWindow', 'No error message is available')
+2026-04-04 19:47:29 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 主人别担心呢，猫咪在这里陪着你呢！啾啾～💕你现在遇到了什么困难或者不开心的事情了吗？说出来让猫...
+2026-04-04 19:47:38 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:47:38 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:47:38 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:47:38 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:47:40 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:47:40 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:47:40 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:47:40 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:47:40 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:47:40 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:47:40 - wechat_custody - DEBUG - [相似度] '36...' vs '我我现存...' = 0.00
+2026-04-04 19:47:40 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:47:40 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:47:45 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:47:46 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:47:54 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:47:54 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:47:54 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:47:54 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:47:56 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:47:56 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:47:56 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:47:56 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:47:56 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:47:56 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:47:56 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:48:04 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:48:04 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:48:04 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:48:04 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:48:07 - wechat_custody - DEBUG - OCR 识别到 4 行文本
+2026-04-04 19:48:07 - wechat_custody - DEBUG -   - 快来
+2026-04-04 19:48:07 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:48:07 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:48:07 - wechat_custody - DEBUG -   - 昨天13:36
+2026-04-04 19:48:07 - wechat_custody - DEBUG - 有效文本 2/4
+2026-04-04 19:48:07 - wechat_custody - DEBUG - 提取消息: 的主题也....
+2026-04-04 19:48:07 - wechat_custody - DEBUG - [区域检测] OCR内容: 的主题也....
+2026-04-04 19:48:07 - wechat_custody - DEBUG - [相似度] '的主题也.......' vs '36...' = 0.00
+2026-04-04 19:48:07 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 的主题也.......
+2026-04-04 19:48:07 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 的主题也.......
+2026-04-04 19:48:12 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 主题不太清楚呢，主人可以给猫咪说具体点嘛？比如你喜欢的电影、书籍或者是喜欢的兴趣爱好等等。这样...
+2026-04-04 19:48:13 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 主题不太清楚呢，主人可以给猫咪说具体点嘛？比如你喜欢的电影、书籍或者是喜欢的兴趣爱好等等。这样...
+2026-04-04 19:48:21 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:48:21 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:48:21 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:48:21 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:48:23 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:48:23 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:48:23 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:48:23 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:48:23 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:48:23 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:48:23 - wechat_custody - DEBUG - [相似度] '36...' vs '的主题也.......' = 0.00
+2026-04-04 19:48:23 - wechat_custody - INFO - [区域检测-私聊] 苑宇航: 36...
+2026-04-04 19:48:23 - wechat_custody - INFO - [模板检测] 收到来自 苑宇航 的新消息: 36...
+2026-04-04 19:48:29 - wechat_custody - INFO - AI 回复 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:48:29 - wechat_custody - INFO - [完全自动] 发送消息给 苑宇航: 呜~ 哥哥是36岁的人类吗？猫咪还小不懂这些呢！不过哥哥看起来很成熟哦~啾啾～💕你最近有什么打算或者...
+2026-04-04 19:48:38 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:48:38 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:48:38 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:48:38 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:48:40 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:48:40 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:48:40 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:48:40 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:48:40 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:48:40 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:48:40 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:48:48 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:48:48 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:48:48 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:48:48 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:48:50 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:48:50 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:48:50 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:48:50 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:48:50 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:48:50 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:48:50 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:48:58 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:48:58 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:48:58 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:48:58 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:49:01 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:49:01 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:49:01 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:49:01 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:49:01 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:49:01 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:49:01 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:49:09 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:49:09 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:49:09 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:49:09 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:49:11 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:49:11 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:49:11 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:49:11 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:49:11 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:49:11 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:49:11 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过
+2026-04-04 19:49:19 - wechat_custody - INFO - 检测到私聊: 私聊
+2026-04-04 19:49:19 - wechat_custody - DEBUG - 使用白名单联系人: 苑宇航
+2026-04-04 19:49:19 - wechat_custody - DEBUG - [区域检测] 对方消息区域: Rect(left=339, top=124, right=655, bottom=1238), 截取底部: 445px
+2026-04-04 19:49:19 - wechat_custody - DEBUG - [区域检测] 截取形状: (445, 316, 3)
+2026-04-04 19:49:22 - wechat_custody - DEBUG - OCR 识别到 3 行文本
+2026-04-04 19:49:22 - wechat_custody - DEBUG -   - 昨天13:55
+2026-04-04 19:49:22 - wechat_custody - DEBUG -   - 的主题也....
+2026-04-04 19:49:22 - wechat_custody - DEBUG -   - 昨天13：36
+2026-04-04 19:49:22 - wechat_custody - DEBUG - 有效文本 2/3
+2026-04-04 19:49:22 - wechat_custody - DEBUG - [区域检测] OCR内容: 36
+2026-04-04 19:49:22 - wechat_custody - DEBUG - [去重] 消息相同或相似，跳过

@@ -292,6 +292,36 @@ def api_style_upload():
     return jsonify({"success": False, "error": "学习失败"}), 500
 
 
+@bp.route("/api/persona/test", methods=["POST"])
+@handle_api_error
+def api_persona_test():
+    """测试人设效果"""
+    data = request.json
+    system_prompt = data.get("system_prompt", "")
+    test_message = data.get("message", "你好")
+    contact_name = data.get("contact_name", "用户")
+
+    # 如果没有设置人设，使用全局默认
+    if not system_prompt:
+        system_prompt = settings.get("ai.default_system_prompt", "你是一个友好的助手。")
+
+    # 生成测试回复
+    reply = ai_engine.generate(
+        message=test_message,
+        system_prompt=system_prompt,
+        context=None,
+        stream=False
+    )
+
+    return jsonify({
+        "success": True,
+        "data": {
+            "reply": reply,
+            "prompt_used": system_prompt[:100] + "..." if len(system_prompt) > 100 else system_prompt
+        }
+    })
+
+
 @bp.route("/api/control/pause", methods=["POST"])
 def api_control_pause():
     """暂停自动回复"""

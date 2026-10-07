@@ -118,10 +118,13 @@ class MessageHandler:
             context_data = await db.get_conversation_context(contact.id)
             context = json.loads(context_data.context_json) if context_data.context_json else []
 
-            # 获取系统提示词
+            # 获取系统提示词（优先使用联系人专属人设，否则使用全局默认人设）
             system_prompt = contact.system_prompt
+            if not system_prompt:
+                # 使用全局默认人设
+                system_prompt = None  # 让 ai_engine 使用默认值
 
-            # 如果有风格档案，生成提示词
+            # 如果有风格档案，基于风格档案生成提示词
             if contact.style_profile:
                 try:
                     style_profile = json.loads(contact.style_profile)
@@ -130,8 +133,11 @@ class MessageHandler:
                         style_profile,
                         base_name=contact.name
                     )
-                except:
-                    pass
+                except Exception as e:
+                    logger.warning(f"生成风格提示词失败: {e}")
+                    # 风格生成失败，使用原提示词
+                    if not system_prompt:
+                        system_prompt = None
 
             # 调用 AI 生成回复
             reply = ai_engine.generate(

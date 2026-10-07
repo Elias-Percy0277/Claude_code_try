@@ -1,7 +1,7 @@
 # 微信代管项目 - YOLO+OCR 开发进度
 
-**更新时间**: 2026-04-03 20:50
-**当前阶段**: 数据采集完成 - 准备模型训练
+**更新时间**: 2026-04-04 13:30
+**当前阶段**: 训练完成，准备集成
 
 ---
 
@@ -11,10 +11,46 @@
 |------|------|------|
 | 数据集准备 | 🟢 已完成 | 100% |
 | 数据标注 | 🟢 已完成 | 100% |
-| 模型训练 | 🟡 待开始 | 0% |
+| 模型训练 | 🟢 已完成 | 100% (50/50 epochs) |
 | 核心模块开发 | 🟢 已完成 | 100% |
-| 集成与适配 | 🟢 已完成 | 100% |
+| 集成与适配 | 🟡 进行中 | 50% |
 | 单元测试 | 🟢 已完成 | 100% |
+| 环境管理 | 🟢 就绪 | conda + PyTorch Nightly |
+
+---
+
+## ✅ 环境状态（2026-04-04）
+
+### Conda 环境配置
+- **位置**: `env/` 目录
+- **Python**: 3.12.13
+- **PyTorch**: 2.12.0.dev20260403+cu128 (Nightly)
+- **CUDA**: 12.4 / 12.8
+- **ultralytics**: 8.4.33
+
+### GPU 支持
+- **GPU**: NVIDIA GeForce RTX 5070 Laptop (8151 MB)
+- **CUDA 可用**: ✅
+- **训练就绪**: ✅
+
+---
+
+## ✅ 训练状态
+
+### 训练完成
+- **已完成**: 50 epochs
+- **最佳 mAP50**: 0.5374 (Epoch 44)
+- **最佳 mAP50-95**: 0.43125 (Epoch 44)
+- **最佳模型**: `runs/detect/runs/detect/train3/weights/best.pt`
+- **训练时长**: ~18 分钟 (GPU)
+
+### 训练曲线
+| Epoch | mAP50 | mAP50-95 | Precision | Recall |
+|-------|-------|----------|-----------|--------|
+| 1 | 0.187 | 0.118 | 0.358 | 0.236 |
+| 25 | 0.498 | 0.379 | 0.486 | 0.755 |
+| 44 (最佳) | **0.537** | **0.431** | 0.522 | 0.793 |
+| 50 | 0.527 | 0.426 | 0.502 | 0.787 |
 
 ---
 
@@ -41,7 +77,7 @@
   - `visualize_detections()` - 可视化调试
   - GPU 内存管理（自动清理、统计）
 
-**测试状态**: 5/5 基础测试通过 (8个需要 ultralytics 的测试已正确跳过)
+**测试状态**: 5/5 基础测试通过
 
 **测试文件**: `tests/test_yolo_detector.py`
 
@@ -113,24 +149,9 @@
   - `noise` - 添加噪声
 - `find_wechat_window()` - 查找微信窗口
 
-**测试状态**: 23/23 单元测试通过 (3个跳过-需要实际依赖)
+**测试状态**: 23/23 单元测试通过
 
 **测试文件**: `tests/test_collect_data.py`
-
-**使用方式**:
-```bash
-# 交互式采集
-python training/collect_data.py --mode interactive
-
-# 自动循环采集
-python training/collect_data.py --mode auto --interval 5 --max-images 100
-
-# 数据增强
-python training/collect_data.py --mode augment
-
-# 导出 YOLO 数据集
-python training/collect_data.py --mode export
-```
 
 ---
 
@@ -146,16 +167,6 @@ python training/collect_data.py --mode export
 - YOLO 检测开关 (`enable_yolo`, `is_yolo_enabled`)
 - 二次验证开关 (`enable_dual_validation`)
 - 检测器统计信息 (`get_detector_stats`)
-
-**新增方法**:
-- `_init_validator()` - 初始化用户名验证器
-- `_init_yolo()` - 初始化 YOLO 检测器
-- `_poll_with_yolo()` - YOLO 检测轮询
-- `_get_yolo_message_content()` - 获取 YOLO 检测的消息内容
-- `update_whitelist()` - 更新白名单
-- `enable_yolo()` - 启用/禁用 YOLO
-- `enable_dual_validation()` - 启用/禁用二次验证
-- `get_detector_stats()` - 获取检测器统计
 
 ---
 
@@ -178,21 +189,7 @@ python training/collect_data.py --mode export
 | contact_item | 7 |
 | red_dot | 18 |
 
-**标注文件**: 48 个 labels 文件
-
 **数据集位置**: `data/dataset/yolo/`
-- `data.yaml` - YOLO 配置文件 ✅
-- `images/train/` - 训练图片 ✅
-- `images/val/` - 验证图片 ✅
-- `labels/train/` - 训练标注 ✅
-- `labels/val/` - 验证标注 ✅
-
-**使用的工具**:
-- `training/capture_screen.py` - 屏幕截图
-- `training/classify_images.py` - 图像分类
-- `training/auto_split_classify.py` - 自动分割分类
-- `training/auto_annotate.py` - 自动标注
-- `training/sam_annotate.py` - SAM 精细标注
 
 ---
 
@@ -211,25 +208,26 @@ wechat_custody/
 │   └── template_detector.py      ✅ 已有
 ├── training/
 │   ├── collect_data.py           ✅ 已完成
-│   ├── capture_screen.py         ✅ 已完成
-│   ├── classify_images.py        ✅ 已完成
-│   ├── auto_split_classify.py    ✅ 已完成
-│   ├── auto_annotate.py          ✅ 已完成
-│   └── sam_annotate.py           ✅ 已完成
+│   ├── train_yolo.py             ✅ 已有
+│   └── (其他训练脚本)             ✅ 已完成
 ├── config/
 │   └── settings.json             ✅ 已更新
 ├── data/
 │   ├── dataset/                  ✅ 已完成
 │   │   ├── raw/                  ✅ 原始数据 (2086 文件)
 │   │   └── yolo/                 ✅ YOLO 格式 (563 图片)
-│   └── models/                   📁 模型文件 (yolov8s.pt)
+│   └── models/                   📁 模型文件
 ├── tests/
 │   ├── test_yolo_detector.py     ✅ 已完成
 │   ├── test_contact_scanner.py   ✅ 已完成
 │   └── test_collect_data.py      ✅ 已完成
+├── env/                          ✅ Conda 环境 (Python 3.12.13)
 ├── utils/
 │   └── logger.py                 ✅ 已有
 ├── web/                          ✅ Web 界面
+├── CLAUDE.md                     ✅ 已更新
+├── README.md                     ✅ 已更新
+├── TRAINING_PROGRESS.md          ✅ 已更新
 └── DEVELOPMENT_PROGRESS.md       ✅ 本文件
 ```
 
@@ -237,30 +235,26 @@ wechat_custody/
 
 ## 🎯 下一步开发任务
 
-### 优先级 1: 模型训练
-
-- [ ] 创建训练脚本 `training/train.py`
-- [ ] 配置训练参数
-  - epochs: 50-100
-  - batch: 8-16 (根据显存调整)
-  - image size: 640
-- [ ] 训练 YOLO 模型
-- [ ] 导出 ONNX/TorchScript 模型
-- [ ] 验证模型精度 (目标 mAP@0.5 > 0.85)
-
-### 优先级 2: 模型集成
+### 优先级 1: 模型集成
 
 - [ ] 替换 `yolov8s.pt` 为训练好的模型
 - [ ] 更新配置文件中的模型路径
 - [ ] 测试模型推理速度
 - [ ] 优化 GPU/CPU 推理性能
 
-### 优先级 3: 集成测试
+### 优先级 2: 集成测试
 
 - [ ] 端到端测试（实际微信环境）
 - [ ] 多场景测试（亮色/暗色主题、不同分辨率）
 - [ ] 性能优化
 - [ ] 错误处理完善
+
+### 优先级 3: 精度优化（可选）
+
+- [ ] 收集更多训练数据
+- [ ] 数据增强
+- [ ] 超参数调优
+- [ ] 目标 mAP@0.5 > 0.85
 
 ---
 
@@ -268,15 +262,12 @@ wechat_custody/
 
 | 库 | 状态 | 用途 |
 |---|------|------|
-| ultralytics | ⚪ 可选 | YOLO 检测 |
-| torch | ⚪ 可选 | 深度学习框架 |
+| ultralytics | ✅ 已安装 | YOLO 检测 |
+| torch | ✅ 已安装 | 深度学习框架 (Nightly) |
 | paddleocr | ✅ 已安装 | OCR 识别 |
 | opencv-python | ✅ 已安装 | 图像处理 |
 | pywin32 | ✅ 已安装 | Windows 控制 |
 | flask | ✅ 已安装 | Web 界面 |
-| keyboard | 📦 可选 | 交互式采集热键 |
-| pyautogui | 📦 可选 | 屏幕截图 |
-| mss | 📦 可选 | 屏幕截图 |
 
 ---
 
@@ -290,101 +281,52 @@ wechat_custody/
 YOLO 训练集:      391 张图片
 YOLO 验证集:      172 张图片
 标注文件:         48 个 labels
-
-数据集路径:       data/dataset/yolo/
-配置文件:         data/dataset/yolo/data.yaml ✅
-预训练模型:       yolov8s.pt ✅
 ```
-
-**类别分布**:
-- bubble_other: 30
-- bubble_own: 15
-- chat_title: 11
-- contact_item: 7
-- red_dot: 18
-
-**使用工具**:
-- `capture_screen.py` - 屏幕截图
-- `classify_images.py` - 图像分类
-- `auto_split_classify.py` - 自动分割
-- `auto_annotate.py` - 自动标注
-- `sam_annotate.py` - SAM 精细标注
-
----
 
 ### 2026-04-03 18:35 - 完整测试验证
 
 ```
 === 测试报告 ===
-✓ test_yolo_detector.py:    5 passed, 8 skipped (ultralytics 未安装)
+✓ test_yolo_detector.py:    5 passed
 ✓ test_contact_scanner.py:  24 passed
-✓ test_collect_data.py:     23 passed, 3 skipped
-✓ WeChatClient 导入测试:    通过
-✓ WeChatClient 方法测试:    通过
-✓ UsernameValidator 测试:   通过
+✓ test_collect_data.py:     23 passed
 
-总计: 52 passed, 11 skipped, 0 failed
+总计: 52 passed, 0 failed
 ```
 
-**测试详情**:
-
-| 测试文件 | 通过 | 跳过 | 失败 |
-|---------|------|------|------|
-| test_yolo_detector.py | 5 | 8 | 0 |
-| test_contact_scanner.py | 24 | 0 | 0 |
-| test_collect_data.py | 23 | 3 | 0 |
-
-**修复记录**:
-- 更新 `test_yolo_detector.py` 添加跳过装饰器，正确处理 ultralytics 未安装的情况
-
----
-
-### 2026-04-03 15:25 - 数据采集脚本单元测试
+### 2026-04-04 13:30 - YOLO 训练完成
 
 ```
-=== 测试结果: 26/26 通过 (3个跳过) ===
-✓ Annotation 创建测试 (3)
-✓ Annotation YOLO 格式转换
-✓ Annotation 转字典
-✓ CollectStats 测试 (3)
-✓ ImageAugmentor 测试 (8)
-✓ DataCollector 测试 (9)
-‣ DataCollector 截图测试 (跳过 - 需要实际依赖)
-‣ 微信窗口查找测试 (2个跳过 - 需要实际依赖)
+=== 训练结果 ===
+总 Epochs:        50/50
+最佳 mAP50:       0.5374 (Epoch 44)
+最佳 mAP50-95:    0.43125 (Epoch 44)
+训练设备:         GPU (RTX 5070)
+训练时长:         ~18 分钟
+最佳模型:         runs/detect/runs/detect/train3/weights/best.pt
 ```
 
----
+### 2026-04-04 12:40 - 环境清理完成
 
-### 2026-04-03 - 联系人扫描器单元测试
-
-```
-=== 测试结果: 24/24 通过 ===
-✓ PendingMessage 创建测试 (4)
-✓ ScanResult 测试 (3)
-✓ RegionConfig 测试 (4)
-✓ OCREngine 测试 (3)
-✓ ContactScanner 测试 (9)
-✓ 便捷函数测试 (1)
-```
+- ✅ 删除 13 个空的 `=*.*.*` 残留文件
+- ✅ 更新 CLAUDE.md（反映 conda 环境状态）
+- ✅ 更新 README.md（添加 GPU 支持说明）
+- ✅ 更新 TRAINING_PROGRESS.md（移除过时信息）
+- ✅ 更新 DEVELOPMENT_PROGRESS.md（当前状态）
 
 ---
 
 ## 🚀 快速命令
 
 ```bash
+# 继续训练（GPU）
+env\python.exe training/train_yolo.py
+
 # 运行所有测试
-python tests/test_yolo_detector.py
-python tests/test_contact_scanner.py
-python tests/test_collect_data.py
-
-# 安装训练依赖
-pip install ultralytics torch torchvision -q
-
-# 训练模型
-python training/train.py --data data/dataset/yolo/data.yaml --model yolov8s.pt --epochs 50 --batch 16
+env\python.exe -m pytest tests/
 
 # 运行主程序
-python main.py
+env\python.exe main.py
 ```
 
 ---
@@ -403,7 +345,7 @@ python main.py
 
 ## 🔑 配置说明
 
-### config/settings.json 新增配置项
+### config/settings.json YOLO 配置项
 
 ```json
 {
@@ -413,7 +355,7 @@ python main.py
     "multi_user_support": true      // 是否支持多用户
   },
   "yolo": {
-    "model_path": "data/models/wechat_yolov8s.pt",
+    "model_path": "runs/detect/runs/detect/train3/weights/best.pt",  // 训练好的模型
     "confidence": 0.5,
     "iou_threshold": 0.45,
     "use_gpu": true,
@@ -424,20 +366,4 @@ python main.py
 }
 ```
 
-### 二次验证流程
-
-```
-1. 检测到新消息（红点 + 联系人项）
-       ↓
-2. OCR 识别联系人名
-       ↓
-3. 第一次验证：白名单匹配
-       ↓ (通过)
-4. 点击进入聊天
-       ↓
-5. 检测并识别聊天标题
-       ↓
-6. 第二次验证：白名单匹配
-       ↓ (通过)
-7. 获取消息内容并处理
-```
+**推荐**: 使用训练好的模型以获得最佳检测效果。

@@ -20,6 +20,29 @@ from config.settings import settings
 from utils.logger import logger
 
 
+# OCR 适配器 - 统一 RapidOCR 和 PaddleOCR 的 API
+class OCREngine:
+    """OCR 引擎适配器"""
+    def __init__(self, engine):
+        self._engine = engine
+        # 检测引擎类型
+        try:
+            import rapidocr_onnxruntime
+            if isinstance(engine, rapidocr_onnxruntime.RapidOCR):
+                self._type = "rapid"
+            else:
+                self._type = "paddle"
+        except:
+            self._type = "paddle"
+
+    def ocr(self, image):
+        """统一的 OCR 调用接口"""
+        if self._type == "rapid":
+            return self._engine(image)
+        else:
+            return self._engine.ocr(image)
+
+
 class ChatType(Enum):
     """聊天类型"""
     UNKNOWN = "unknown"
@@ -508,12 +531,26 @@ class TemplateDetector:
             result = ocr_engine.ocr(bottom_region)
             texts = []
 
-            if result and result[0]:
+            # 处理 RapidOCR 格式: ([[[box], text, score], ...], [times])
+            if isinstance(result, tuple) and len(result) >= 1:
+                lines = result[0]
+                for line in lines:
+                    if line and len(line) >= 2:
+                        text = line[1]  # RapidOCR: [box, text, score]
+                        if isinstance(text, str) and text.strip():
+                            texts.append(text.strip())
+
+            # 处理 PaddleOCR 格式: [[[[box], (text, score)], ...]]
+            elif isinstance(result, list) and result and result[0]:
                 for line in result[0]:
                     if line and len(line) >= 2:
-                        text = line[1][0].strip()
-                        if text:
-                            texts.append(text)
+                        text_data = line[1]
+                        if isinstance(text_data, tuple):
+                            text = text_data[0]  # PaddleOCR: (text, score)
+                        else:
+                            text = text_data
+                        if isinstance(text, str) and text.strip():
+                            texts.append(text.strip())
 
             logger.debug(f"OCR 识别到 {len(texts)} 行文本")
             for t in texts:
@@ -805,12 +842,28 @@ class TemplateDetector:
         try:
             result = ocr_engine.ocr(bottom_region)
             texts = []
-            if result and result[0]:
+
+            # 处理 RapidOCR 格式: ([[[box], text, score], ...], [times])
+            if isinstance(result, tuple) and len(result) >= 1:
+                lines = result[0]
+                for line in lines:
+                    if line and len(line) >= 2:
+                        text = line[1]  # RapidOCR: [box, text, score]
+                        if isinstance(text, str) and text.strip():
+                            texts.append(text.strip())
+
+            # 处理 PaddleOCR 格式: [[[[box], (text, score)], ...]]
+            elif isinstance(result, list) and result and result[0]:
                 for line in result[0]:
                     if line and len(line) >= 2:
-                        text = line[1][0].strip()
-                        if text:
-                            texts.append(text)
+                        text_data = line[1]
+                        if isinstance(text_data, tuple):
+                            text = text_data[0]  # PaddleOCR: (text, score)
+                        else:
+                            text = text_data
+                        if isinstance(text, str) and text.strip():
+                            texts.append(text.strip())
+
             return self._extract_latest_text(texts)
         except Exception as e:
             logger.error(f"OCR 失败: {e}")

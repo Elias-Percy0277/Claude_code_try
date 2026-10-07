@@ -6,7 +6,7 @@
 """
 import asyncio
 import threading
-from typing import TypeVar
+from typing import TypeVar, Awaitable
 
 T = TypeVar('T')
 
@@ -22,7 +22,7 @@ def get_event_loop() -> asyncio.AbstractEventLoop:
     return _loop_local.loop
 
 
-def run_async(coro: asyncioAwaitable[T]) -> T:
+def run_async(coro: Awaitable[T]) -> T:
     """
     运行异步函数（复用事件循环）
 

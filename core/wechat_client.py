@@ -29,8 +29,16 @@ except ImportError:
     PADDLEOCR_AVAILABLE = False
     PaddleOCR = None
 
+# RapidOCR - 更稳定的替代方案
+try:
+    from rapidocr_onnxruntime import RapidOCR
+    RAPIDOCR_AVAILABLE = True
+except ImportError:
+    RAPIDOCR_AVAILABLE = False
+    RapidOCR = None
+
 from config.settings import settings
-from core.template_detector import template_detector, get_template
+from core.template_detector import template_detector, get_template, OCREngine
 from utils.logger import logger
 
 # YOLO 检测器 - 延迟导入
@@ -123,25 +131,35 @@ class WeChatClient:
         logger.info(f"WeChatClient 初始化完成（检测模式: {self._detection_mode}, YOLO: {self._yolo_enabled}, 二次验证: {self._dual_validation}）")
 
     def _init_ocr(self):
-        """初始化 OCR 引擎"""
+        """初始化 OCR 引擎 - 优先使用 RapidOCR"""
         if self._ocr_engine is not None:
             return self._ocr_engine
 
-        if not PADDLEOCR_AVAILABLE:
-            logger.error("PaddleOCR 未安装，请运行: pip install paddleocr paddlepaddle")
-            return None
+        # 优先使用 RapidOCR（更稳定）
+        if RAPIDOCR_AVAILABLE:
+            try:
+                self._ocr_engine = RapidOCR()
+                logger.info("RapidOCR 初始化成功")
+                self._ocr_type = "rapid"
+                return self._ocr_engine
+            except Exception as e:
+                logger.warning(f"RapidOCR 初始化失败: {e}")
 
-        try:
-            # PaddleOCR 新版本参数简化
-            self._ocr_engine = PaddleOCR(
-                use_angle_cls=True,
-                lang='ch'
-            )
-            logger.info("PaddleOCR 初始化成功")
-            return self._ocr_engine
-        except Exception as e:
-            logger.error(f"PaddleOCR 初始化失败: {e}")
-            return None
+        # 降级使用 PaddleOCR
+        if PADDLEOCR_AVAILABLE:
+            try:
+                self._ocr_engine = PaddleOCR(
+                    use_angle_cls=True,
+                    lang='ch'
+                )
+                logger.info("PaddleOCR 初始化成功")
+                self._ocr_type = "paddle"
+                return self._ocr_engine
+            except Exception as e:
+                logger.warning(f"PaddleOCR 初始化失败: {e}")
+
+        logger.error("无可用 OCR 引擎")
+        return None
 
     def _init_validator(self):
         """初始化用户名验证器"""
@@ -339,15 +357,30 @@ class WeChatClient:
             return []
 
         try:
-            # PaddleOCR 新版本不支持 cls 参数
-            result = ocr.ocr(image)
+            result = ocr(image)  # RapidOCR 和 PaddleOCR 都支持直接调用
             texts = []
-            if result and result[0]:
+
+            # 处理 RapidOCR 格式: ([[[box], text, score], ...], [times])
+            if isinstance(result, tuple) and len(result) >= 1:
+                lines = result[0]
+                for line in lines:
+                    if line and len(line) >= 2:
+                        text = line[1]  # RapidOCR: [box, text, score]
+                        if isinstance(text, str) and text.strip():
+                            texts.append(text.strip())
+
+            # 处理 PaddleOCR 格式: [[[[box], (text, score)], ...]]
+            elif isinstance(result, list) and result and result[0]:
                 for line in result[0]:
                     if line and len(line) >= 2:
-                        text = line[1][0]  # 获取识别的文本
-                        if text:
+                        text_data = line[1]
+                        if isinstance(text_data, tuple):
+                            text = text_data[0]  # PaddleOCR: (text, score)
+                        else:
+                            text = text_data
+                        if isinstance(text, str) and text.strip():
                             texts.append(text.strip())
+
             return texts
         except Exception as e:
             logger.error(f"OCR 识别失败: {e}")
@@ -462,12 +495,15 @@ class WeChatClient:
                 self._username_validator.update_whitelist(WhitelistConfig(users=contacts))
                 logger.info(f"验证器白名单已更新，共 {len(contacts)} 个用户")
 
-            # 初始化 OCR
+            # 初始化 OCR（模板模式需要 OCR 提取消息内容）
             self._init_ocr()
             if self._ocr_engine is None:
-                logger.error("OCR 初始化失败，无法启动监听")
-                self._running = False
-                return
+                # OCR 初始化失败时的降级处理
+                if self._detection_mode in ["hybrid", "ocr_only"]:
+                    logger.warning("OCR 初始化失败，切换到纯模板检测模式")
+                    self._detection_mode = "template"
+                # template 模式可以在没有 OCR 的情况下运行（仅检测不提取内容）
+                logger.info("使用纯模板检测模式（无 OCR）")
 
             # 启动轮询线程
             self._listen_thread = Thread(target=self._poll_messages, daemon=True)
@@ -528,6 +564,9 @@ class WeChatClient:
                 logger.debug("OCR 未初始化，跳过检测")
                 return
 
+            # 使用 OCR 适配器包装（统一 RapidOCR 和 PaddleOCR API）
+            ocr_adapter = OCREngine(ocr)
+
             # 使用屏幕尺寸（与校准工具匹配）
             screen_height, screen_width = screenshot.shape[:2]
             screen_rect = (0, 0, screen_width, screen_height)
@@ -537,7 +576,7 @@ class WeChatClient:
                 screenshot=screenshot,
                 window_rect=screen_rect,
                 whitelist_contacts=self._whitelist_contacts,
-                ocr_engine=ocr
+                ocr_engine=ocr_adapter
             )
 
             for msg_data in detected_messages:

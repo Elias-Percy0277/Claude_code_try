@@ -96,10 +96,17 @@
                             加入白名单（启用自动回复）
                         </label>
                     </div>
+                    <hr class="my-4">
                     <div class="mb-3">
-                        <label class="form-label">自定义系统提示词（可选）</label>
-                        <textarea class="form-control" name="system_prompt" rows="3"
-                                  placeholder="例如：你是一个幽默的朋友，喜欢用表情包..."></textarea>
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-person-badge me-2 text-primary"></i>
+                            <strong>专属 AI 人设</strong> <span class="text-muted ms-2">(可选)</span>
+                        </label>
+                        <div class="form-text mb-2">
+                            为此联系人设置专属人设，AI 将以此人设风格回复。留空则使用全局默认人设。
+                        </div>
+                        <textarea class="form-control" name="system_prompt" id="addSystemPrompt" rows="4"
+                                  placeholder="例如：你是一个幽默的朋友，喜欢用表情包和轻松的语气回复..."></textarea>
                     </div>
                 </form>
             </div>
@@ -140,9 +147,26 @@
                             加入白名单
                         </label>
                     </div>
+                    <hr class="my-4">
                     <div class="mb-3">
-                        <label class="form-label">系统提示词</label>
-                        <textarea class="form-control" name="system_prompt" id="editSystemPrompt" rows="3"></textarea>
+                        <label class="form-label d-flex align-items-center">
+                            <i class="bi bi-person-badge me-2 text-primary"></i>
+                            <strong>专属 AI 人设</strong>
+                        </label>
+                        <div class="form-text mb-2">
+                            为此联系人设置专属人设，AI 将以此人设风格回复。留空则使用全局默认人设。
+                        </div>
+                        <textarea class="form-control" name="system_prompt" id="editSystemPrompt" rows="4"
+                                  placeholder="例如：你是一个幽默的朋友，喜欢用表情包和轻松的语气回复..."></textarea>
+                        <div class="d-flex justify-content-between mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="testPersona()">
+                                <i class="bi bi-play-circle"></i> 测试人设效果
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearPersona()">
+                                <i class="bi bi-x-circle"></i> 清空人设（使用全局默认）
+                            </button>
+                        </div>
+                        <div id="testResult" class="mt-2" style="display: none;"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">风格学习</label>
@@ -379,6 +403,49 @@ async function learnStyle() {
     } catch (e) {
         alert('操作失败: ' + e);
     }
+}
+
+async function testPersona() {
+    const systemPrompt = document.getElementById('editSystemPrompt').value;
+    const contactName = document.getElementById('editName').value;
+    const testMessage = prompt('请输入测试消息：', '你好');
+
+    if (!testMessage) return;
+
+    const resultDiv = document.getElementById('testResult');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> 正在测试...</div>';
+
+    try {
+        const res = await fetch('/api/persona/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                system_prompt: systemPrompt,
+                message: testMessage,
+                contact_name: contactName
+            })
+        });
+        const result = await res.json();
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <strong><i class="bi bi-check-circle"></i> AI 回复：</strong><br>
+                    ${result.data.reply}
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger mb-0">测试失败: ${result.error}</div>`;
+        }
+    } catch (e) {
+        resultDiv.innerHTML = `<div class="alert alert-danger mb-0">测试失败: ${e}</div>`;
+    }
+}
+
+function clearPersona() {
+    if (!confirm('确定要清空该联系人的人设吗？清空后将使用全局默认人设。')) return;
+    document.getElementById('editSystemPrompt').value = '';
+    document.getElementById('testResult').style.display = 'none';
 }
 </script>
 {% endblock %}

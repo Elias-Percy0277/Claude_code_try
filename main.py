@@ -15,6 +15,9 @@ from threading import Event
 # 禁用 PaddlePaddle oneDNN（解决兼容性问题）
 os.environ['FLAGS_use_mkldnn'] = '0'
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['FLAGS_cudnn_batchnorm_spatial_persistent'] = '0'
+os.environ['FLAGS_executor_strategy'] = 'sequential'
+os.environ['FLAGS_new_executor'] = '0'
 
 # 添加项目根目录到 Python 路径
 PROJECT_ROOT = Path(__file__).parent

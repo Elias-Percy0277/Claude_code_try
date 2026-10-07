@@ -7,6 +7,7 @@
 - 自动回复微信私聊消息（基于白名单）
 - 使用本地 Ollama 模型（qwen2.5）
 - **坐标模板快速检测**（优化性能，低 CPU 占用）
+- **YOLO+OCR 双重检测模式**（正在训练中）
 - 支持从聊天记录学习你的说话风格
 - 按联系人设置不同 AI 人设
 - 网页管理后台（5001 端口）
@@ -16,33 +17,30 @@
 ## 环境要求
 
 - Windows 10/11
-- Python 3.10+
+- Python 3.12+
 - 微信 PC 客户端（推荐 4.x 版本）
 - Ollama + qwen2.5 模型
 
 ## 安装
 
 ```bash
-# 1. 创建虚拟环境（重要！）
-python -m venv venv
+# 1. 克隆项目后进入目录
+cd wechat_custody
 
-# 2. 激活虚拟环境
-venv\Scripts\activate
+# 2. 环境已配置（env/ 目录为 conda 环境，Python 3.12.13）
+#    包含 PyTorch Nightly，支持 RTX 5070 GPU
 
-# 3. 安装依赖（必须在虚拟环境中安装）
-pip install -r requirements.txt
-
-# 4. 确保 Ollama 正在运行
+# 3. 确保 Ollama 正在运行
 ollama serve
 
-# 5. 启动程序（使用虚拟环境中的 Python）
-python main.py
+# 4. 启动程序
+env\python.exe main.py
 ```
 
 **⚠️ 重要提示**：
-- **必须使用虚拟环境**，不要直接安装到全局 Python
-- 每次启动前先激活虚拟环境：`venv\Scripts\activate`
-- 或使用虚拟环境中的 Python 直接运行：`venv\Scripts\python.exe main.py`
+- 项目使用 conda 虚拟环境（`env/` 目录）
+- PyTorch Nightly 已安装，支持 CUDA 12.8
+- RTX 5070 GPU 可直接使用
 
 ## 消息检测模式
 
@@ -72,7 +70,7 @@ python main.py
 calibrate.bat
 
 # 方式2：命令行运行
-python utils/calibrate_template.py
+env\python.exe utils/calibrate_template.py
 ```
 
 校准工具会：
@@ -99,7 +97,8 @@ wechat_custody/
 ├── config/                      # 配置模块
 ├── core/                        # 核心功能
 │   ├── wechat_client.py         # 微信客户端
-│   ├── template_detector.py     # 坐标模板检测（新增）
+│   ├── template_detector.py     # 坐标模板检测
+│   ├── yolo_detector.py         # YOLO 检测器
 │   ├── ai_engine.py             # AI 引擎
 │   ├── message_handler.py       # 消息处理
 │   └── personality.py           # 风格学习
@@ -109,6 +108,9 @@ wechat_custody/
 ├── utils/                       # 工具函数
 │   └── calibrate_template.py    # 模板校准工具
 ├── data/                        # 数据目录
+│   └── dataset/yolo/            # YOLO 训练数据集
+├── training/                    # 训练脚本
+├── env/                         # Conda 环境
 └── calibrate.bat                # 校准工具快捷启动
 ```
 
@@ -141,7 +143,7 @@ wechat_custody/
 
 ## 技术方案
 
-### 坐标模板检测（新增）
+### 坐标模板检测
 
 通过预先定义的消息区域坐标模板，直接读取像素变化来检测新消息：
 
@@ -153,6 +155,12 @@ wechat_custody/
 
 - 仅在模板检测到新消息后，对特定区域进行 OCR 提取内容
 - 大幅减少 OCR 调用频率
+
+### YOLO 检测（开发中）
+
+- 使用 YOLOv8s 检测微信 UI 元素
+- 支持红点、联系人、气泡、标题检测
+- 当前训练进度：5/50 epochs (mAP50=0.221)
 
 ## 许可证
 
